@@ -1,0 +1,622 @@
+# Portfolio Website — PRD Discovery & Creative Direction
+
+You are working with a senior web developer and creative director to design a distinctive personal portfolio website for an early-career AI Engineer.
+
+IMPORTANT:
+
+Do NOT write any code.
+
+Do NOT create the website yet.
+
+Do NOT assume that a typical AI Engineer portfolio aesthetic is appropriate.
+
+The goal is to first create a strong Product Requirements Document and creative direction for the website.
+
+---
+
+## 1. Project Context
+
+The portfolio belongs to an AI / Machine Learning Engineer with a background in Biomedical Engineering.
+
+Relevant areas:
+
+* Artificial Intelligence
+* Machine Learning
+* Deep Learning
+* Computer Vision
+* AI Research
+* Model experimentation
+* AI deployment
+* Backend/API development
+
+Real portfolio material includes:
+
+### Project 1 — Tuberculosis Detection
+
+A computer vision research project for early tuberculosis detection using chest X-ray images.
+
+Main model:
+
+* DenseNet121
+
+Other experimented models include:
+
+* VGG19
+* ResNet50
+
+Technology and research workflow includes:
+
+* PyTorch
+* image preprocessing
+* augmentation
+* hyperparameter experimentation
+* model evaluation
+* ROC/AUC
+* confusion matrix
+* Grad-CAM
+
+The project is based on a local chest X-ray dataset and has been developed as academic research and conference publication material.
+
+### Project 2 — Melon Plant Detection
+
+An AI-based melon plant detection system involving:
+
+* TensorFlow Lite
+* ESP32-CAM
+* FastAPI
+* PostgreSQL
+* Docker
+* Linux VPS
+* AI inference
+* detection history
+* web integration
+
+This project demonstrates the transition from an AI model into a working application and deployment environment.
+
+The owner also has research/publication experience and wants the website to communicate both engineering and research capability.
+
+---
+
+# 2. Core Brand Idea
+
+The website should communicate:
+
+> "I build things."
+
+The owner should NOT be presented as someone who simply lists AI technologies.
+
+The portfolio should communicate:
+
+* curiosity
+* technical thinking
+* experimentation
+* research
+* building
+* problem solving
+* learning through projects
+
+The website should feel like a personal engineering archive rather than a generic developer template.
+
+---
+
+# 3. IMPORTANT DESIGN CONSTRAINT
+
+Avoid the visual language commonly associated with AI-generated portfolios.
+
+Do NOT rely heavily on:
+
+* neon blue
+* neon purple
+* cyan glow
+* futuristic gradients
+* excessive glassmorphism
+* glowing borders
+* robot illustrations
+* generic AI imagery
+* floating 3D brains
+* excessive particles
+* excessive rounded cards
+* generic "AI Engineer" landing page templates
+
+The website should NOT immediately look like an AI-themed website.
+
+Instead, explore:
+
+* editorial design
+* technical documentation
+* engineering notebook
+* digital archive
+* modern magazine
+* personal studio
+* experimental portfolio
+
+The final result should feel intentionally designed by a human designer.
+
+---
+
+# 4. Desired Visual Personality
+
+Explore a visual direction combining:
+
+EDITORIAL × TECHNICAL × PERSONAL
+
+The design should feel:
+
+* confident
+* intelligent
+* understated
+* experimental
+* professional
+* slightly unconventional
+* memorable
+
+Avoid making the website overly corporate.
+
+Avoid making it look like a startup landing page.
+
+Avoid making it look like a resume converted into HTML.
+
+---
+
+# 5. Color Direction
+
+Explore a palette based around:
+
+* warm off-white
+* charcoal
+* warm gray
+* muted earth tones
+* subtle olive
+* restrained terracotta/brown accent
+
+Potential direction:
+
+Background:
+warm off-white
+
+Primary text:
+near-black / charcoal
+
+Secondary text:
+warm gray
+
+Accent:
+muted terracotta or another non-neon color
+
+IMPORTANT:
+
+Do not finalize the exact color values yet.
+
+Explain the reasoning behind the proposed palette and provide 2–3 alternative palette directions.
+
+The final palette should remain restrained.
+
+---
+
+# 6. Typography
+
+Typography should be a major part of the visual identity.
+
+Explore combinations such as:
+
+* modern grotesk + serif
+* clean sans-serif + monospace
+* editorial serif + technical sans-serif
+
+Typography should create hierarchy without relying on excessive decoration.
+
+Explain:
+
+* heading font direction
+* body font direction
+* monospace usage
+* numerical/statistical typography
+* project metadata typography
+
+---
+
+# 7. Hero Concept
+
+Do not create a generic hero section.
+
+Avoid:
+
+"Hello, I'm..."
+
+"Passionate AI Engineer..."
+
+Instead, explore several unconventional hero concepts.
+
+The hero may contain:
+
+* name
+* short statement
+* current role
+* location if useful
+* selected disciplines
+* interactive Lanyard component from React Bits
+* subtle motion
+
+The React Bits Lanyard component may become part of the visual identity.
+
+The Lanyard should feel intentional rather than decorative.
+
+Propose at least 3 different hero concepts and explain their strengths and weaknesses.
+
+---
+
+# 8. Portfolio Storytelling
+
+The website should tell a story:
+
+PERSON
+
+↓
+
+THINKING
+
+↓
+
+BUILDING
+
+↓
+
+RESEARCH
+
+↓
+
+DEPLOYING
+
+↓
+
+LEARNING
+
+Do not make every section look like a collection of cards.
+
+Explore different presentation formats:
+
+* archive
+* timeline
+* editorial layout
+* split-screen
+* numbered projects
+* large typography
+* interactive details
+
+---
+
+# 9. Project Presentation
+
+Projects are the most important part of the website.
+
+Do not use a generic 3-column project card grid as the primary presentation.
+
+Explore a more editorial project listing.
+
+Possible structure:
+
+01 — Tuberculosis Detection
+
+Computer Vision / Research
+
+02 — Melon Plant Detection
+
+Edge AI / Deployment
+
+Each project should reveal:
+
+* problem
+* context
+* approach
+* technology
+* experiments
+* results
+* lessons learned
+* GitHub
+* publication
+* live demo when available
+
+The project should feel like a case study.
+
+---
+
+# 10. Research Section
+
+Research should not feel like a generic "Publications" list.
+
+Explore a presentation that makes research part of the owner's identity.
+
+Possible concept:
+
+RESEARCH LOG
+
+or
+
+SELECTED RESEARCH
+
+or
+
+FIELD NOTES
+
+Research entries should communicate:
+
+* title
+* conference
+* year
+* topic
+* contribution
+* paper link
+* media/presentation
+
+---
+
+# 11. Skills
+
+Do NOT create a giant wall of technology logos.
+
+Avoid:
+
+Python 95%
+PyTorch 90%
+etc.
+
+Instead explore grouping skills by what the owner actually does:
+
+BUILD
+
+* Python
+* FastAPI
+* PostgreSQL
+
+MODEL
+
+* PyTorch
+* TensorFlow
+* Computer Vision
+
+DEPLOY
+
+* Docker
+* Linux
+* VPS
+
+RESEARCH
+
+* experimentation
+* evaluation
+* visualization
+* scientific documentation
+
+The skill section should communicate capability rather than percentages.
+
+---
+
+# 12. Experience
+
+Explore a timeline or editorial layout.
+
+The experience section should focus on:
+
+* what was built
+* what responsibilities existed
+* what was learned
+
+Avoid generic corporate job descriptions.
+
+---
+
+# 13. Personal Section
+
+The website should have a human element.
+
+The owner should feel like a real person rather than a machine learning résumé.
+
+Explore a section where the owner can talk briefly about:
+
+* what they like building
+* what they are currently learning
+* what problems interest them
+* what direction they want to pursue
+
+Keep it concise and natural.
+
+---
+
+# 14. Interaction Design
+
+Use animation intentionally.
+
+Possible technologies:
+
+* React Bits
+* Framer Motion
+* CSS transitions
+
+Potential interactions:
+
+* Lanyard
+* cursor interaction
+* hover reveal
+* image reveal
+* text reveal
+* scroll-based transitions
+* project preview
+* subtle page transitions
+
+IMPORTANT:
+
+Animation must support storytelling.
+
+Do not animate everything.
+
+Do not use animation simply because it is technically possible.
+
+The website must still feel professional with animations disabled.
+
+---
+
+# 15. Responsive Design
+
+The website must work exceptionally well on:
+
+* desktop
+* laptop
+* tablet
+* mobile
+
+Do not simply stack desktop sections on mobile.
+
+Mobile should have its own considered layout.
+
+The Lanyard interaction must have an appropriate mobile fallback if necessary.
+
+---
+
+# 16. Accessibility
+
+Define requirements for:
+
+* semantic HTML
+* keyboard navigation
+* contrast
+* reduced motion
+* alt text
+* focus states
+* screen readers
+
+Animations must respect:
+
+prefers-reduced-motion.
+
+---
+
+# 17. Performance
+
+The website should prioritize:
+
+* fast initial load
+* optimized images
+* minimal JavaScript
+* lazy loading
+* efficient animation
+* minimal dependencies
+
+Do not add libraries unless there is a clear reason.
+
+---
+
+# 18. SEO
+
+Define:
+
+* title
+* meta description
+* Open Graph
+* structured metadata
+* sitemap
+* robots.txt
+* semantic headings
+
+The portfolio should be discoverable for searches related to the owner's professional profile.
+
+---
+
+# 19. Technical Direction
+
+The intended stack is:
+
+* Next.js
+* React
+* TypeScript
+* Tailwind CSS
+* React Bits
+* Framer Motion
+* Lucide React
+
+Deployment target:
+
+* Vercel
+
+The architecture should be scalable and maintainable.
+
+---
+
+# 20. Deliverables From This PRD Phase
+
+Produce:
+
+1. Product vision
+
+2. Design philosophy
+
+3. Target audience
+
+4. Brand personality
+
+5. Three possible visual directions
+
+6. Recommended visual direction
+
+7. Three possible hero concepts
+
+8. Recommended hero concept
+
+9. Information architecture
+
+10. Sitemap
+
+11. Complete homepage structure
+
+12. Section-by-section UX requirements
+
+13. Project case study structure
+
+14. Research presentation concept
+
+15. Skills presentation concept
+
+16. Experience presentation concept
+
+17. Animation philosophy
+
+18. Responsive strategy
+
+19. Accessibility requirements
+
+20. Performance requirements
+
+21. SEO requirements
+
+22. Technical requirements
+
+23. Component requirements
+
+24. Content requirements
+
+25. Acceptance criteria
+
+26. Potential design risks
+
+27. Future expansion possibilities
+
+---
+
+## Important Final Instruction
+
+Do not make this portfolio look like a portfolio generated from an AI website prompt.
+
+Think like a human designer who has spent years creating editorial websites, developer portfolios, digital products, and experimental interactive websites.
+
+The final result should have a recognizable visual personality.
+
+It should make someone think:
+
+"This person clearly designed this website intentionally."
+
+rather than:
+
+"This is another AI Engineer portfolio template."
+
+Do not write implementation code.
+
+End the PRD with a concise list of decisions that must be approved before development begins.

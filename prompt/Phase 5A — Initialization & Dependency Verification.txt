@@ -1,0 +1,662 @@
+We are now entering:
+
+PHASE 5A — PROJECT INITIALIZATION & DEPENDENCY VERIFICATION
+
+The PRD, Design Specification, Content Specification, and Technical Architecture have already been approved.
+
+This is the FIRST implementation phase.
+
+==================================================
+IMPORTANT SCOPE RULE
+==================================================
+
+In this phase, you are ONLY preparing the technical foundation.
+
+DO NOT build the portfolio UI yet.
+
+DO NOT create:
+
+- Hero
+- Navigation UI
+- Lanyard UI
+- Project cards
+- Project preview
+- Research section
+- About section
+- Contact section
+- Footer design
+- animations
+- case study pages
+
+DO NOT attempt to "finish" the website.
+
+The goal is to create a clean, working, production-ready Next.js foundation that we can build on in the next implementation phases.
+
+==================================================
+1. FINAL TECHNICAL DIRECTION
+==================================================
+
+Project:
+
+Personal AI Engineer Portfolio
+
+Design:
+
+EDITORIAL × ENGINEERING × PERSONAL
+
+Framework:
+
+Next.js 16.x
+
+React:
+
+React 19.x
+
+Language:
+
+TypeScript
+
+Styling:
+
+Tailwind CSS 4.x
+
+Animation:
+
+Motion for React
+
+Icons:
+
+Lucide React
+
+Interactive component:
+
+React Bits Lanyard
+
+Font direction:
+
+Fraunces
+DM Sans
+JetBrains Mono
+
+Deployment target:
+
+Vercel
+
+Repository:
+
+GitHub
+
+Architecture:
+
+Static / content-driven
+
+Database:
+
+NONE
+
+Backend:
+
+NONE
+
+API routes:
+
+NONE unless technically required later
+
+Content:
+
+Local structured TypeScript data
+
+==================================================
+2. BEFORE INSTALLING DEPENDENCIES
+==================================================
+
+IMPORTANT:
+
+DO NOT blindly install dependencies.
+
+First inspect the current project state and determine:
+
+- Node.js version
+- npm version
+- existing package.json
+- existing lockfile
+- existing Next.js version
+- existing React version
+- existing TypeScript version
+
+Then determine the appropriate compatible versions.
+
+The project must use a stable and compatible combination around:
+
+Next.js 16.x
+React 19.x
+TypeScript 5.x
+Tailwind CSS 4.x
+
+If the current environment does not satisfy these requirements, explain what needs to change before changing anything.
+
+==================================================
+3. REACT BITS LANYARD VERIFICATION
+==================================================
+
+This is the MOST IMPORTANT dependency verification step.
+
+Before installing Lanyard dependencies:
+
+Inspect the CURRENT official React Bits Lanyard implementation/documentation.
+
+Do NOT rely on an old tutorial.
+
+Do NOT assume its dependencies.
+
+Do NOT assume:
+
+- react-spring
+- cannon-es
+- any specific Three.js version
+- any specific React Three Fiber version
+
+Determine the actual current dependency requirements.
+
+Specifically verify compatibility between:
+
+- React 19
+- Next.js 16
+- React Three Fiber
+- Three.js
+- @react-three/drei
+- @react-three/rapier
+- Motion
+- React Bits Lanyard
+
+If React Bits Lanyard currently specifies a different dependency/version combination, report it BEFORE installation.
+
+Do not force incompatible peer dependencies just to make npm install succeed.
+
+==================================================
+4. DEPENDENCY PRINCIPLE
+==================================================
+
+Keep dependencies minimal.
+
+Only install a dependency if it is actually needed.
+
+Initial expected dependencies may include:
+
+- next
+- react
+- react-dom
+- lucide-react
+- motion
+- react-bits / Lanyard dependencies if required by the actual implementation
+
+Do NOT install libraries for:
+
+- forms
+- state management
+- database
+- API calls
+- animation utilities
+- UI kits
+
+unless they become necessary in a later phase.
+
+==================================================
+5. NEXT.JS SETUP
+==================================================
+
+Initialize a modern Next.js App Router project.
+
+Use:
+
+- TypeScript
+- ESLint
+- src directory
+- App Router
+- Tailwind CSS
+- import aliases
+
+Recommended alias:
+
+@/*
+
+Do not add unnecessary configuration.
+
+==================================================
+6. TAILWIND CSS
+==================================================
+
+Use Tailwind CSS 4.x if compatibility is confirmed.
+
+Do not copy a Tailwind 3 configuration into a Tailwind 4 project.
+
+Use the current official setup appropriate for:
+
+Next.js 16
+Tailwind 4
+
+Keep the initial styling configuration minimal.
+
+Do NOT create the portfolio design system yet.
+
+Do NOT add the final colors yet.
+
+Do NOT add the final typography system yet.
+
+That belongs to Phase 5B.
+
+==================================================
+7. PROJECT STRUCTURE
+==================================================
+
+Create the foundational structure only.
+
+Expected direction:
+
+src/
+├── app/
+├── components/
+├── data/
+├── lib/
+└── types/
+
+public/
+├── images/
+└── fonts/
+
+Do not create dozens of empty folders.
+
+Only create directories that are immediately useful.
+
+Explain every created directory.
+
+==================================================
+8. APP ROUTER FOUNDATION
+==================================================
+
+Create only the minimum required routes for initialization.
+
+At this point:
+
+/
+
+is enough.
+
+Do not create the final project routes yet.
+
+Do not create:
+
+/work
+/work/[slug]
+/research
+/about
+
+until the relevant implementation phase.
+
+==================================================
+9. ROOT LAYOUT
+==================================================
+
+Create a minimal root layout.
+
+It should establish:
+
+- HTML structure
+- metadata foundation
+- font loading foundation if necessary
+- global stylesheet
+
+Do NOT implement:
+
+- navbar
+- footer
+- hero
+- portfolio sections
+
+The root layout should remain minimal.
+
+==================================================
+10. FONTS
+==================================================
+
+Prepare the font architecture.
+
+Use next/font where appropriate.
+
+Fonts:
+
+Display:
+Fraunces
+
+Body:
+DM Sans
+
+Technical:
+JetBrains Mono
+
+For this phase:
+
+- verify that the fonts are available through the intended source
+- establish the architecture
+- avoid building the final typography system
+
+If local font files are required, explain where they should be placed.
+
+Do not download random font files from unofficial sources.
+
+==================================================
+11. GLOBAL CSS
+==================================================
+
+Create only the minimum global CSS required for:
+
+- Tailwind
+- browser normalization if necessary
+- basic body setup
+
+Do NOT implement:
+
+- final color palette
+- grids
+- editorial borders
+- animation tokens
+- project styling
+- Lanyard styling
+
+Those belong to Phase 5B and later.
+
+==================================================
+12. TYPESCRIPT
+==================================================
+
+Enable strict TypeScript.
+
+Do not create the complete project data types yet.
+
+Only establish the TypeScript configuration needed for a clean project.
+
+==================================================
+13. ESLINT
+==================================================
+
+Configure ESLint using the current recommended Next.js-compatible setup.
+
+Do not add a large collection of custom lint rules.
+
+The goal is:
+
+npm run lint
+
+should work cleanly.
+
+==================================================
+14. GITIGNORE
+==================================================
+
+Ensure the repository ignores:
+
+node_modules
+.next
+.env*
+*.log
+
+and other standard Next.js build artifacts.
+
+Do not ignore files that should be committed.
+
+==================================================
+15. ENVIRONMENT VARIABLES
+==================================================
+
+At this stage, no secrets should be required.
+
+If the project needs a site URL later, do NOT invent one.
+
+Possible future variable:
+
+NEXT_PUBLIC_SITE_URL
+
+But do not require it yet.
+
+Do not create fake values.
+
+==================================================
+16. LANYARD ISOLATION
+==================================================
+
+Do NOT implement Lanyard in this phase.
+
+However, prepare the architecture so that the future implementation can isolate it as a Client Component.
+
+Expected future structure may be:
+
+components/
+└── lanyard/
+    ├── LanyardWrapper
+    └── LanyardClient
+
+Do not create the actual implementation yet.
+
+Explain how the future Client Component boundary will work.
+
+==================================================
+17. SERVER / CLIENT STRATEGY
+==================================================
+
+The default architecture is:
+
+Server Components by default.
+
+Client Components only where interaction requires them.
+
+Do not add:
+
+"use client"
+
+to the root layout.
+
+Do not make the homepage a Client Component.
+
+Do not create a global client provider unless technically necessary.
+
+==================================================
+18. STATIC ARCHITECTURE
+==================================================
+
+The website is content-driven and static.
+
+Do not add:
+
+- database
+- Prisma
+- Supabase
+- Firebase
+- API routes
+- Express
+- FastAPI
+- CMS
+
+These are not required.
+
+Content will later live in:
+
+src/data/
+
+==================================================
+19. BUILD VERIFICATION
+==================================================
+
+After initialization, verify:
+
+npm install
+npm run dev
+npm run lint
+npm run build
+
+All must succeed.
+
+If any command fails:
+
+1. identify the exact error
+2. determine the root cause
+3. fix only what is necessary
+4. rerun the command
+
+Do not hide warnings.
+
+Do not suppress errors with:
+
+--force
+--legacy-peer-deps
+
+unless absolutely necessary and explicitly justified.
+
+==================================================
+20. DEPENDENCY CONFLICT POLICY
+==================================================
+
+If Lanyard causes peer dependency conflicts:
+
+STOP.
+
+Do not blindly use:
+
+npm install --force
+
+or:
+
+npm install --legacy-peer-deps
+
+Instead report:
+
+- package causing conflict
+- required version
+- installed version
+- compatible version range
+- recommended solution
+
+Then wait for review.
+
+Dependency correctness is more important than finishing this phase quickly.
+
+==================================================
+21. PERFORMANCE BASELINE
+==================================================
+
+Before adding Lanyard or other heavy interactive components:
+
+record the baseline build.
+
+We will later compare:
+
+Before Lanyard
+vs.
+After Lanyard
+
+Do not invent bundle size numbers.
+
+Use actual build output.
+
+==================================================
+22. DOCUMENTATION
+==================================================
+
+Create or update README.md with only:
+
+- project name
+- project purpose
+- tech stack
+- local setup
+- development command
+- build command
+
+Do not write a huge README yet.
+
+==================================================
+23. INITIAL FILES
+==================================================
+
+At the end of this phase, the repository should contain only the foundational files needed to run the application.
+
+Do not create fake placeholder content.
+
+Do not create:
+
+Lorem ipsum
+fake project data
+fake metrics
+fake links
+fake names
+
+==================================================
+24. ACCEPTANCE CRITERIA
+==================================================
+
+Phase 5A is complete ONLY when:
+
+[ ] Next.js 16.x is installed and working
+[ ] React 19.x is compatible
+[ ] TypeScript works
+[ ] Tailwind 4.x works
+[ ] ESLint works
+[ ] App Router works
+[ ] src directory is used
+[ ] @/* alias works
+[ ] root layout works
+[ ] global CSS works
+[ ] project runs locally
+[ ] npm run lint passes
+[ ] npm run build passes
+[ ] no unnecessary dependencies exist
+[ ] no fake content exists
+[ ] no Lanyard implementation has been added yet
+[ ] React Bits Lanyard dependency compatibility has been verified
+[ ] no force/legacy peer dependency workaround has been used
+
+==================================================
+25. OUTPUT FORMAT
+==================================================
+
+When finished, report:
+
+1. Environment detected
+
+2. Installed versions
+
+3. Dependencies installed
+
+4. React Bits Lanyard compatibility findings
+
+5. Files created/modified
+
+6. Commands executed
+
+7. Build result
+
+8. Lint result
+
+9. Any warnings
+
+10. Any unresolved issues
+
+11. Exact next step recommendation
+
+==================================================
+FINAL RULE
+==================================================
+
+STOP after Phase 5A.
+
+Do NOT continue automatically to Phase 5B.
+
+Do NOT build the portfolio UI.
+
+Do NOT create the Hero.
+
+Do NOT create Lanyard.
+
+Do NOT create navigation.
+
+Do NOT create project cards.
+
+Wait for review before continuing.

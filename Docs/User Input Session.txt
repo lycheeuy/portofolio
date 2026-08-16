@@ -1,0 +1,49 @@
+1. Hero -> nama saya Nashiruddin Alif Alvareezi ( bisa beri panggilan AL) berikan yang menarik, dan saya adalah fullstack developer, Ai /Machine Learning Engineer, Design Graphic. Avaible for ai / ML engineer. dan saya telah menyelesaikan studi s1 Teknik biomedis saya. ini karir direksi saya AI Engineer → Machine Learning Engineer → Applied AI / Generative AI. 
+
+linkedin : linkedin.com/in/nashiruddinalifalvareezi/
+GitHub	: https://github.com/lycheeuy
+No hp : +62 895 2014 1464 
+Email : nashiruddinalifalvareezi1@gmail.com
+
+Nama yang ditampilkan: Alif Reezi
+Nama lengkap:Nashiruddin Alif Alvareezi
+Lokasi yang ingin ditampilkan : Kota Cirebon, west Java
+Status saat ini:FreshGraduate
+
+DenseNet121:
+Accuracy: 0.7075
+Precision: NON_TBC 0.5491, TUBERKULOSIS 0.8827  
+Recall/Sensitivity:NON_TBC 0.8381, TUBERKULOSIS 0.6391, 
+Specificity:
+F1:NON_TBC 0.6635, TUBERKULOSIS 0.7414
+ROC-AUC:0.8286
+
+ResNet50:
+Accuracy:
+Precision:NON_TBC       0.57 , TUBERKULOSIS       0.81
+Recall/Sensitivity:NON_TBC 0.68 , TUBERKULOSIS 0.73
+Specificity:
+F1:NON_TBC 0.62,TUBERKULOSIS 0.77
+ROC-AUC:0.7773
+
+VGG19:
+Accuracy:0.6699
+Precision:NON_TBC     0.5161, TUBERKULOSIS     0.7868
+Recall/Sensitivity:NON_TBC  0.6478, TUBERKULOSIS 0.6815 
+Specificity:
+F1:NON_TBC 0.5745 ,TUBERKULOSIS 0.5745
+ROC-AUC:0.7350
+
+MELON
+Training dataset:tidak perlu disebutkan
+Jumlah gambar:ini juga tidak perlu disebutkan
+Client:ini juga tidak perlu disebutkan
+Boleh disebut nama client? YA/TIDAK
+
+Project mulai:Juni 20
+Project selesai:Juni 30
+
+GitHub:ada di repo GitHub saya
+Live URL:di up VPS client
+
+Sisanya kamu sesuaikan saja yang terbaik

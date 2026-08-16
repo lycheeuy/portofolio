@@ -1,0 +1,1007 @@
+We have completed and approved:
+
+PHASE 1 — PRODUCT REQUIREMENTS DOCUMENT
+PHASE 2 — DESIGN SPECIFICATION
+PHASE 3 — CONTENT & DATA SPECIFICATION
+
+We are now entering:
+
+PHASE 4 — TECHNICAL ARCHITECTURE & NEXT.JS IMPLEMENTATION PLAN
+
+IMPORTANT:
+
+You are NOT building the website yet.
+
+Do NOT write the complete application.
+
+Do NOT implement the pages.
+
+Do NOT generate the full codebase.
+
+Your task is to create the FINAL TECHNICAL BLUEPRINT that will be used for implementation in the next phase.
+
+The technical architecture MUST preserve the approved:
+
+EDITORIAL × ENGINEERING × PERSONAL
+
+design direction.
+
+==================================================
+1. PROJECT OBJECTIVE
+==================================================
+
+The website is a personal engineering portfolio for:
+
+Display name:
+Alif Reezi
+
+Full name:
+Nashiruddin Alif Alvareezi
+
+Professional positioning:
+
+AI Engineer
+Machine Learning Engineer
+Full-Stack Developer
+
+Additional capability:
+
+Graphic Design
+UI/UX
+
+Academic background:
+
+Bachelor of Biomedical Engineering
+
+Career direction:
+
+AI Engineer
+→ Machine Learning Engineer
+→ Applied AI / Generative AI
+
+Availability:
+
+AI / ML Engineer
+
+Current status:
+
+Fresh Graduate
+
+The website must NOT feel like:
+
+- an AI-generated portfolio
+- a generic developer template
+- a SaaS landing page
+- a cyberpunk AI website
+- a dashboard
+- a React component showcase
+
+==================================================
+2. APPROVED DESIGN DIRECTION
+==================================================
+
+Editorial × Engineering × Personal
+
+The website uses:
+
+- warm neutral palette
+- editorial typography
+- generous whitespace
+- technical metadata
+- thin borders
+- restrained animation
+- strong typography
+- archive-like project structure
+
+Approved typography direction:
+
+Display:
+Fraunces
+
+Body:
+DM Sans
+
+Technical:
+JetBrains Mono
+
+Approved interaction concept:
+
+React Bits Lanyard
+
+The Lanyard should be treated as a personal credential / ID object.
+
+It must NOT dominate the entire website.
+
+==================================================
+3. TECHNOLOGY STACK
+==================================================
+
+Evaluate and specify the final stack.
+
+Recommended baseline:
+
+Framework:
+Next.js
+
+Language:
+TypeScript
+
+UI:
+React
+
+Styling:
+Tailwind CSS
+
+Animation:
+Motion for React / Framer Motion if appropriate
+
+Interactive component:
+React Bits Lanyard
+
+Icons:
+Lucide React
+
+Fonts:
+next/font
+
+Deployment:
+Vercel
+
+Git:
+GitHub
+
+You may recommend changes ONLY if there is a strong technical reason.
+
+Do not add libraries simply because they are popular.
+
+Keep dependencies minimal.
+
+==================================================
+4. NEXT.JS ARCHITECTURE
+==================================================
+
+Define the recommended Next.js architecture.
+
+Prefer modern Next.js App Router architecture.
+
+Specify:
+
+- app directory
+- route structure
+- layouts
+- pages
+- loading states
+- not-found page
+- metadata
+- static generation strategy
+
+The portfolio is primarily content-driven and does not require a database.
+
+Explain why.
+
+==================================================
+5. ROUTING
+==================================================
+
+Define the route structure.
+
+Recommended:
+
+/
+
+ /work
+
+ /work/tuberculosis-detection
+
+ /work/melon-detection
+
+ /research
+
+ /about
+
+Potential:
+
+ /cv
+
+Only include routes that are justified.
+
+Define:
+
+- purpose of each route
+- page type
+- static/dynamic behavior
+- SEO importance
+
+==================================================
+6. COMPONENT ARCHITECTURE
+==================================================
+
+Create a complete conceptual component tree.
+
+Example:
+
+app
+├── layout
+├── page
+├── work
+│   ├── page
+│   └── [slug]
+├── research
+├── about
+└── ...
+
+components
+├── navigation
+├── hero
+├── lanyard
+├── work
+├── research
+├── capabilities
+├── about
+├── contact
+└── ...
+
+Do NOT write code.
+
+Explain responsibilities for each major component.
+
+==================================================
+7. COMPONENT CATEGORIES
+==================================================
+
+Separate components into:
+
+A. Layout components
+
+B. Content components
+
+C. Interactive components
+
+D. UI primitives
+
+E. Page-specific components
+
+F. Data/content modules
+
+Explain why each category exists.
+
+Avoid over-componentization.
+
+Do not create components for every small text element.
+
+==================================================
+8. DATA ARCHITECTURE
+==================================================
+
+The website should use local structured data rather than a database.
+
+Design a content architecture for:
+
+projects
+research
+experience
+education
+capabilities
+now
+social links
+
+Recommend where this data should live.
+
+Example conceptual structure:
+
+data/
+├── projects
+├── research
+├── experience
+└── ...
+
+Do NOT write TypeScript interfaces yet.
+
+Just define:
+
+- content source
+- structure
+- relationships
+- slug strategy
+
+==================================================
+9. PROJECT DATA
+==================================================
+
+Define the project content model.
+
+Required fields may include:
+
+- slug
+- title
+- shortTitle
+- year
+- category
+- description
+- role
+- technologies
+- dataset
+- context
+- problem
+- approach
+- experiments
+- results
+- learning
+- links
+- media
+
+The project model must support both:
+
+TB Detection
+
+and
+
+Melon Detection
+
+without creating unrelated fields everywhere.
+
+Use optional fields when appropriate.
+
+==================================================
+10. TB PROJECT ARCHITECTURE
+==================================================
+
+Project:
+
+TUBERCULOSIS DETECTION
+
+Known data:
+
+Dataset:
+4,784 chest X-ray images
+
+Source:
+RS Paru Sidawangi, West Java
+
+Models:
+
+DenseNet121
+VGG19
+ResNet50
+
+DenseNet121:
+
+Accuracy:
+70.75%
+
+ROC-AUC:
+82.86%
+
+VGG19:
+
+Accuracy:
+66.99%
+
+ROC-AUC:
+73.50%
+
+ResNet50:
+
+ROC-AUC:
+77.73%
+
+Other evaluation metrics are available in the Content Specification.
+
+Do not invent missing metrics.
+
+The case study should support:
+
+- dataset
+- preprocessing
+- model architecture
+- experiment comparison
+- training configuration
+- evaluation
+- confusion matrix
+- ROC curve
+- Grad-CAM
+- final model
+- limitations
+- learning
+
+Also support the related application:
+
+THORAXVISION
+
+ThoraxVision should be treated as a deployment/application extension of the TB project, NOT as a separate homepage project.
+
+Explain how the architecture should represent this relationship.
+
+==================================================
+11. MELON PROJECT ARCHITECTURE
+==================================================
+
+Project:
+
+MELON PLANT DETECTION
+
+Known data:
+
+Dataset:
+1,250 images
+
+Client:
+Not disclosed
+
+Timeline:
+June 20 – June 30
+
+Hardware:
+ESP32-CAM
+
+Model:
+MobileNetV2 FOMO
+
+Format:
+TensorFlow Lite
+
+Backend:
+FastAPI
+
+Database:
+PostgreSQL
+
+Deployment:
+Client VPS
+
+Architecture:
+Push-based inference
+
+Post-processing:
+Connected Component Analysis (CCA)
+
+Known engineering issue:
+
+144 false positives
+
+Root cause analysis and CCA correction were used to address the issue.
+
+The case study should emphasize engineering decisions rather than only model performance.
+
+==================================================
+12. MEDIA ARCHITECTURE
+==================================================
+
+Define the image/media strategy.
+
+Use Next.js optimized image handling where appropriate.
+
+Specify:
+
+- public assets
+- project media
+- research media
+- thumbnails
+- Open Graph images
+- responsive images
+
+Define a naming convention.
+
+Example:
+
+public/
+├── images/
+│   ├── projects/
+│   │   ├── tuberculosis/
+│   │   └── melon/
+│   └── research/
+
+Do not assume media exists.
+
+Use clear placeholders/data references for missing media.
+
+==================================================
+13. LANYARD ARCHITECTURE
+==================================================
+
+React Bits Lanyard is one of the primary interactive components.
+
+Define:
+
+- where it is loaded
+- whether it should be a Client Component
+- how it interacts with the Server Component hierarchy
+- how to prevent unnecessary client-side JavaScript
+- fallback for mobile
+- fallback for reduced motion
+- accessibility considerations
+- loading behavior
+
+Important:
+
+Do not convert the entire homepage into a Client Component just because Lanyard requires client-side interaction.
+
+Prefer the smallest possible client boundary.
+
+==================================================
+14. SERVER / CLIENT COMPONENT STRATEGY
+==================================================
+
+Explicitly determine:
+
+Which components should remain Server Components?
+
+Which components must be Client Components?
+
+Expected client components may include:
+
+- Lanyard
+- project hover interaction
+- mobile navigation
+- animated reveal
+- interactive preview
+
+Explain the boundary.
+
+Performance is important.
+
+==================================================
+15. ANIMATION ARCHITECTURE
+==================================================
+
+Define a restrained animation architecture.
+
+Potential animation areas:
+
+- page reveal
+- section reveal
+- project preview
+- hover
+- navigation
+- Lanyard
+
+Avoid unnecessary global animation libraries if CSS can handle the interaction.
+
+Define:
+
+- where Motion is actually needed
+- where CSS is enough
+- reduced-motion strategy
+- animation duration
+- easing
+- viewport behavior
+
+==================================================
+16. PROJECT PREVIEW INTERACTION
+==================================================
+
+The selected work section has a signature interaction.
+
+Desktop:
+
+Hover/focus a project row
+→ update preview
+
+Mobile:
+
+Project rows become tappable
+→ preview appears below or inside the selected project
+
+Keyboard:
+
+Focus must update the preview.
+
+Reduced motion:
+
+Preview changes immediately or with minimal transition.
+
+Define the architecture for this without turning the entire section into a heavy client application.
+
+==================================================
+17. RESPONSIVE ARCHITECTURE
+==================================================
+
+Define breakpoints conceptually.
+
+Do not blindly use framework defaults if they conflict with the design.
+
+Define:
+
+Desktop
+Tablet
+Mobile
+
+For:
+
+- navigation
+- hero
+- Lanyard
+- work preview
+- research
+- capabilities
+- about
+- contact
+
+Explain mobile-specific behavior.
+
+==================================================
+18. ACCESSIBILITY ARCHITECTURE
+==================================================
+
+Define:
+
+- semantic HTML
+- heading hierarchy
+- landmark structure
+- keyboard navigation
+- focus-visible
+- ARIA only where necessary
+- image alt text
+- reduced motion
+- color contrast
+- interactive target sizes
+
+Especially address:
+
+Lanyard
+Project preview
+Mobile navigation
+
+==================================================
+19. SEO ARCHITECTURE
+==================================================
+
+Define:
+
+- metadata
+- title templates
+- descriptions
+- canonical URLs
+- Open Graph
+- Twitter/X cards if appropriate
+- sitemap
+- robots
+- structured data if justified
+
+Potential structured data:
+
+Person
+WebSite
+CreativeWork / SoftwareApplication where appropriate
+
+Do not over-engineer SEO.
+
+==================================================
+20. PERFORMANCE ARCHITECTURE
+==================================================
+
+Define performance strategy.
+
+Priorities:
+
+1. Fast initial page load
+2. Minimal client JavaScript
+3. Optimized images
+4. Lazy loading
+5. Font optimization
+6. Avoid unnecessary dependencies
+7. Animation performance
+8. Lanyard isolation
+
+Discuss:
+
+- dynamic imports
+- image loading
+- bundle size
+- client boundaries
+- third-party dependencies
+
+==================================================
+21. ERROR / FALLBACK STRATEGY
+==================================================
+
+Define:
+
+- not-found
+- loading
+- broken image
+- Lanyard failure
+- missing project media
+- missing external link
+
+The website must remain usable if an enhancement fails.
+
+==================================================
+22. FOLDER STRUCTURE
+==================================================
+
+Provide a recommended production-ready folder structure.
+
+Example direction:
+
+src/
+├── app/
+├── components/
+├── data/
+├── lib/
+└── ...
+
+public/
+├── images/
+├── fonts/
+└── ...
+
+Explain each directory.
+
+Do not create unnecessary abstractions.
+
+==================================================
+23. DEPENDENCY PLAN
+==================================================
+
+Create a table:
+
+Dependency
+Purpose
+Required?
+Reason
+
+Only include dependencies that are justified.
+
+Potential dependencies:
+
+next
+react
+react-dom
+tailwindcss
+motion
+lucide-react
+
+React Bits Lanyard may require additional dependencies.
+
+If so:
+
+- identify them
+- explain why
+- minimize them
+
+==================================================
+24. DEVELOPMENT ORDER
+==================================================
+
+Define the implementation sequence.
+
+Recommended:
+
+1. Project initialization
+2. Global styles / tokens
+3. Fonts
+4. Root layout
+5. Navigation
+6. Hero
+7. Lanyard
+8. Selected Work
+9. Project Preview
+10. Research
+11. Capabilities
+12. NOW
+13. About
+14. Contact
+15. Footer
+16. Project pages
+17. Research pages
+18. Responsive
+19. Animation
+20. Accessibility
+21. SEO
+22. Performance
+23. QA
+
+Explain dependencies between steps.
+
+==================================================
+25. GIT STRATEGY
+==================================================
+
+Recommend a simple Git strategy.
+
+Define:
+
+- main branch
+- development branch if necessary
+- commit naming
+- logical commit boundaries
+
+Do not overcomplicate Git workflow for a personal portfolio.
+
+==================================================
+26. ENVIRONMENT VARIABLES
+==================================================
+
+Determine whether environment variables are necessary.
+
+Potential examples:
+
+SITE_URL
+
+Do not create unnecessary secrets.
+
+Explain which variables are:
+
+- required
+- optional
+- development-only
+
+==================================================
+27. DEPLOYMENT
+==================================================
+
+Recommended deployment:
+
+GitHub
+→ Vercel
+
+Define:
+
+- build command
+- environment setup
+- domain configuration
+- preview deployment
+- production deployment
+
+Do not assume the custom domain exists yet.
+
+==================================================
+28. ANALYTICS
+==================================================
+
+Determine whether analytics should be included.
+
+If recommended:
+
+- choose a privacy-conscious option
+- explain why
+
+Do not add analytics just because it is common.
+
+==================================================
+29. SECURITY
+==================================================
+
+Even though this is a static portfolio, define basic security considerations:
+
+- no exposed secrets
+- external link handling
+- dependency hygiene
+- headers if appropriate
+- form security if a contact form exists
+
+Prefer direct email/contact links instead of a backend contact form unless there is a strong reason for one.
+
+==================================================
+30. TECHNICAL RISKS
+==================================================
+
+Identify risks such as:
+
+- Lanyard increasing bundle size
+- excessive client components
+- project preview performance
+- animation jank
+- mobile interaction mismatch
+- image payload
+- dependency conflicts
+- React Bits integration issues
+- Next.js version compatibility
+
+For every risk:
+
+Risk
+Impact
+Mitigation
+
+==================================================
+31. IMPLEMENTATION RULES FOR CLAUDE
+==================================================
+
+Create explicit coding rules that must be followed in the next phase.
+
+Examples:
+
+1. Do not redesign the approved UI.
+
+2. Do not introduce AI-themed colors.
+
+3. Do not add unnecessary cards.
+
+4. Do not add unnecessary animations.
+
+5. Do not invent content.
+
+6. Do not hardcode project content inside UI components.
+
+7. Keep content in structured data.
+
+8. Keep interactive components isolated.
+
+9. Prefer Server Components.
+
+10. Use Client Components only when interaction requires them.
+
+11. Do not create a global client provider unless necessary.
+
+12. Optimize images.
+
+13. Maintain semantic HTML.
+
+14. Test responsive behavior.
+
+15. Do not install dependencies without justification.
+
+16. Do not replace approved typography.
+
+17. Do not replace the approved Lanyard concept.
+
+18. Do not create fake metrics.
+
+19. Do not use placeholder text that could accidentally ship to production.
+
+20. Preserve the editorial character of the website.
+
+==================================================
+32. DEVELOPMENT DEFINITION OF DONE
+==================================================
+
+Define what "complete" means.
+
+Include:
+
+Visual
+Functional
+Responsive
+Accessibility
+Performance
+SEO
+Content integrity
+Deployment
+
+Create a checklist.
+
+==================================================
+33. FINAL TECHNICAL BLUEPRINT
+==================================================
+
+End the document with:
+
+A. Final stack
+
+B. Final route map
+
+C. Final folder structure
+
+D. Final component architecture
+
+E. Final data architecture
+
+F. Client/Server boundary
+
+G. Dependency list
+
+H. Development sequence
+
+I. Technical risks
+
+J. Definition of Done
+
+==================================================
+FINAL INSTRUCTION
+==================================================
+
+This is still an ARCHITECTURE phase.
+
+Do NOT generate the complete website code.
+
+Do NOT create all React components.
+
+Do NOT implement the pages.
+
+Do NOT start writing hundreds of lines of code.
+
+The output must be a technical implementation blueprint that can be reviewed before development begins.
+
+The next phase will be actual implementation.
