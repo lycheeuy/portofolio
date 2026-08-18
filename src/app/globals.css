@@ -1,0 +1,165 @@
+@import "tailwindcss";
+
+/* ===========================================================================
+   ALIF REEZI - ENGINEERING ARCHIVE - DESIGN SYSTEM (Phase 5B)
+   EDITORIAL x ENGINEERING x PERSONAL
+
+   Tailwind CSS 4, CSS-first. All tokens live in @theme so they become
+   Tailwind utilities (bg-bg, text-ink, font-display, etc.) AND remain
+   available as CSS variables (var(--color-ink)).
+
+   No tailwind.config.js. No JS config.
+   =========================================================================== */
+
+@theme {
+  /* --- Typography families ---------------------------------------------
+     Fraunces  -> display: large headings, hero name, editorial statements
+     DM Sans   -> body: paragraphs, navigation, UI labels
+     JetBrains -> mono: metadata, index numbers, technical labels, metrics */
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-sans:    var(--font-dm-sans), system-ui, sans-serif;
+  --font-mono:    var(--font-jetbrains-mono), ui-monospace, monospace;
+
+  /* --- Color: Warm Archive palette --------------------------------------
+     Restrained, warm-neutral, editorial. One terracotta accent.
+     All values contrast-verified against the background (see comments). */
+
+  /* Surfaces */
+  --color-bg:      #F6F2EB;  /* warm off-white - primary background */
+  --color-surface: #EDE9E1;  /* slightly deeper - section alternation, insets */
+
+  /* Text */
+  --color-ink:       #1B1815; /* primary text - 15.84:1 on bg (AAA) */
+  --color-secondary: #6B6560; /* secondary text - 5.15:1 on bg (AA)  */
+  --color-muted:     #726C66; /* metadata/labels - 4.64:1 on bg (AA) */
+
+  /* Structure */
+  --color-border: #D5D0C8;   /* thin rules and dividers - pencil-line weight */
+
+  /* Accent - used sparingly: links, active states, one marker per section */
+  --color-accent:       #9E4F35; /* muted terracotta - 5.19:1 on bg (AA) */
+  --color-accent-hover: #7E3E28; /* deeper terracotta - 7.22:1 on bg (AAA) */
+
+  /* Selection */
+  --color-selection: #9E4F3526; /* terracotta @ ~15% for ::selection */
+
+  /* --- Typographic scale ------------------------------------------------
+     Fluid via clamp(): min at mobile, max at desktop, no JS.
+     Display sizes for Fraunces; text sizes for DM Sans/JetBrains. */
+  --text-hero:    clamp(3.5rem, 9vw, 6.25rem);    /* 56 -> 100px - hero name */
+  --text-display: clamp(2.5rem, 6vw, 4.5rem);     /* 40 -> 72px - section openers */
+  --text-h1:      clamp(2.25rem, 4.5vw, 3.5rem);  /* 36 -> 56px */
+  --text-h2:      clamp(1.625rem, 3vw, 2.375rem); /* 26 -> 38px */
+  --text-h3:      clamp(1.25rem, 2.5vw, 1.625rem);/* 20 -> 26px */
+  --text-body-lg: 1.125rem;  /* 18px - lead paragraphs */
+  --text-body:    1rem;      /* 16px - standard body */
+  --text-small:   0.875rem;  /* 14px - captions, secondary */
+  --text-label:   0.6875rem; /* 11px - tracked-out uppercase labels */
+  --text-meta:    0.75rem;   /* 12px - mono metadata */
+  --text-stat:    1.75rem;   /* 28px - numeric callouts */
+
+  /* --- Line heights ----------------------------------------------------- */
+  --leading-hero:    0.9;
+  --leading-display: 0.98;
+  --leading-heading: 1.15;
+  --leading-body:    1.65;
+  --leading-relaxed: 1.7;
+
+  /* --- Letter spacing --------------------------------------------------- */
+  --tracking-tight:  -0.02em; /* large display type */
+  --tracking-normal: 0;
+  --tracking-label:  0.1em;   /* uppercase labels */
+  --tracking-mono:   0.02em;  /* mono metadata */
+
+  /* --- Spacing scale ----------------------------------------------------
+     Editorial rhythm. Named steps for section-level spacing. */
+  --spacing-section: clamp(4rem, 10vw, 8rem);  /* 64 -> 128px between sections */
+  --spacing-block:   clamp(2rem, 5vw, 3rem);   /* 32 -> 48px between blocks */
+  --spacing-gutter:  1.5rem;                   /* 24px grid gutter */
+
+  /* --- Layout ----------------------------------------------------------- */
+  --container-max:  80rem;   /* 1280px - max content width */
+  --container-text: 42.5rem; /* 680px - reading column for prose */
+  --container-pad:  clamp(1.25rem, 5vw, 5rem); /* 20 -> 80px page margin */
+
+  /* --- Border radius: restrained, editorial not app-like ---------------- */
+  --radius-none: 0;
+  --radius-xs:   2px;  /* images, subtle softening */
+  --radius-sm:   4px;  /* maximum for most elements */
+
+  /* --- Transition timing ------------------------------------------------ */
+  --ease-standard:   cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-editorial:  cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast:   150ms;
+  --duration-normal: 250ms;
+  --duration-medium: 300ms;
+}
+
+/* ===========================================================================
+   BASE LAYER
+   =========================================================================== */
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scroll-padding-top: 5rem;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    line-height: var(--leading-heading);
+    font-weight: 500;
+  }
+
+  ::selection {
+    background-color: var(--color-selection);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+/* ===========================================================================
+   REDUCED MOTION - global safety net
+   =========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}
