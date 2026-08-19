@@ -1,4 +1,5 @@
 import { PageContainer } from "@/components/layout/page-container";
+import { LanyardWrapper } from "@/components/lanyard/lanyard-wrapper";
 
 const ctaLink =
   "group inline-flex items-center gap-2 font-sans text-[length:var(--text-body)] font-medium text-ink transition-colors hover:text-accent";
@@ -59,14 +60,12 @@ export function Hero() {
               </a>
             </div>
           </div>
-
-          <div
-            data-lanyard-slot
-            aria-hidden="true"
-            className="relative hidden min-h-[420px] lg:col-span-4 lg:flex lg:items-start lg:justify-center"
-          >
-            <span className="absolute top-0 h-24 w-px bg-[var(--color-border)]" />
-            <span className="absolute top-24 h-1.5 w-1.5 -translate-x-[2.5px] rounded-full bg-[var(--color-accent)]" />
+              <div className="relative min-h-[420px] lg:col-span-4 lg:min-h-[560px]">
+            <div className="pointer-events-none absolute inset-x-0 -top-8 bottom-0 lg:-inset-y-16 lg:-right-16 lg:left-0">
+              <div className="pointer-events-auto h-full w-full">
+                <LanyardWrapper />
+              </div>
+            </div>
           </div>
         </div>
       </PageContainer>

@@ -1,0 +1,169 @@
+# Phase 5D-1 — Hero Composition
+
+**Status:** Complete and verified
+**Date:** August 2026
+**Depends on:** Phase 5A (Foundation), 5B (Design System), 5C (Page Shell)
+
+---
+
+## Objective
+
+Design and implement the Hero — the first major visual section of the
+portfolio. Scope is composition only: the Lanyard is not installed or
+implemented here (that is Phase 5D-2). An intentional visual zone is reserved
+for it.
+
+Design direction preserved: **EDITORIAL × ENGINEERING × PERSONAL**.
+
+---
+
+## Hero composition
+
+An asymmetric 12-column grid, deliberately not a conventional centered hero.
+
+┌─────────────────────────────────────────────┬──────────────┐
+│ PRIMARY (8 cols) │ VISUAL (4) │
+│ │ │
+│ 00 —— FRESH GRADUATE │ │ (rule) │
+│ │ • (accent) │
+│ Alif Reezi ← dominant display │ │
+│ Nashiruddin Alif Alvareezi ← mono │ reserved │
+│ │ Lanyard │
+│ AI / Machine Learning Engineer working │ zone │
+│ across computer vision... ← positioning │ │
+│ │ │
+│ AI / ML ENGINEERING · COMPUTER VISION · │ │
+│ RESEARCH ← metadata │ │
+│ │ │
+│ View work → Read research → ← CTA │ │
+└─────────────────────────────────────────────┴──────────────┘
+
+
+The name is the dominant element. Everything else is subordinate to it in
+scale and weight.
+
+---
+
+## Hero copy
+
+Only confirmed information appears. No invented experience, companies,
+statistics, availability, or marketing claims.
+
+| Element | Content | Source |
+|---|---|---|
+| Display name | Alif Reezi | Confirmed |
+| Full name | Nashiruddin Alif Alvareezi | Confirmed |
+| Status label | Fresh Graduate | Confirmed |
+| Positioning | "AI / Machine Learning Engineer working across computer vision, model experimentation, and research." | Factual, non-marketing |
+| Focus areas | AI / ML Engineering · Computer Vision · Research | Confirmed interests |
+
+No hero mission statement is included yet — the five options in the Content
+Spec remain owner-pending. The composition reserves room for one between the
+positioning and the metadata when chosen.
+
+---
+
+## Typography hierarchy
+
+| Role | Font | Token |
+|---|---|---|
+| Name (dominant) | Fraunces | `--text-hero` (56 → 100px), semibold, tight tracking |
+| Full name, index, metadata | JetBrains Mono | `--text-meta`, uppercase where labelled |
+| Positioning, CTA | DM Sans | `--text-body-lg` / `--text-body` |
+
+Not every element is oversized — only the name carries display scale. The
+three-font system is legible at a glance.
+
+---
+
+## Layout decisions
+
+- **Index opener.** `00` + hairline rule + `FRESH GRADUATE` sets an editorial,
+  archive-like tone before the name.
+- **Metadata as text, not badges.** Focus areas are an inline mono list — no
+  rounded pills, no chips.
+- **CTA as text links.** `View work →` / `Read research →` use real anchors
+  (`#work`, `#research`) with a subtle arrow nudge on hover. No filled buttons.
+- **Bottom border** closes the section and separates it from what follows.
+
+---
+
+## Lanyard reserved area
+
+The right 4-column zone is compositionally intentional without containing a
+placeholder graphic:
+
+- A thin vertical rule descends from the top (a suggested hanging point).
+- A small terracotta dot marks where the credential will attach.
+- Marked `data-lanyard-slot` and `aria-hidden="true"`.
+- Hidden below `lg` (`hidden lg:flex`) — mobile position is decided in 5D-2.
+
+It reads as a considered empty space, not an empty gray card.
+
+---
+
+## Responsive behavior
+
+| Breakpoint | Behavior |
+|---|---|
+| Desktop (≥ 1024px) | Asymmetric 12-column grid; visual zone visible |
+| Mobile / tablet | Single-column stack; hierarchy preserved; visual zone hidden |
+
+Mobile is a genuine recomposition, not shrunken desktop type — the clamp-based
+tokens scale the name down naturally.
+
+---
+
+## Accessibility
+
+- Semantic `<section aria-labelledby="hero-name">` with a single `<h1>`.
+- Focus areas are a real `<ul>` with `aria-label`.
+- CTAs are real `<a>` links with visible terracotta focus rings.
+- Decorative elements (rule, dot, arrows) are `aria-hidden`.
+- No meaning conveyed by color alone.
+
+---
+
+## Verification
+
+| Check | Result |
+|---|---|
+| `npm run lint` | Pass |
+| `npx tsc --noEmit` | Pass |
+| `npm run build` | Pass (2 static routes) |
+
+Confirmed: Hero remains a Server Component (only `mobile-nav` is a client
+chunk). Compiled CSS contains `--text-hero`, the 12-column grid, and
+`--leading-hero`.
+
+---
+
+## Files created / modified
+
+- **Created:** `src/components/sections/hero.tsx`
+- **Modified:** `src/app/page.tsx` (renders Hero above the anchor sections)
+
+---
+
+## Dependencies added
+
+None. No Three.js, React Three Fiber, React Bits, or Motion.
+
+---
+
+## Notes and deferrals
+
+- **Hero mission statement** is owner-pending. Recommended option from the
+  Content Spec: *"I make models that work outside of notebooks."* When chosen,
+  it slots in as a Fraunces italic line between positioning and metadata.
+- **Lanyard** (install + integration) → Phase 5D-2, which also decides the
+  mobile placement of the reserved zone.
+
+---
+
+## Implementation note
+
+During implementation, long Tailwind class strings were extracted to named
+constants (`ctaLink`, `ctaArrow`, `metaLabel`) and multi-line JSX attributes
+were avoided. This keeps the JSX robust when edited and prevents parser issues
+from very long inline `className` values.
