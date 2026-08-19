@@ -1,0 +1,140 @@
+# Phase 5C — Page Shell & Navigation
+
+**Status:** Complete and verified
+**Date:** August 2026
+**Depends on:** Phase 5A (Foundation), Phase 5B (Design System)
+
+---
+
+## Objective
+
+Establish the structural page shell and navigation framework that all future
+sections will build on. This phase creates the header, navigation, reusable
+layout primitives, and empty anchor targets — but no portfolio content yet.
+
+Design direction preserved: **EDITORIAL × ENGINEERING × PERSONAL**.
+
+---
+
+## Components created
+
+All under `src/components/layout/`.
+
+| File | Type | Responsibility |
+|---|---|---|
+| `page-container.tsx` | Server | Centers content within `--container-max`, applies `--container-pad` horizontal margin |
+| `section.tsx` | Server | Semantic `<section>` wrapper with anchor id and consistent vertical rhythm |
+| `nav-links.ts` | Data | Single source of navigation targets (Work, Research, About, Contact) |
+| `site-header.tsx` | Server | Editorial header — wordmark + desktop nav; imports MobileNav |
+| `mobile-nav.tsx` | Client | Mobile menu toggle + overlay (the only client component in the shell) |
+| `site-footer.tsx` | Server | Minimal structural footer |
+
+**Modified:** `src/app/page.tsx` — assembles the shell.
+
+---
+
+## Navigation structure
+Header (sticky, thin bottom border, backdrop blur)
+├── Wordmark "Alif Reezi" → #top
+└── Primary nav
+├── Work → #work
+├── Research → #research
+├── About → #about
+└── Contact → #contact
+
+Navigation targets live in a single `nav-links.ts` module so the desktop nav
+and mobile overlay never fall out of sync. Anchor targets correspond to
+homepage section ids that are populated in later phases.
+
+---
+
+## Architecture decisions
+
+**Server-first.** Only `mobile-nav.tsx` carries `"use client"` — it needs
+open/close state, Escape handling, and focus management. Everything else
+(header shell, desktop links, container, section, footer) is a Server
+Component and ships zero JavaScript.
+
+**No premature abstraction.** `PageContainer` and `Section` are the two
+primitives every future section reuses. Nothing else was extracted.
+
+**Data over duplication.** Navigation links are defined once and mapped in
+both the desktop and mobile views.
+
+---
+
+## Responsive behavior
+
+| Breakpoint | Behavior |
+|---|---|
+| Mobile (< 768px) | Desktop nav hidden; `Menu` toggle shown; tapping opens a full-screen overlay |
+| Desktop (≥ 768px) | Full horizontal nav; mobile toggle hidden |
+
+- Horizontal padding is fluid via `--container-pad` (20px → 80px).
+- Typography scales through the clamp-based tokens from Phase 5B.
+- No fixed-pixel positioning.
+
+---
+
+## Accessibility
+
+- Semantic `<header>`, `<nav aria-label="Primary">`, `<main>`, `<footer>`.
+- Real `<a>` links for navigation; real `<button type="button">` for the toggle.
+- Mobile toggle exposes `aria-expanded`, `aria-controls`, and `aria-label`.
+- Terracotta keyboard focus ring on every interactive element (`:focus-visible`).
+- Escape closes the mobile overlay and returns focus to the trigger button.
+- Body scroll is locked while the overlay is open.
+- Touch targets are 44 × 44px minimum (`h-11 w-11`).
+- No interaction relies on hover alone.
+
+---
+
+## Design system usage
+
+All styling uses Phase 5B tokens — no new colors, no new fonts, no
+`tailwind.config.js`.
+
+- Wordmark: Fraunces (display), `--text-h3`, semibold
+- Desktop nav links: DM Sans (sans), `--text-small`, secondary → ink on hover
+- Mobile toggle: JetBrains Mono (mono), `--text-meta`, uppercase
+- Header background: `--color-bg` at 92% with `backdrop-blur-sm`
+- Borders: single `--color-border` hairline
+
+---
+
+## Verification
+
+| Check | Result |
+|---|---|
+| `npm run lint` | Pass (0 warnings) |
+| `npx tsc --noEmit` | Pass (0 errors) |
+| `npm run build` | Pass (2 static routes) |
+
+Confirmed in the compiled CSS: arbitrary-value utilities resolve to real
+declarations, the `/92` opacity modifier compiles to `color-mix`, and only
+`mobile-nav` produces a client chunk.
+
+---
+
+## Dependencies added
+
+None. No Motion, no Three.js, no icon library, no UI kit.
+
+---
+
+## Not in this phase (deferred)
+
+- Hero content and copy → Phase 5D
+- Lanyard component → Phase 5D
+- Project, research, about, contact content → later phases
+- Active-link scroll state (highlighting the section in view) → after sections have content
+- Final footer content → later phase
+
+---
+
+## Notes
+
+- The area below the header is intentionally empty. Sections are anchor
+  targets awaiting content.
+- The wordmark reads "Alif Reezi" (full display name) rather than "Alif."
+  per owner preference during review.

@@ -1,20 +1,18 @@
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { Section } from "@/components/layout/section";
+import { Hero } from "@/components/sections/hero";
 
 /**
- * Homepage shell (Phase 5C).
- * Establishes header, navigation, anchor targets, and page rhythm.
- * Section content (Hero, Work, Research, About, Contact) is implemented
- * in later phases - sections are intentionally empty anchor targets here.
+ * Homepage (Phase 5D-1).
+ * Header + Hero + empty anchor targets for future sections.
  */
 export default function Home() {
   return (
     <>
       <SiteHeader />
       <main id="top">
-        {/* Hero placeholder - built in Phase 5D */}
-        <Section label="Introduction" className="min-h-[40vh]" />
+        <Hero />
 
         {/* Anchor targets for future sections */}
         <Section id="work" label="Selected work" />
