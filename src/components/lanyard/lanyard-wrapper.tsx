@@ -1,6 +1,6 @@
 "use client";
 
-import { Component, type ReactNode } from "react";
+import { Component, useSyncExternalStore, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 
 function LanyardFallback() {
@@ -33,10 +33,41 @@ class LanyardErrorBoundary extends Component<BoundaryProps, BoundaryState> {
   }
 }
 
+/**
+ * react-three-fiber creates its renderer asynchronously, so a missing WebGL
+ * context rejects a promise rather than throwing during render — an error
+ * boundary never sees it and the hero is left with a dead canvas. Probing up
+ * front keeps the quiet fallback in charge whenever WebGL is unavailable.
+ */
+let webglSupport: boolean | undefined;
+
+function hasWebGL(): boolean {
+  if (webglSupport !== undefined) return webglSupport;
+  try {
+    const probe = document.createElement("canvas");
+    const gl =
+      probe.getContext("webgl2") ??
+      (probe.getContext("webgl") as WebGLRenderingContext | null);
+    webglSupport = Boolean(gl);
+    gl?.getExtension("WEBGL_lose_context")?.loseContext();
+  } catch {
+    webglSupport = false;
+  }
+  return webglSupport;
+}
+
+const noopSubscribe = () => () => {};
+
 export function LanyardWrapper() {
+  // Support never changes within a session, so this is a one-shot read that
+  // still renders the fallback on the server and through hydration.
+  const supported = useSyncExternalStore(noopSubscribe, hasWebGL, () => false);
+
+  if (!supported) return <LanyardFallback />;
+
   return (
     <LanyardErrorBoundary>
-            {/* Camera moved closer (z: 20) so the card fills the hero slot. */}
+      {/* Camera moved closer (z: 20) so the card fills the hero slot. */}
       <LanyardCanvas position={[0, 0, 20]} fov={20} />
     </LanyardErrorBoundary>
   );

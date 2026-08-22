@@ -61,7 +61,11 @@ export function Hero() {
             </div>
           </div>
               <div className="relative min-h-[420px] lg:col-span-4 lg:min-h-[560px]">
-            <div className="pointer-events-none absolute inset-x-0 -top-8 bottom-0 lg:-inset-y-16 lg:-right-16 lg:left-0">
+            {/* The canvas bleeds past the column so the strap has room to
+                swing. The bleed is stepped by breakpoint: at lg the page
+                margin is narrower than the bleed, and a fixed -right-16 would
+                push the document into horizontal scroll. */}
+            <div className="pointer-events-none absolute inset-x-0 -top-8 bottom-0 lg:-inset-y-16 lg:-right-6 lg:left-0 xl:-right-12">
               <div className="pointer-events-auto h-full w-full">
                 <LanyardWrapper />
               </div>
