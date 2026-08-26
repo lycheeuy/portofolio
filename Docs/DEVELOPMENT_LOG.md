@@ -79,7 +79,7 @@ training data. `AGENTS.md` requires reading the relevant guide in
 Commit history:
 
 ```
-<6a>      fix: resolve location contradiction, restore 5D-3 lanyard assets (Phase 6A)
+ff73396  fix: resolve location contradiction, restore 5D-3 lanyard assets (Phase 6A)
 8952031  chore: checkpoint working portfolio before Phase 6A
 5f6db14  fix(lanyard): render in dev, personalize card, shrink model (Phase 5D-3)
 014f2dd  docs: add Phase 5D-2 lanyard integration documentation
