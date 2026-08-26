@@ -79,7 +79,7 @@ training data. `AGENTS.md` requires reading the relevant guide in
 Commit history:
 
 ```
-<6b>     perf(lanyard): legible card, quiet strap, paused when off screen (Phase 6B)
+5929bac  perf(lanyard): legible card, quiet strap, paused when off screen (Phase 6B)
 36d8a8f  docs: record the Phase 6A commit hash in the development log
 ff73396  fix: resolve location contradiction, restore 5D-3 lanyard assets (Phase 6A)
 8952031  chore: checkpoint working portfolio before Phase 6A
