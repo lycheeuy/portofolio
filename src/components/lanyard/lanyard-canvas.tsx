@@ -329,9 +329,23 @@ function Band({
           0.1,
           Math.min(1, lerped.distanceTo(ref.current.translation())),
         );
+        // The chase factor is `delta * 50`, so it passes 1 as soon as a frame
+        // takes longer than 20ms — and THREE.Vector3.lerp does not clamp its
+        // alpha, so above 1 the point is thrown *past* its target instead of
+        // drawn towards it. `clampedDistance` then saturates at its own
+        // ceiling of 1, which leaves the factor at `delta * 50` for the next
+        // frame too, so the error compounds instead of correcting: one slow
+        // frame is enough to walk the strap's control points out to 1e15,
+        // where the band leaves the frustum and the lanyard is simply gone.
+        // Startup reliably supplies that slow frame — the Suspense boundary
+        // above keeps the Canvas mounted, so this loop is already ticking
+        // while Rapier's WASM and the model are still landing on the main
+        // thread (measured: a 2.1s frame at frame 7). Capping the factor at 1
+        // keeps every step a convex combination of the two points, which can
+        // approach the target but never overshoot it.
         lerped.lerp(
           ref.current.translation(),
-          delta * (minSpeed + clampedDistance * (maxSpeed - minSpeed)),
+          Math.min(1, delta * (minSpeed + clampedDistance * (maxSpeed - minSpeed))),
         );
       });
       curve.points[0].copy(j3.current.translation());

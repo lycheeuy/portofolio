@@ -1,10 +1,8 @@
 /**
- * Primary navigation targets. Anchors correspond to homepage section ids
- * that are populated in later phases.
+ * Primary navigation targets.
+ *
+ * The list itself lives in `src/data/site.ts` so the data layer owns the
+ * labels; this module stays as the import path the header and mobile overlay
+ * already use.
  */
-export const NAV_LINKS = [
-  { label: "Work", href: "#work" },
-  { label: "Research", href: "#research" },
-  { label: "About", href: "#about" },
-  { label: "Contact", href: "#contact" },
-] as const;
+export { NAVIGATION as NAV_LINKS } from "@/data/site";
