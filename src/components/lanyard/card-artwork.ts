@@ -31,7 +31,6 @@ interface Tokens {
   surface: string;
   ink: string;
   secondary: string;
-  muted: string;
   border: string;
   accent: string;
   display: string;
@@ -44,7 +43,6 @@ const FALLBACK_TOKENS: Tokens = {
   surface: "#EDE9E1",
   ink: "#1B1815",
   secondary: "#6B6560",
-  muted: "#726C66",
   border: "#D5D0C8",
   accent: "#9E4F35",
   display: "Georgia, serif",
@@ -64,7 +62,6 @@ function readTokens(): Tokens {
     surface: read("--color-surface", FALLBACK_TOKENS.surface),
     ink: read("--color-ink", FALLBACK_TOKENS.ink),
     secondary: read("--color-secondary", FALLBACK_TOKENS.secondary),
-    muted: read("--color-muted", FALLBACK_TOKENS.muted),
     border: read("--color-border", FALLBACK_TOKENS.border),
     accent: read("--color-accent", FALLBACK_TOKENS.accent),
     display: read("--font-display", FALLBACK_TOKENS.display),
@@ -142,13 +139,18 @@ function uvRect(uv: typeof FRONT_UV): Rect {
 
 /**
  * Front of the credential. Composition is anchored on a single left margin —
- * name, a short terracotta rule, role, focus, then a footer row under a
- * hairline. The top ~14% stays clear because the model's metal clamp sits
- * over it.
+ * a header rule under the clamp, the name, a short terracotta rule, role,
+ * focus, then a footer row under a second hairline. The top ~14% stays clear
+ * because the model's metal clamp sits over it.
+ *
+ * Everything is set in `--color-ink` or `--color-secondary`. `--color-muted`
+ * is deliberately not used here: it measures 4.28:1 on `--color-surface`,
+ * under the 4.5:1 AA floor (see the design-system note in the log), and the
+ * card is rendered small enough that anything borderline reads as blank.
  */
 function drawFront(ctx: CanvasRenderingContext2D, t: Tokens): void {
   const r = uvRect(FRONT_UV);
-  const padX = r.w * 0.115;
+  const padX = r.w * 0.1;
   const left = r.x + padX;
   const right = r.x + r.w - padX;
   const contentW = right - left;
@@ -156,42 +158,54 @@ function drawFront(ctx: CanvasRenderingContext2D, t: Tokens): void {
   ctx.textBaseline = "alphabetic";
   ctx.textAlign = "left";
 
+  // Header rule, just below the clamp, paired with the footer rule below to
+  // frame the type block. Both are secondary, not border: the card renders at
+  // roughly four fifths of its albedo, and a page-weight hairline measured at
+  // that exposure is simply not there.
+  ctx.fillStyle = t.secondary;
+  ctx.fillRect(left, r.y + r.h * 0.168, contentW, Math.max(1, r.h * 0.0018));
+
   // Name — display face, tracked slightly open so it reads as a credential
   // rather than a repeat of the hero headline.
   const nameTracking = 0.015;
-  const nameSize = fitSize(ctx, "ALIF REEZI", t.display, "600", r.h * 0.092, nameTracking, contentW);
+  const nameSize = fitSize(ctx, "ALIF REEZI", t.display, "600", r.h * 0.105, nameTracking, contentW);
   ctx.font = `600 ${nameSize}px ${t.display}`;
   ctx.fillStyle = t.ink;
-  drawTracked(ctx, "ALIF REEZI", left, r.y + r.h * 0.215, nameSize * nameTracking);
+  drawTracked(ctx, "ALIF REEZI", left, r.y + r.h * 0.278, nameSize * nameTracking);
 
   // The one accent mark on the card: the same short rule the hero uses.
   ctx.fillStyle = t.accent;
-  ctx.fillRect(left, r.y + r.h * 0.259, contentW * 0.19, Math.max(2, r.h * 0.0055));
+  ctx.fillRect(left, r.y + r.h * 0.321, contentW * 0.19, Math.max(2, r.h * 0.006));
 
-  // Role — fitted so the long first line can never run past the margin
-  const roleSize = fitSize(ctx, "AI / MACHINE LEARNING", t.sans, "500", r.h * 0.04, 0.09, contentW);
+  // Role — ink, not secondary. At the size the card renders on screen this is
+  // the line most likely to disappear, so it takes the full-contrast tone and
+  // is fitted so the long first line can never run past the margin.
+  const roleSize = fitSize(ctx, "AI / MACHINE LEARNING", t.sans, "500", r.h * 0.052, 0.09, contentW);
   const roleTracking = roleSize * 0.09;
   ctx.font = `500 ${roleSize}px ${t.sans}`;
-  ctx.fillStyle = t.secondary;
-  drawTracked(ctx, "AI / MACHINE LEARNING", left, r.y + r.h * 0.358, roleTracking);
-  drawTracked(ctx, "ENGINEER", left, r.y + r.h * 0.409, roleTracking);
+  ctx.fillStyle = t.ink;
+  drawTracked(ctx, "AI / MACHINE LEARNING", left, r.y + r.h * 0.437, roleTracking);
+  drawTracked(ctx, "ENGINEER", left, r.y + r.h * 0.503, roleTracking);
 
-  // Focus — mono metadata, the same register as the hero's focus list
-  const focusSize = r.h * 0.034;
+  // Focus — mono metadata, the same register as the hero's focus list. It
+  // stays a step under the role through size and family, not tone: this is the
+  // smallest type that still has to be read, and at the size the card occupies
+  // on screen a lighter grey is the difference between metadata and smudge.
+  const focusSize = r.h * 0.045;
   const focusTracking = focusSize * 0.13;
   ctx.font = `400 ${focusSize}px ${t.mono}`;
-  ctx.fillStyle = t.muted;
-  drawTracked(ctx, "COMPUTER VISION", left, r.y + r.h * 0.578, focusTracking);
-  drawTracked(ctx, "RESEARCH", left, r.y + r.h * 0.629, focusTracking);
+  ctx.fillStyle = t.ink;
+  drawTracked(ctx, "COMPUTER VISION", left, r.y + r.h * 0.638, focusTracking);
+  drawTracked(ctx, "RESEARCH", left, r.y + r.h * 0.701, focusTracking);
 
   // Footer
-  ctx.fillStyle = t.border;
-  ctx.fillRect(left, r.y + r.h * 0.852, contentW, Math.max(1, r.h * 0.0014));
+  ctx.fillStyle = t.secondary;
+  ctx.fillRect(left, r.y + r.h * 0.852, contentW, Math.max(1, r.h * 0.0018));
 
-  const footSize = r.h * 0.029;
+  const footSize = r.h * 0.031;
   const footTracking = footSize * 0.13;
   ctx.font = `400 ${footSize}px ${t.mono}`;
-  ctx.fillStyle = t.muted;
+  ctx.fillStyle = t.secondary;
   drawTracked(ctx, "FRESH GRADUATE", left, r.y + r.h * 0.918, footTracking);
   drawTracked(ctx, "2026", right, r.y + r.h * 0.918, footTracking, "right");
 }
@@ -206,13 +220,13 @@ function drawBack(ctx: CanvasRenderingContext2D, t: Tokens): void {
   ctx.textBaseline = "alphabetic";
   ctx.textAlign = "left";
 
-  ctx.fillStyle = t.border;
-  ctx.fillRect(left, r.y + r.h * 0.852, contentW, Math.max(1, r.h * 0.0014));
+  ctx.fillStyle = t.secondary;
+  ctx.fillRect(left, r.y + r.h * 0.852, contentW, Math.max(1, r.h * 0.0018));
 
-  const size = r.h * 0.029;
+  const size = r.h * 0.031;
   const tracking = size * 0.13;
   ctx.font = `400 ${size}px ${t.mono}`;
-  ctx.fillStyle = t.muted;
+  ctx.fillStyle = t.secondary;
   drawTracked(ctx, "NASHIRUDDIN ALIF ALVAREEZI", left, r.y + r.h * 0.918, tracking);
 }
 
@@ -236,13 +250,15 @@ function paintBand(canvas: HTMLCanvasElement): void {
   if (!ctx) return;
   const t = readTokens();
 
-  // Plain ink webbing with two hairline stripes near the edges. Symmetric, so
-  // it tiles seamlessly along the strap at any repeat.
+  // Plain webbing with two hairline stripes near the edges. Symmetric, so it
+  // tiles seamlessly along the strap at any repeat. Secondary rather than ink:
+  // the strap is a thin shape, but at full ink weight it read darker than the
+  // card it carries, which put the emphasis in the wrong place.
   ctx.clearRect(0, 0, BAND_W, BAND_H);
-  ctx.fillStyle = t.ink;
+  ctx.fillStyle = t.secondary;
   ctx.fillRect(0, 0, BAND_W, BAND_H);
 
-  ctx.globalAlpha = 0.42;
+  ctx.globalAlpha = 0.32;
   ctx.fillStyle = t.border;
   const stripe = Math.max(1, BAND_H * 0.02);
   ctx.fillRect(0, BAND_H * 0.26, BAND_W, stripe);

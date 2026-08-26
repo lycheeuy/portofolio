@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import {
   Canvas,
   extend,
@@ -41,6 +41,29 @@ declare module "@react-three/fiber" {
 }
 
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+const MOBILE_QUERY = "(max-width: 767px)";
+
+/**
+ * Both switches are media queries, so they are read the same way: one
+ * subscription each, and a state update only when the query actually flips.
+ * The mobile flag used to ride a `resize` listener, which re-rendered the
+ * whole scene on every pixel of a window drag to recompute one boolean.
+ */
+function useMediaQuery(query: string): boolean {
+  const [matches, setMatches] = useState<boolean>(
+    () => typeof window !== "undefined" && window.matchMedia(query).matches,
+  );
+
+  useEffect(() => {
+    const mql = window.matchMedia(query);
+    const handleChange = (): void => setMatches(mql.matches);
+    handleChange();
+    mql.addEventListener("change", handleChange);
+    return () => mql.removeEventListener("change", handleChange);
+  }, [query]);
+
+  return matches;
+}
 
 interface LanyardProps {
   position?: [number, number, number];
@@ -55,48 +78,59 @@ export default function Lanyard({
   fov = 20,
   transparent = true,
 }: LanyardProps) {
-  const [isMobile, setIsMobile] = useState<boolean>(
-    () => typeof window !== "undefined" && window.innerWidth < 768,
-  );
-  const [reducedMotion, setReducedMotion] = useState<boolean>(
-    () =>
-      typeof window !== "undefined" &&
-      window.matchMedia(REDUCED_MOTION_QUERY).matches,
-  );
+  const isMobile = useMediaQuery(MOBILE_QUERY);
+  const reducedMotion = useMediaQuery(REDUCED_MOTION_QUERY);
+
+  const slot = useRef<HTMLDivElement>(null);
+  // The hero scrolls away but the canvas does not: without this the rope
+  // simulation and a full render pass keep running at 60fps behind five
+  // screens of static content, for an element nobody can see.
+  const [inView, setInView] = useState(true);
 
   useEffect(() => {
-    const handleResize = (): void => setIsMobile(window.innerWidth < 768);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    const node = slot.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { rootMargin: "200px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    const query = window.matchMedia(REDUCED_MOTION_QUERY);
-    const handleChange = (): void => setReducedMotion(query.matches);
-    query.addEventListener("change", handleChange);
-    return () => query.removeEventListener("change", handleChange);
-  }, []);
+  // `never` stops the loop outright; `demand` is the reduced-motion still
+  // life, which draws only when SettleFrames asks for a frame.
+  const frameloop = !inView ? "never" : reducedMotion ? "demand" : "always";
 
   return (
-    <div className="relative z-0 flex h-full w-full items-center justify-center">
+    <div
+      ref={slot}
+      className="relative z-0 flex h-full w-full items-center justify-center"
+    >
       <Canvas
         camera={{ position, fov }}
         dpr={[1, isMobile ? 1.5 : 2]}
-        // Reduced motion: the scene is a still life, so only draw when
-        // something actually asks for a frame.
-        frameloop={reducedMotion ? "demand" : "always"}
+        frameloop={frameloop}
         gl={{ alpha: transparent }}
         onCreated={({ gl }) =>
           gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1)
         }
       >
-        {/* The stock scene used intensity={Math.PI}, which reproduces an
-            albedo exactly — right for the metallic demo card, far too hot for
-            a matte one that also picks up the environment on top. Measured off
-            the rendered frame: at 2 the card face came back RGB ~245, the same
-            brightness as the page it sits on, so it read as blank. At 1 it
-            lands ~232 and separates from the background. */}
-        <ambientLight intensity={1} />
+        {/* Exposure is set by measurement, not by taste: screenshot the slot,
+            take the modal colour of the card, compare it to the page.
+
+            The old setup — ambient 1 plus four lightformers, one of them a
+            broadside at intensity 10 — put the card face at #ECECEA against a
+            #F6F2EB page. That is 1.06:1. The card was not subtly low
+            contrast, it was the same colour as the paper behind it.
+
+            Two lightformers do much less of the lifting than four did, so
+            ambient has to rise to compensate; what matters is where the face
+            lands, and 1.95 puts it at #CAC8C4 — 1.50:1, reading as card stock
+            in soft light rather than as a hole in the page. Going brighter
+            walks back toward the old problem; going darker turns warm stock
+            grey and drops the whole scene out of the palette. */}
+        <ambientLight intensity={1.95} />
         {/* This boundary is load-bearing, not cosmetic. <Physics> suspends
             while the Rapier WASM initialises and useGLTF suspends on the
             model. Without a boundary of our own, that suspension reaches the
@@ -115,40 +149,34 @@ export default function Lanyard({
             key={reducedMotion ? "still" : "live"}
             gravity={gravity}
             timeStep={isMobile ? 1 / 30 : 1 / 60}
-            paused={reducedMotion}
+            paused={reducedMotion || !inView}
           >
             <Band isMobile={isMobile} reducedMotion={reducedMotion} />
           </Physics>
         </Suspense>
-        {reducedMotion ? <SettleFrames /> : null}
-        <Environment blur={0.75}>
+        {reducedMotion && inView ? <SettleFrames /> : null}
+        {/* Two soft strip lights instead of the stock four. The pair that
+            went is the one that cost the most and showed the least: a
+            broadside at intensity 10 that lit the card like a shop window and
+            put a hard specular streak across the metal clip. What is left
+            gives the card top-left modelling and nothing to reflect.
+            resolution={64} because a blurred environment feeding a matte
+            surface has no detail to lose, and the cube render target is built
+            on every mount. */}
+        <Environment blur={0.75} resolution={64}>
           <Lightformer
-            intensity={2}
+            intensity={1.6}
             color="white"
             position={[0, -1, 5]}
             rotation={[0, 0, Math.PI / 3]}
             scale={[100, 0.1, 1]}
           />
           <Lightformer
-            intensity={3}
+            intensity={2}
             color="white"
-            position={[-1, -1, 1]}
+            position={[-1, 1, 1]}
             rotation={[0, 0, Math.PI / 3]}
             scale={[100, 0.1, 1]}
-          />
-          <Lightformer
-            intensity={3}
-            color="white"
-            position={[1, 1, 1]}
-            rotation={[0, 0, Math.PI / 3]}
-            scale={[100, 0.1, 1]}
-          />
-          <Lightformer
-            intensity={10}
-            color="white"
-            position={[-10, 0, 14]}
-            rotation={[0, Math.PI / 2, Math.PI / 3]}
-            scale={[100, 10, 1]}
           />
         </Environment>
       </Canvas>
@@ -238,6 +266,14 @@ const STILL_SEED: Seed = {
   card: [0, -4.45, 0],
 };
 
+const SEGMENT_PROPS: RigidBodyProps = {
+  type: "dynamic",
+  canSleep: true,
+  colliders: false,
+  angularDamping: 4,
+  linearDamping: 4,
+};
+
 function Band({
   maxSpeed = 50,
   minSpeed = 0,
@@ -252,20 +288,16 @@ function Band({
   const j3 = useRef<RapierRigidBody>(null!);
   const card = useRef<RapierRigidBody>(null!);
 
-  const vec = new THREE.Vector3();
-  const ang = new THREE.Vector3();
-  const rot = new THREE.Vector3();
-  const dir = new THREE.Vector3();
+  // Scratch vectors for the frame loop. Allocated once per mount rather than
+  // once per render.
+  const [{ vec, ang, rot, dir }] = useState(() => ({
+    vec: new THREE.Vector3(),
+    ang: new THREE.Vector3(),
+    rot: new THREE.Vector3(),
+    dir: new THREE.Vector3(),
+  }));
 
   const seed = reducedMotion ? STILL_SEED : LIVE_SEED;
-
-  const segmentProps: RigidBodyProps = {
-    type: "dynamic",
-    canSleep: true,
-    colliders: false,
-    angularDamping: 4,
-    linearDamping: 4,
-  };
 
   const getLerped = (body: LanyardRigidBody): THREE.Vector3 => {
     if (!body.lerped) {
@@ -292,6 +324,15 @@ function Band({
   });
   const [dragged, drag] = useState<false | THREE.Vector3>(false);
   const [hovered, hover] = useState(false);
+
+  // curve.getPoints() returns a fresh array of fresh Vector3s on every call,
+  // which is 33 objects per frame for the life of the page. Sampling into a
+  // reused array costs the same arithmetic and allocates nothing.
+  const segments = isMobile ? 16 : 32;
+  const curvePoints = useMemo(
+    () => Array.from({ length: segments + 1 }, () => new THREE.Vector3()),
+    [segments],
+  );
 
   useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 1]);
   useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 1]);
@@ -352,7 +393,10 @@ function Band({
       curve.points[1].copy(getLerped(j2.current));
       curve.points[2].copy(getLerped(j1.current));
       curve.points[3].copy(fixed.current.translation());
-      band.current.geometry.setPoints(curve.getPoints(isMobile ? 16 : 32));
+      for (let i = 0; i <= segments; i += 1) {
+        curve.getPoint(i / segments, curvePoints[i]);
+      }
+      band.current.geometry.setPoints(curvePoints);
       if (!reducedMotion) {
         ang.copy(card.current.angvel());
         rot.copy(card.current.rotation());
@@ -388,40 +432,45 @@ function Band({
   return (
     <>
       <group position={[0, 4, 0]}>
-        <RigidBody ref={fixed} {...segmentProps} type="fixed" />
-        <RigidBody position={seed.j1} ref={j1} {...segmentProps} type="dynamic">
+        <RigidBody ref={fixed} {...SEGMENT_PROPS} type="fixed" />
+        <RigidBody position={seed.j1} ref={j1} {...SEGMENT_PROPS} type="dynamic">
           <BallCollider args={[0.1]} />
         </RigidBody>
-        <RigidBody position={seed.j2} ref={j2} {...segmentProps} type="dynamic">
+        <RigidBody position={seed.j2} ref={j2} {...SEGMENT_PROPS} type="dynamic">
           <BallCollider args={[0.1]} />
         </RigidBody>
-        <RigidBody position={seed.j3} ref={j3} {...segmentProps} type="dynamic">
+        <RigidBody position={seed.j3} ref={j3} {...SEGMENT_PROPS} type="dynamic">
           <BallCollider args={[0.1]} />
         </RigidBody>
         <RigidBody
           position={seed.card}
           ref={card}
-          {...segmentProps}
+          {...SEGMENT_PROPS}
           type={dragged ? "kinematicPosition" : "dynamic"}
         >
           <CuboidCollider args={[0.8, 1.125, 0.01]} />
           <group scale={2.25} position={[0, -1.2, -0.05]} {...pointerHandlers}>
             <mesh geometry={nodes.card.geometry}>
-              {/* Matte card stock, not a glossy plastic badge: no metalness,
-                  only a whisper of clearcoat to keep an edge highlight. */}
-              <meshPhysicalMaterial
+              {/* Uncoated card stock. The clearcoat that used to sit here was
+                  meant to give the card an edge highlight, but what it
+                  actually did was read as laminate and pull a sheen across the
+                  face at the angles the card spends most of its time at. The
+                  printed rules on the artwork define the face better and cost
+                  nothing to render. Dropping it also drops the material to a
+                  plain standard one, which is the cheaper shader. */}
+              <meshStandardMaterial
                 map={cardTexture}
-                map-anisotropy={16}
-                clearcoat={isMobile ? 0 : 0.3}
-                clearcoatRoughness={0.55}
-                roughness={0.68}
+                roughness={0.85}
                 metalness={0}
               />
             </mesh>
+            {/* The clip and clamp share one material instance from the GLB,
+                so this roughness applies to both. Brushed, not chromed — a
+                mirror-finish clip out-sparkles everything on the card. */}
             <mesh
               geometry={nodes.clip.geometry}
               material={materials.metal}
-              material-roughness={0.3}
+              material-roughness={0.62}
             />
             <mesh geometry={nodes.clamp.geometry} material={materials.metal} />
           </group>

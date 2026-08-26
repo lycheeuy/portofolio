@@ -79,6 +79,8 @@ training data. `AGENTS.md` requires reading the relevant guide in
 Commit history:
 
 ```
+<6b>     perf(lanyard): legible card, quiet strap, paused when off screen (Phase 6B)
+36d8a8f  docs: record the Phase 6A commit hash in the development log
 ff73396  fix: resolve location contradiction, restore 5D-3 lanyard assets (Phase 6A)
 8952031  chore: checkpoint working portfolio before Phase 6A
 5f6db14  fix(lanyard): render in dev, personalize card, shrink model (Phase 5D-3)
@@ -508,6 +510,63 @@ physics change.
 
 ---
 
+### Phase 6B — Lanyard Performance & Legibility · Complete
+
+Scoped to the lanyard. No section, layout, type scale, spacing, or copy was
+touched, and no dependency was added. `card.glb` is untouched at 162,612 bytes.
+
+**The card was not low contrast, it was the same colour as the page.** Measured
+off the rendered frame: card face `#ECECEA` against a `#F6F2EB` page — 1.06:1.
+Everything else followed from that.
+
+- **Exposure.** The stock rig was ambient 1 plus four lightformers, one a
+  broadside at intensity 10 that lit the face flat and put a specular streak
+  across the metal clip. Now two soft strip lights and ambient 1.95, which
+  lands the face at `#CAC8C4` — **1.50:1** against the page. Set by
+  measurement, not by eye; the method is in §7.
+- **Type.** Role and focus lines moved to `--color-ink`, sizes up roughly a
+  third (role `0.040 → 0.052`, focus `0.034 → 0.045` of the island height),
+  and the name fits a wider measure. `--color-muted` is gone from the card
+  entirely — it is 4.28:1 on `--color-surface`, under AA (§11), and it was
+  carrying the focus lines. Two secondary hairlines now frame the type block;
+  the old `--color-border` footer rule measured out invisible at this exposure.
+- **Material.** `meshPhysicalMaterial` + clearcoat → `meshStandardMaterial`
+  at roughness 0.85. The clearcoat was reading as laminate rather than card
+  stock, and standard is the cheaper shader. Clip and clamp roughness 0.3 →
+  0.62, so the metal is brushed rather than chromed.
+- **Strap.** Ink webbing → `--color-secondary`. A thin strap at full ink
+  weight had more tonal mass than a card that was barely there, which put the
+  emphasis on the lanyard instead of the credential.
+
+**Performance.** The measured win is the render loop, not the bundle:
+
+- **The canvas kept simulating and drawing at 60fps while the hero was five
+  screens above the viewport.** An `IntersectionObserver` now switches
+  `frameloop` to `"never"` and pauses `<Physics>` when the slot leaves the
+  viewport (200px margin). Script CPU while scrolled away: **6.0% → 0.0%**,
+  and it resumes on return. This is the whole of the runtime saving.
+- `Environment resolution={64}` (from the 256 default) and four lightformers
+  down to two: a smaller cube render target, built on every mount, feeding a
+  blurred environment that a matte surface cannot show detail from anyway.
+- Per-frame allocation removed from the frame loop: `curve.getPoints()` built
+  a fresh array of 33 `Vector3`s every frame and now samples into a reused
+  one; the four scratch vectors and `segmentProps` were being rebuilt on every
+  render.
+- The mobile breakpoint moved from a `resize` listener to `matchMedia`, so
+  dragging a window edge no longer re-renders the scene once per pixel to
+  recompute one boolean.
+- `LanyardCanvas` now renders on the first `requestIdleCallback` rather than
+  during hydration, holding ~3.3 MB of three/drei/rapier off the hydration
+  task. **Measured honestly: this did not move first paint or blocking time**
+  in local testing — `next/dynamic` already defers past FCP, and the profile
+  is dominated by software WebGL. It is kept as insurance for slow devices,
+  not claimed as a win.
+
+**Verified:** lint, typecheck, build; then a headless-Chrome pass over CDP at
+1440 / 1280 / 1024 / 768 / 430 / 390 / 375 — see §7.
+
+---
+
 ## 4. Current Portfolio Architecture
 
 ```
@@ -591,7 +650,13 @@ Hero (server)
 - The card mesh, clip, and clamp come from `card.glb`; the strap is a `meshline`
   `MeshLineGeometry` fed each frame from a chordal `CatmullRomCurve3`.
 - Mobile tuning: DPR capped at 1.5, physics timestep 1/30, 16 curve samples
-  instead of 32, clearcoat disabled.
+  instead of 32.
+- The card is `meshStandardMaterial`, roughness 0.85, no metalness and no
+  clearcoat (Phase 6B). Lighting is `ambientLight` 1.95 plus two Lightformers
+  inside an `Environment` at `resolution={64}`.
+- The whole canvas stops when the hero leaves the viewport: an
+  `IntersectionObserver` on the slot switches `frameloop` to `"never"` and
+  pauses `<Physics>` (Phase 6B).
 
 ### Custom card artwork (`card-artwork.ts`)
 
@@ -612,8 +677,10 @@ tokens via `getComputedStyle`, so the credential stays in sync with
 
 ### Strap customisation
 
-512×128 tiling band: solid ink webbing with two hairline stripes at 26% and 74%,
-symmetric so it tiles seamlessly at any repeat. Drawn from the same tokens.
+512×128 tiling band: solid `--color-secondary` webbing with two hairline
+stripes at 26% and 74%, symmetric so it tiles seamlessly at any repeat. Drawn
+from the same tokens. It was ink until Phase 6B, which gave the strap more
+tonal weight than the card and inverted the intended hierarchy.
 
 ### Model
 
@@ -1155,6 +1222,105 @@ geometry. Fresh navigation and a 4s settle per width.
 - The footer year read `2026` in this run because that is the build date. It is
   build-time, not visitor-time — by design, see the Phase 5J decisions.
 
+### Phase 6B run — 2026-08-26
+
+| Check | Result |
+|---|---|
+| `npm run lint` | Clean — no output, no warnings |
+| `npx tsc --noEmit` | Exit 0 |
+| `npm run build` | Exit 0 — 4/4 static pages, routes `/` and `/_not-found` both static |
+| `public/lanyard/card.glb` | 162,612 bytes, unchanged |
+
+Run against `next start` (production build) in headless Chrome driven over CDP
+from a script using only Node built-ins — no test dependency was added to the
+project. The whole before/after comparison is one build stashed against the
+other on the same machine, same server, same flags.
+
+#### Card legibility — measured, not eyeballed
+
+Screenshot the lanyard slot, take the modal colour of the non-page pixels,
+compare it to the page. That is the whole method, and it is what should be
+repeated if the lighting is ever touched again.
+
+| | Before (5D-3) | After (6B) |
+|---|---|---|
+| Card face | `#ECECEA` (236,236,234) | `#CAC8C4` (202,200,196) |
+| Contrast vs `--color-bg` | **1.06:1** | **1.50:1** |
+| Strap | ink, near-black, glossy | `#706862`, 4.89:1 |
+| Role / focus tone | secondary / muted | ink / ink |
+
+1.06:1 is not "low contrast". At that separation the card is the page, which
+is exactly what the audit reported and what the screenshots show.
+
+#### Responsive — seven widths
+
+| Width | `scrollWidth` / `clientWidth` | Overflow | Canvas | WebGL | Console errors |
+|---|---|---|---|---|---|
+| 1440 | 1425 / 1425 | none | 405×688 | yes | none |
+| 1280 | 1265 / 1265 | none | 406×688 | yes | none |
+| 1024 | 1009 / 1009 | none | 305×688 | yes | none |
+| 768  | 753 / 753   | none | 676×452 | yes | none |
+| 430  | 430 / 430   | none | 387×452 | yes | none |
+| 390  | 390 / 390   | none | 350×452 | yes | none |
+| 375  | 375 / 375   | none | 335×452 | yes | none |
+
+- **No horizontal overflow at any width**, and no element sweep offender.
+- **The canvas never overlaps the hero text.** Below `lg` the layout stacks and
+  the canvas starts below the text block; at and above `lg` the two columns do
+  not intersect at all.
+- **The lanyard blocks nothing.** Both hero CTAs hit-test as reachable at all
+  seven widths, at their centre and both corners. Mobile navigation opens from
+  the 44×44 menu button and all four overlay links are reachable at 83px tall.
+  Zero network failures.
+- Three console warnings appear at every width, all pre-existing: two library
+  deprecations (`THREE.Clock`, a Rapier init signature) and one SwiftShader
+  shader-compiler note that only exists under software rendering.
+
+#### Reduced motion, WebGL fallback, drag
+
+| Check | Result |
+|---|---|
+| Reduced motion — still | Two screenshots 1.2s apart are **byte-identical** at 1440 / 768 / 375; the same pair differ in normal motion |
+| Reduced motion — drag inert | Hover and press over the card leave `body.style.cursor` unset and move the card by (0, 0) |
+| No WebGL (`--disable-webgl`) | No `<canvas>`; the quiet rule-and-dot fallback renders; hero headline, lead, and both CTAs intact; **zero console errors, zero network failures** at 1440 / 768 / 375 |
+| Drag — normal motion | Cursor goes unset → `grab` on hover → `grabbing` on press → `grab` on release, and the card centroid follows a commanded (−96, −48) drag by (−96, −45) |
+
+#### Runtime cost
+
+Script time is sampled from `Performance.getMetrics` over a fixed 4s window,
+expressed as a percentage of one core.
+
+| Window | Before | After |
+|---|---|---|
+| Hero on screen | 7.8% | 7.6% |
+| **Scrolled past the hero** | **6.0%** | **0.0%** |
+| Scrolled back to the hero | 6.7% | 6.9% |
+
+The middle row is the point: the scene used to cost almost as much when it was
+five screens off the top of the viewport as it did when someone was looking at
+it. It now costs nothing, and resumes cleanly.
+
+**Caveats — read these before quoting the numbers:**
+
+- Software rendering (SwiftShader), as with every previous browser run here.
+  Absolute CPU percentages are therefore not what a GPU-backed browser would
+  report; the before/after ratio is the meaningful figure.
+- **The idle deferral of `LanyardCanvas` did not measurably improve first
+  paint or blocking time.** Unthrottled, the first heavy chunk starts at 368ms
+  before and 361ms after; at 4× CPU throttle, total blocking time was 5,712ms
+  before and 6,505ms after — inside the run-to-run noise of a 3.4s software
+  WebGL shader compile that dominates both profiles. `next/dynamic` already
+  defers the import past FCP. The change is kept because it moves the work off
+  the hydration task on devices slower than this one, but it is not evidence
+  of a measured improvement and should not be reported as one.
+- Bundle size is unchanged, and was never expected to change: initial scripts
+  574,991 → 575,290 bytes, total resources 1,657,685 → 1,657,865 bytes. The
+  3D chunks are the same ~3.31 MB uncompressed / ~1.12 MB over the wire. This
+  phase changed *when* they run and *how much they cost once running*, not how
+  large they are.
+
+---
+
 ---
 
 ## 8. Known Issues / Remaining Work
@@ -1173,6 +1339,9 @@ geometry. Fresh navigation and a 4s settle per width.
 - **Location contradiction between metadata and the data layer.** Resolved in
   Phase 6A — `src/app/layout.tsx` composes its description from `site.ts` and
   `profile.ts` instead of naming a city.
+- **Card face contrast was 1.06:1 against the page.** Fixed in Phase 6B by
+  re-exposing the scene and rebuilding the card's type contrast; measured at
+  1.50:1 after.
 
 ### Remaining
 
@@ -1180,10 +1349,6 @@ geometry. Fresh navigation and a 4s settle per width.
   `fix/lanyard-5d3-regression`, with `phase-5d-3-lanyard` preserving the
   recovered original commit. Both the 5D-3 work and the strap fix need
   committing and merging.
-- **Card face contrast is very low.** `--color-surface` card stock on
-  `--color-bg` under `ambientLight intensity={1}` renders the card nearly the
-  same value as the page. This is the 5D-3 design as specified, not a bug, but
-  it is worth a deliberate legibility decision.
 - **Texture disposal under Strict Mode.** The cleanup in `useDrawnTextures`
   disposes `CanvasTexture`s that live materials still reference. Three.js
   re-uploads them, so there is no visual effect — dev-only cost. Not causal to
@@ -1242,7 +1407,7 @@ from `src/data/`. What is left is not more sections.
 
 - **No production domain.** `site.url` is `null`, so canonical URLs, the
   sitemap, robots, and Open Graph cannot be finalised.
-- **Nothing after 5D-2 is merged to `main`.** Every phase from 5D-3 to 6A is
+- **Nothing after 5D-2 is merged to `main`.** Every phase from 5D-3 to 6B is
   committed on `fix/lanyard-5d3-regression` but not landed. See §3.
 
 **Debt worth paying in one pass, now that no phase is scoped away from

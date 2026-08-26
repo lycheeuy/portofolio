@@ -1,6 +1,12 @@
 "use client";
 
-import { Component, useSyncExternalStore, type ReactNode } from "react";
+import {
+  Component,
+  useEffect,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 import dynamic from "next/dynamic";
 
 function LanyardFallback() {
@@ -63,7 +69,32 @@ export function LanyardWrapper() {
   // still renders the fallback on the server and through hydration.
   const supported = useSyncExternalStore(noopSubscribe, hasWebGL, () => false);
 
-  if (!supported) return <LanyardFallback />;
+  // three + drei + rapier is ~3.3 MB of JavaScript. next/dynamic keeps it out
+  // of the initial bundle, but it still fetches and executes the moment this
+  // component renders — which is during hydration, on the same main thread
+  // that is trying to make the page interactive. Holding the render back to
+  // the first idle period moves all of that after first paint. The fallback
+  // occupies the slot in the meantime, and the hero reserves the height, so
+  // nothing shifts when the scene arrives.
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    if (!supported) return;
+
+    if (typeof window.requestIdleCallback === "function") {
+      const handle = window.requestIdleCallback(() => setReady(true), {
+        timeout: 2000,
+      });
+      return () => window.cancelIdleCallback?.(handle);
+    }
+
+    // Safari before 16.4 has no requestIdleCallback; a short timeout clears
+    // first paint, which is the point of the deferral.
+    const handle = window.setTimeout(() => setReady(true), 200);
+    return () => window.clearTimeout(handle);
+  }, [supported]);
+
+  if (!supported || !ready) return <LanyardFallback />;
 
   return (
     <LanyardErrorBoundary>
