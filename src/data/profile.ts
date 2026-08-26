@@ -102,6 +102,5 @@ export const profile: Profile = {
     "Graduation year and institution name.",
     "Personal / 'now' copy: what he likes building, what he is currently learning.",
     "Work experience entries — none are documented yet.",
-    "Location conflict: `src/app/layout.tsx` metadata says Purwokerto; the owner's input says Cirebon. Cirebon is used here.",
   ],
 };

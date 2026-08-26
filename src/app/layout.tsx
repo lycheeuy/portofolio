@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { profile } from "@/data/profile";
+import { site } from "@/data/site";
 
 const fraunces = localFont({
   src: [
@@ -30,8 +32,9 @@ const jetbrainsMono = localFont({
 
 export const metadata: Metadata = {
   title: "Alif Reezi - AI Engineer",
-  description:
-    "AI engineer and Biomedical Engineering graduate building machine learning systems for medical imaging and edge AI deployment. Based in Purwokerto, Indonesia.",
+  // Location comes from the data layer so metadata cannot drift from what
+  // the footer and About section render.
+  description: `${site.description} Based in ${profile.location}.`,
 };
 
 export default function RootLayout({

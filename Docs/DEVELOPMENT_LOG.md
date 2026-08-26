@@ -1,7 +1,7 @@
 # Development Log
 
 Rolling record of work actually completed and verified on this project.
-Last updated: 2026-08-25.
+Last updated: 2026-08-26.
 
 Companion phase docs live alongside this file in `Docs/`. This log is the
 entry point; those docs carry the per-phase detail.
@@ -79,6 +79,8 @@ training data. `AGENTS.md` requires reading the relevant guide in
 Commit history:
 
 ```
+<6a>      fix: resolve location contradiction, restore 5D-3 lanyard assets (Phase 6A)
+8952031  chore: checkpoint working portfolio before Phase 6A
 5f6db14  fix(lanyard): render in dev, personalize card, shrink model (Phase 5D-3)
 014f2dd  docs: add Phase 5D-2 lanyard integration documentation
 3cb6924  feat: integrate 3D Lanyard ... (Phase 5D-2)
@@ -152,7 +154,7 @@ Commit history:
 - **Verified:** clean install, 0 vulnerabilities, no peer conflicts.
 - **Doc:** `Docs/PHASE_5D-2.md`
 
-### Phase 5D-3 — Card Personalisation & Dev Rendering · Complete, fix uncommitted
+### Phase 5D-3 — Card Personalisation & Dev Rendering · Complete
 
 - **Objective:** replace the stock branded card with a personalised credential,
   make the scene render reliably in dev, and shrink the model.
@@ -168,9 +170,9 @@ Commit history:
 `main` sits at `014f2dd` (5D-2 + docs). The original 5D-3 commit `fbdba4d` was
 left dangling on a deleted branch and was recovered from the reflog; it is now
 preserved on branch `phase-5d-3-lanyard`. Active work is on
-**`fix/lanyard-5d3-regression`** (`5f6db14`, a cherry-pick of 5D-3) with the
-strap fix **uncommitted** in the working tree. Merging 5D-3 into `main` is
-outstanding.
+**`fix/lanyard-5d3-regression`** (`5f6db14`, a cherry-pick of 5D-3). The
+strap fix is **committed** as of Phase 6A (`8952031`). Merging the branch into
+`main` is still outstanding.
 
 ### Phase 5E — Content & Project Data · Complete
 
@@ -471,6 +473,38 @@ outstanding.
 - **No new dependencies. Hero, Lanyard, Selected Work, Research, About, and the
   project and research data were not modified.**
 - **Verified:** see §7.
+
+---
+
+### Phase 6A — Critical Safety & Correctness · Complete
+
+Scoped to P0 safety and correctness only. No redesign, no refactor, no
+consistency cleanup, no dependency change, and no Lanyard appearance or
+physics change.
+
+- **Git safety.** Every uncommitted phase — the strap fix, `src/data/`, and
+  the 5G–5J sections — was captured in checkpoint commit `8952031` on
+  `fix/lanyard-5d3-regression` before anything else was touched. Nothing was
+  reset or deleted. Both stray assets were byte-identical to blobs already in
+  history, so the checkpoint added no new object weight.
+- **Location contradiction resolved.** `src/app/layout.tsx` no longer hardcodes
+  a city. Its description is composed from `site.description` and
+  `profile.location`, so metadata now reads Cirebon, West Java, Indonesia and
+  cannot drift from what the footer and About section render. The now-obsolete
+  conflict notes were dropped from `profile.pending` and `site.pending`.
+- **Lanyard asset restored.** `public/lanyard/card.glb` is back to the
+  committed 5D-3 model: **162,612 bytes (159 KB)**, blob `702b283`, down from
+  the 2,457,784-byte (2.4 MB) copy that had reappeared in the working tree.
+  Verified before the swap that the committed version existed and that
+  `lanyard-canvas.tsx` still resolves the same path (`/lanyard/card.glb`,
+  one `useGLTF` plus one `useGLTF.preload`). The scene file was not modified.
+- **Stray asset removed.** `public/lanyard/lanyard.png` (7,527 bytes) had zero
+  references anywhere in `src/` or `public/` — the strap texture is drawn at
+  runtime in `card-artwork.ts` — and was deleted.
+- **Verified:** `npm run lint` clean, `npx tsc --noEmit` clean, `npm run build`
+  succeeds; `/` and `/_not-found` prerender static. The built
+  `<meta name="description">` reads Cirebon, and no shipped output contains
+  Purwokerto (only the stale Turbopack cache under `.next/cache/`).
 
 ---
 
@@ -1129,23 +1163,19 @@ geometry. Fresh navigation and a 4s settle per width.
 
 - **Strap divergence (Phase 5D-3 regression).** Unclamped lerp alpha sent the
   band's control points to ~1e15 within seconds of load. Fixed by clamping the
-  chase factor to 1. Verified over 16s plus drag, resize, and mobile. Fix is
-  **uncommitted** in the working tree.
+  chase factor to 1. Verified over 16s plus drag, resize, and mobile.
+  Committed in Phase 6A (`8952031`).
+
+- **5D-2 lanyard assets had reappeared in the working tree.** `card.glb` was
+  the 2.4 MB branded model and `lanyard.png` (7.5 KB) was back as an untracked
+  file, reverting 5D-3's asset reduction. Phase 6A restored the committed
+  162,612-byte `card.glb` and deleted the unreferenced `lanyard.png`.
+- **Location contradiction between metadata and the data layer.** Resolved in
+  Phase 6A — `src/app/layout.tsx` composes its description from `site.ts` and
+  `profile.ts` instead of naming a city.
 
 ### Remaining
 
-- **Working tree has the 5D-2 lanyard assets back, contradicting 5D-3.**
-  `public/lanyard/card.glb` is currently the 2.4 MB branded model and
-  `public/lanyard/lanyard.png` (7.5 KB) has reappeared as an untracked file.
-  Both are byte-identical (SHA-1 verified) to the Phase 5D-2 versions, and both
-  are timestamped after the 5D-3 work — they were restored outside the 5D-3
-  changes. Nothing in `src/` references `lanyard.png` any more, and the card
-  face is drawn at runtime, so the scene should still render from the larger
-  model; but this reverts 5D-3's 2.3 MB asset reduction and needs a deliberate
-  decision. Left in place rather than reverted, since it is an application
-  asset. Restore the committed state with
-  `git checkout HEAD -- public/lanyard/card.glb` and delete the stray
-  `lanyard.png` if the 5D-3 reduction is intended.
 - **Phase 5D-3 is not merged to `main`.** `main` is still at 5D-2. Work sits on
   `fix/lanyard-5d3-regression`, with `phase-5d-3-lanyard` preserving the
   recovered original commit. Both the 5D-3 work and the strap fix need
@@ -1180,10 +1210,6 @@ silently invented. Consolidated here:
   were left blank. VGG19 records F1 `0.5745` for *both* classes, which cannot
   both be right — the Tuberculosis value is stored as `null` pending
   correction.
-- **Location conflict.** `src/app/layout.tsx` metadata says Purwokerto; the
-  owner's own input says Cirebon, West Java. `profile.ts` uses Cirebon and
-  `site.ts` drops the location from the description until this is settled.
-  Root metadata was left untouched — Phase 5E does not change components.
 - **Hero mission statement** — still owner-pending from Phase 5D-1.
 - **Personal / experience content.** No work experience and no "now" copy are
   documented; `Experience` and `NowItem` remain declared but unpopulated.
@@ -1215,16 +1241,9 @@ from `src/data/`. What is left is not more sections.
 **Blocking a real launch:**
 
 - **No production domain.** `site.url` is `null`, so canonical URLs, the
-  sitemap, robots, and Open Graph cannot be finalised. Root metadata in
-  `src/app/layout.tsx` also still says Purwokerto where `profile.ts` says
-  Cirebon — that conflict is now visible on the page, since the footer and
-  About both render Cirebon.
-- **Phase 5D-3 is still not merged to `main`,** and neither is anything
-  after it. Every phase from 5D-3 to 5J sits uncommitted or on
-  `fix/lanyard-5d3-regression`. See the branch note in §3.
-- **`public/lanyard/card.glb` is the 2.4 MB model,** not the committed
-  159 KB one — a 2.3 MB regression on a page that is otherwise static
-  (§8).
+  sitemap, robots, and Open Graph cannot be finalised.
+- **Nothing after 5D-2 is merged to `main`.** Every phase from 5D-3 to 6A is
+  committed on `fix/lanyard-5d3-regression` but not landed. See §3.
 
 **Debt worth paying in one pass, now that no phase is scoped away from
 touching several files:**

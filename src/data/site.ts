@@ -43,6 +43,5 @@ export const site: SiteConfig = {
     "Production domain — no URL is chosen yet, so canonical, sitemap, and Open Graph URLs cannot be set.",
     "Open Graph / social share image.",
     "Footer copy — the current footer is an acknowledged placeholder.",
-    "Root metadata in `src/app/layout.tsx` states Purwokerto; the owner's stated location is Cirebon. The description here drops the location line until that is settled.",
   ],
 };
