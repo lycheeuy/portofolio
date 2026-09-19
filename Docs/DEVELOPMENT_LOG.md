@@ -79,6 +79,8 @@ training data. `AGENTS.md` requires reading the relevant guide in
 Commit history:
 
 ```
+ea35364  feat: multi-page information architecture (Phase 6C + 6D)
+7ae7682  docs: record the Phase 6B commit hash in the development log
 5929bac  perf(lanyard): legible card, quiet strap, paused when off screen (Phase 6B)
 36d8a8f  docs: record the Phase 6A commit hash in the development log
 ff73396  fix: resolve location contradiction, restore 5D-3 lanyard assets (Phase 6A)
@@ -91,9 +93,8 @@ ff73396  fix: resolve location contradiction, restore 5D-3 lanyard assets (Phase
 46c6c0a  chore: initialize portfolio project
 ```
 
-Phases 6C and 6D are complete and verified but **not yet committed** — both sit
-in the working tree on `fix/lanyard-5d3-regression`. They should land with the
-rest of the branch; see §9.
+Phases 6C and 6D landed together in `ea35364` on `fix/lanyard-5d3-regression`
+(2026-09-19). The branch is still not merged to `main`; see §9.
 
 ### Phase 5A — Foundation · Complete
 
@@ -756,6 +757,31 @@ No Lanyard change of any kind. No new dependency. No token, palette, or type
 scale change. No content edit to `projects.ts`, `research.ts`, or `profile.ts`
 beyond one added lookup helper. `Docs/Detail.txt` was read but deliberately not
 ingested — see §8.
+
+### Owner decisions applied · 2026-09-19 · Complete
+
+Five decisions confirmed by the owner, applied as one commit on top of
+`ea35364`. Content-only; no route, component structure, token, or Lanyard
+change, no dependency, and no other item from `Docs/Detail.txt` ingested.
+
+| Decision | Where it landed |
+|---|---|
+| Email → `alifalvareezi1@gmail.com` | `profile.contact[0]` — Hero colophon, Contact, mobile overlay all read from it |
+| Tuberculosis project → **ThoraxVision**, `/projects/thoraxvision`, live at `https://thoraxvision.site/` | `projects.ts`: `slug`, `title`, `links: [{ label: "Live", … }]` |
+| Melon project → **MelonVision AI**, `/projects/melonvision-ai` | `projects.ts`: `slug`, `title` |
+| Location → **Kota Cirebon, West Java, Indonesia** | `profile.location` — Hero, About, footer, root and `/about` metadata |
+| Research percentage results not displayed for now | `SHOW_MODEL_RESULTS = false` in `components/projects/project-detail.tsx`; the `models` arrays in `projects.ts` are byte-identical |
+
+Slugs come from the data layer, so the route files did not change — only their
+comments. `nav-links.ts`, `about.tsx`, `project-detail.tsx`, the README tree,
+and the two empty `public/images/projects/` folders were updated to the new
+names. The historical `tuberculosis-detection` / `melon-detection` slugs are
+not redirected: nothing was ever published at them.
+
+**Not applied, still in `Docs/Detail.txt`:** the MelonVision repository URL,
+year, and architecture; both paper titles, full conference names, topics,
+author positions, and research repository URLs; the long-form about copy. All
+remain in the `pending` arrays for Phase 6E.
 
 ---
 
@@ -1731,7 +1757,7 @@ notices. The Lanyard renders on `/` under ANGLE/SwiftShader as before.
   the regression; left alone to keep the fix minimal.
 - **No Phase 5D-3 doc.** Phases 5C, 5D-1, and 5D-2 each have one; 5D-3 does not.
 
-### Owner input has arrived but is NOT yet ingested — `Docs/Detail.txt`
+### Owner input has arrived and is PARTLY ingested — `Docs/Detail.txt`
 
 An untracked `Docs/Detail.txt` in the working tree answers a large share of the
 `pending` list below: final project names (**ThoraxVision**, **MelonVision
@@ -1741,8 +1767,10 @@ names, both topics and author positions, two research repository URLs,
 long-form "about me" copy, and a different final email address from the one in
 `profile.ts`.
 
-**None of it is in `src/data/` yet, and Phase 6D deliberately did not put it
-there.** Phase 6D was scoped to information architecture, and its own rules said
+**On 2026-09-19 the owner confirmed five of these** — the two project names
+and slugs, the ThoraxVision live URL, the email, the city, and hiding the
+percentage tables — and those are now in `src/data/` (see §3). The rest is
+still not, and Phase 6D deliberately did not put it there. Phase 6D was scoped to information architecture, and its own rules said
 the data layer is the source of truth and slugs must come from it. Ingesting
 this is a content phase — it changes titles, slugs, and therefore URLs, and it
 raises questions the file does not settle: the file says not to display model
@@ -1750,8 +1778,8 @@ percentages at all (which would remove the results tables), and the email in it
 differs from the one currently published site-wide. Both are owner decisions,
 not implementation details.
 
-Until then the routes are `/projects/tuberculosis-detection` and
-`/projects/melon-detection`, and the `pending` arrays below stand as written.
+The routes are now `/projects/thoraxvision` and `/projects/melonvision-ai`;
+the `pending` arrays below stand as written.
 
 ### Owner input still required (blocks parts of the content sections)
 
@@ -1811,9 +1839,9 @@ from `src/data/`. What is left is not more pages.
 
 - **No production domain.** `site.url` is `null`, so canonical URLs, the
   sitemap, robots, and Open Graph cannot be finalised.
-- **Nothing after 5D-2 is merged to `main`.** Every phase from 5D-3 to 6B is
-  committed on `fix/lanyard-5d3-regression` but not landed, and 6C and 6D are
-  not even committed. See §3.
+- **Nothing after 5D-2 is merged to `main`.** Every phase from 5D-3 through
+  6D, plus the 2026-09-19 owner decisions, is committed on
+  `fix/lanyard-5d3-regression` but not landed. See §3.
 
 **Debt worth paying in one pass, now that no phase is scoped away from
 touching several files:**
@@ -1829,11 +1857,10 @@ touching several files:**
 
 **The next phase is content ingestion, not code.** `Docs/Detail.txt` is sitting
 untracked in the working tree with answers to most of §8's pending list —
-project renames, repository URLs, both paper titles, both conference names,
-topics, author positions, and long-form personal copy. Phase 6D deliberately
-left it alone: it is a content change, it moves slugs and therefore URLs, and it
-carries two owner decisions the file does not settle (whether to drop the model
-percentage tables entirely, and which of two email addresses is canonical).
+repository URLs, both paper titles, both conference names, topics, author
+positions, and long-form personal copy. The five owner decisions it needed
+(names, slugs, live URL, email, city, hiding the percentage tables) were
+settled and applied on 2026-09-19; the remaining content is Phase 6E.
 Everything downstream of it — `/research` in particular — is already built to
 fill in without a code change.
 

@@ -4,18 +4,20 @@ import type { Project } from "@/types";
  * Selected work.
  *
  * Sources: `Docs/PRD.txt` §1 (project descriptions, technology, workflow),
- * `Docs/User Input Session.txt` (metrics, timeline, link availability), and
- * the dataset sizes confirmed for Phase 5E.
+ * `Docs/User Input Session.txt` (metrics, timeline, link availability), the
+ * dataset sizes confirmed for Phase 5E, and the owner decisions confirmed on
+ * 2026-09-19 (`Docs/Detail.txt`: display names, slugs, the ThoraxVision live
+ * URL).
  *
  * Deliberately absent: any metric, link, date, client name, or outcome that
  * is not in those documents. Where something is known to exist but has no
  * documented value, the field is `null` and the gap is listed in `pending`.
  */
 
-const tuberculosisDetection: Project = {
-  slug: "tuberculosis-detection",
+const thoraxVision: Project = {
+  slug: "thoraxvision",
   index: "01",
-  title: "Tuberculosis Detection",
+  title: "ThoraxVision",
   discipline: "Computer Vision / Research",
   year: null,
   timeline: null,
@@ -58,6 +60,10 @@ const tuberculosisDetection: Project = {
    * Figures are reproduced exactly as recorded in
    * `Docs/User Input Session.txt`. Values the owner left blank there —
    * ResNet50 accuracy, specificity for every model — are `null`, not derived.
+   *
+   * Not displayed for now, by owner decision (2026-09-19): the figures stay
+   * here untouched, and `SHOW_MODEL_RESULTS` in
+   * `components/projects/project-detail.tsx` keeps the tables off the page.
    */
   models: [
     {
@@ -98,7 +104,7 @@ const tuberculosisDetection: Project = {
       ],
     },
   ],
-  links: [],
+  links: [{ label: "Live", href: "https://thoraxvision.site/" }],
   pending: [
     "Project start and completion dates.",
     "GitHub repository URL.",
@@ -110,10 +116,10 @@ const tuberculosisDetection: Project = {
   ],
 };
 
-const melonDetection: Project = {
-  slug: "melon-detection",
+const melonVisionAi: Project = {
+  slug: "melonvision-ai",
   index: "02",
-  title: "Melon Plant Detection",
+  title: "MelonVision AI",
   discipline: "Edge AI / Deployment",
   year: null,
   timeline: "20 – 30 June",
@@ -166,7 +172,7 @@ const melonDetection: Project = {
 };
 
 /** Ordered as they appear in the Selected Work section. */
-export const projects: Project[] = [tuberculosisDetection, melonDetection];
+export const projects: Project[] = [thoraxVision, melonVisionAi];
 
 export function getProject(slug: string): Project | undefined {
   return projects.find((project) => project.slug === slug);

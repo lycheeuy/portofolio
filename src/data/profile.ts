@@ -4,14 +4,15 @@ import type { Profile } from "@/types";
  * Owner profile.
  *
  * Every field below traces to `Docs/User Input Session.txt`, `Docs/PRD.txt`,
- * or `Docs/DEVELOPMENT_LOG.md`. Nothing is inferred. Items the owner has not
- * supplied are listed in `pending` rather than filled in.
+ * `Docs/DEVELOPMENT_LOG.md`, or the owner decisions confirmed on 2026-09-19
+ * (`Docs/Detail.txt`: final email, city). Nothing is inferred. Items the owner
+ * has not supplied are listed in `pending` rather than filled in.
  */
 export const profile: Profile = {
   displayName: "Alif Reezi",
   fullName: "Nashiruddin Alif Alvareezi",
   status: "Fresh Graduate",
-  location: "Cirebon, West Java, Indonesia",
+  location: "Kota Cirebon, West Java, Indonesia",
   positioning:
     "AI / Machine Learning Engineer working across computer vision, model experimentation, and research.",
   roles: [
@@ -73,8 +74,8 @@ export const profile: Profile = {
   contact: [
     {
       label: "Email",
-      value: "nashiruddinalifalvareezi1@gmail.com",
-      href: "mailto:nashiruddinalifalvareezi1@gmail.com",
+      value: "alifalvareezi1@gmail.com",
+      href: "mailto:alifalvareezi1@gmail.com",
       primary: true,
     },
     {

@@ -31,11 +31,11 @@ import type {
  * URL changes the page without touching it.
  *
  * The two projects look different because their data is different, not
- * because they are styled differently. Tuberculosis Detection carries three
- * benchmarked models, so it gets the results tables. Melon Plant Detection
- * carries no evaluation figures but does carry a timeline and a deployment
- * chain ending on ESP32-CAM hardware, so its weight falls on approach and
- * stack. Neither shape is hardcoded per project.
+ * because they are styled differently. ThoraxVision carries three benchmarked
+ * models, so it gets the results tables (currently gated off — see
+ * `SHOW_MODEL_RESULTS`). MelonVision AI carries no evaluation figures but does
+ * carry a timeline and a deployment chain ending on ESP32-CAM hardware, so its
+ * weight falls on approach and stack. Neither shape is hardcoded per project.
  */
 
 const WORK = getSection("/projects");
@@ -99,6 +99,15 @@ const blockHeading = metaLabel;
 /* ------------------------------------------------------------------ */
 /* Results — rendered only for projects that have benchmarked models    */
 /* ------------------------------------------------------------------ */
+
+/**
+ * Owner decision, 2026-09-19: do not show the model percentage results for
+ * now. The figures stay in `projects.ts` exactly as recorded and the two
+ * tables below stay wired, so flipping this to `true` restores them without
+ * touching data or markup. Typed as `boolean` rather than the literal so the
+ * branch it guards is not narrowed away.
+ */
+const SHOW_MODEL_RESULTS: boolean = false;
 
 /**
  * Tables scroll inside their own container rather than widening the page, and
@@ -429,7 +438,7 @@ export function ProjectDetail({ project }: { project: Project }) {
           </div>
         </div>
 
-        {project.models.length > 0 ? (
+        {SHOW_MODEL_RESULTS && project.models.length > 0 ? (
           <div className="mt-16 min-w-0 border-t border-[var(--color-ink)] pt-8 lg:mt-20">
             <h2 className={blockHeading}>Results</h2>
             <ModelComparison

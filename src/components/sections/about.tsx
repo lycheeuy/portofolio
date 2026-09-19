@@ -110,9 +110,9 @@ export function About() {
           </p>
 
           {/* The two endings are the two documented projects, not a
-              generalisation: Melon Plant Detection's approach records a
+              generalisation: MelonVision AI's approach records a
               FastAPI service, PostgreSQL, Docker, and a Linux VPS, and
-              Tuberculosis Detection records per-model evaluation figures with
+              ThoraxVision records per-model evaluation figures with
               the context "Academic research and conference publication
               material". Both begin from a trained model. */}
           <p className={`mt-6 ${statement} text-secondary`}>

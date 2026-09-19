@@ -6,8 +6,8 @@ import { getProject, projects } from "@/data/projects";
 /**
  * Project case study — `/projects/[slug]`.
  *
- * Slugs come from `projects.ts` and nowhere else: `tuberculosis-detection`
- * and `melon-detection`. `generateStaticParams` prerenders exactly those two
+ * Slugs come from `projects.ts` and nowhere else: `thoraxvision` and
+ * `melonvision-ai`. `generateStaticParams` prerenders exactly those two
  * at build time, and `dynamicParams = false` makes any other slug a 404
  * instead of a request-time render of a project that does not exist.
  *

@@ -57,8 +57,8 @@ portofolio/
 │ │ └── jetbrains-mono-variable-normal.woff2
 │ └── images/
 │ ├── projects/
-│ │ ├── tuberculosis-detection/
-│ │ └── melon-detection/
+│ │ ├── thoraxvision/
+│ │ └── melonvision-ai/
 │ └── og/ Open Graph images
 │
 ├── src/
