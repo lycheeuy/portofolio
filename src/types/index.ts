@@ -107,6 +107,11 @@ export interface Project {
   summary: string;
   problem: string;
   approach: string[];
+  /**
+   * What the owner counts as the project's main achievement, in their own
+   * words. `null` until supplied — never summarised from the approach.
+   */
+  outcome: string | null;
   stack: CapabilityGroup[];
   dataset: ProjectDataset | null;
   models: ModelResult[];

@@ -789,6 +789,45 @@ year, and architecture; both paper titles, full conference names, topics,
 author positions, and research repository URLs; the long-form about copy. All
 remain in the `pending` arrays for Phase 6E.
 
+### Phase 6E — Content & Case Study Refinement · Complete
+
+Full report: `Docs/PHASE_6E_REPORT.md`. Two commits on `main`: `c0f65c3`
+(documentation consistency — the six statements above that still said the
+branch was unmerged) and the content commit that follows it.
+
+**Ingested from `Docs/Detail.txt`, each item approved by the owner first:**
+
+- **MelonVision AI** — `year: 2026`; GitHub `lycheeuy/MelonVision_AI`; stack
+  Model group now `MobileNetV2 FOMO · INT8 quantised · TensorFlow Lite`;
+  `problem` replaced by the owner's stated purpose; new `outcome` field
+  carrying the owner's account of the FOMO-decoder fix (144 false detections
+  from one image → Connected Component Analysis, BFS 8-connectivity). Both
+  prose fields are English renderings of the Indonesian answers, shown in
+  full in the report. The Live-link note was *not* changed — not approved.
+- **Research, both entries** — paper title, full conference name, topic,
+  author position (ICWT second author, ICSMech first author), repository
+  link, and `projectSlug: "thoraxvision"`. `status` stays
+  `pending-confirmation`; nothing confirms submission or acceptance.
+  "Wireeless" corrected; the trailing year dropped from the ICWT name because
+  `conference.year` already carries it.
+- **ThoraxVision** — no content change. `outcome: null`; gains a `pending`
+  line for the unanswered "what to highlight" item. Related research now
+  renders because the data links it.
+
+**Code:** `Project.outcome: string | null` in `types/index.ts`; an Outcome
+`h2` block in `project-detail.tsx`, conditional on the field; the `/research`
+standfirst branches on `ANY_VENUE_ONLY` so it stops promising titles "once
+settled" above a list of titles. Doc comments describing both entries as
+venue-only updated. Nothing else — no route, token, layout, Lanyard, or
+dependency change; `SHOW_MODEL_RESULTS` still `false`; every metric value
+byte-identical.
+
+**Verified:** lint, tsc, build; 11 routes × 7 widths with 0 overflow and 0
+empty blocks; one `h1` per route; keyboard path on the five changed pages;
+link crawl all 200; old slugs 404; console clean apart from the Lanyard's
+pre-existing Three.js notices. Four subjective presentation candidates were
+listed for the owner rather than applied (report §7).
+
 ---
 
 ## 4. Current Portfolio Architecture
@@ -1791,17 +1830,23 @@ the `pending` arrays below stand as written.
 Recorded in code as `pending` arrays on each data export, so nothing is
 silently invented. Consolidated here:
 
-- **Research — both entries are venue-only.** ICWT 2026 and ICSMech 2026 are
-  confirmed as venues; paper titles, full conference names, topics,
-  contributions, submission state, co-authors, and links are all unknown. The
-  Research section cannot be built beyond a "venue confirmed" treatment until
-  these arrive.
-- **Links.** No GitHub repository URL for either project; the melon live
-  deployment sits on the client's VPS and may not be public. `ExternalLink.href`
-  is `null` with a note rather than a guessed address.
-- **Melon project.** No year (only 20–30 June), no model architecture behind
-  the TFLite build, no evaluation figures, and the "may the client be named?"
-  question was asked but never answered.
+- **Research — both entries.** Title, conference name, topic, author
+  position, repository link, and source project are in (Phase 6E). Still
+  unknown: conference host/location, submission state, co-authors, and a
+  paper / DOI / presentation link. `status` stays `pending-confirmation`.
+- **Links.** ThoraxVision's repository is not public (Detail.txt); its live
+  site is linked. MelonVision's repository is linked (Phase 6E); its live
+  deployment sits on the client's VPS and whether it may be shown is still
+  open. `ExternalLink.href` is `null` with a note rather than a guessed
+  address.
+- **MelonVision AI.** Year, architecture, purpose, and achievement are in
+  (Phase 6E). The owner confirms no evaluation figures exist. The "may the
+  client be named?" question is still unanswered.
+- **ThoraxVision.** Detail.txt item 10 — what the owner wants highlighted —
+  is unanswered; `outcome` is `null`.
+- **About copy.** The six-section "about me" text in Detail.txt is the one
+  owner-supplied block not yet raised for approval; it is About-page content,
+  outside Phase 6E's case-study scope.
 - **TB metrics gaps.** ResNet50 accuracy and specificity for all three models
   were left blank. VGG19 records F1 `0.5745` for *both* classes, which cannot
   both be right — the Tuberculosis value is stored as `null` pending
@@ -1858,7 +1903,14 @@ touching several files:**
   it is content, and inventing a replacement is exactly what the data layer
   exists to prevent.
 
-**The next phase is content ingestion, not code.** `Docs/Detail.txt` is sitting
+**Phase 6E ingested the case-study and research content; Phase 6F is the
+About page.** `Docs/Detail.txt` (gitignored) still holds the six-section
+"about me" text, which needs the same item-by-item approval and a decision on
+whether it replaces or joins About's authored paragraphs. Also open: the four
+subjective presentation candidates in `PHASE_6E_REPORT.md` §7, and deleting
+the two fully merged side branches.
+
+*Previous note, kept for the record:* `Docs/Detail.txt` was sitting
 untracked in the working tree with answers to most of §8's pending list —
 repository URLs, both paper titles, both conference names, topics, author
 positions, and long-form personal copy. The five owner decisions it needed
@@ -1873,7 +1925,8 @@ F1), the MelonVision detection figures, whether the client may be named, the
 graduation year and institution, work-experience entries, and the production
 domain.
 
-Phase 6D was explicitly scoped to stop here.
+Phase 6D was explicitly scoped to stop here; Phase 6E took it as far as the
+case studies and research entries.
 
 ---
 

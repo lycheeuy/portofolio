@@ -5,9 +5,11 @@ import type { Project } from "@/types";
  *
  * Sources: `Docs/PRD.txt` §1 (project descriptions, technology, workflow),
  * `Docs/User Input Session.txt` (metrics, timeline, link availability), the
- * dataset sizes confirmed for Phase 5E, and the owner decisions confirmed on
- * 2026-09-19 (`Docs/Detail.txt`: display names, slugs, the ThoraxVision live
- * URL).
+ * dataset sizes confirmed for Phase 5E, and the owner input in
+ * `Docs/Detail.txt` as confirmed on 2026-09-19 (display names, slugs, the
+ * ThoraxVision live URL) and in Phase 6E (MelonVision repository, year,
+ * architecture, purpose, and achievement — the two prose fields are English
+ * renderings of the owner's Indonesian answers, approved item by item).
  *
  * Deliberately absent: any metric, link, date, client name, or outcome that
  * is not in those documents. Where something is known to exist but has no
@@ -34,6 +36,7 @@ const thoraxVision: Project = {
     "Evaluated with accuracy, per-class precision/recall/F1, ROC-AUC, and confusion matrices.",
     "Used Grad-CAM to inspect which regions drive each prediction.",
   ],
+  outcome: null,
   stack: [
     { label: "Model", items: ["PyTorch", "DenseNet121", "ResNet50", "VGG19"] },
     {
@@ -112,6 +115,7 @@ const thoraxVision: Project = {
     "ResNet50 accuracy — left blank in the owner's figures.",
     "Specificity for all three models — left blank in the owner's figures.",
     "VGG19 Tuberculosis F1 — the source lists 0.5745 for both classes, which cannot both be right; awaiting the correct value.",
+    "What the owner wants highlighted about this project (Detail.txt item 10 is unanswered).",
     "Lessons learned / reflection copy for the case study.",
   ],
 };
@@ -121,13 +125,17 @@ const melonVisionAi: Project = {
   index: "02",
   title: "MelonVision AI",
   discipline: "Edge AI / Deployment",
-  year: null,
+  year: 2026,
   timeline: "20 – 30 June",
   context: "Client project",
   summary:
     "An AI-based melon plant detection system that runs inference on an ESP32-CAM and reports into a FastAPI service, taking a trained model through to a deployed, working application.",
+  /**
+   * The owner's stated purpose (Detail.txt, Melon §8), rendered into English.
+   * It replaces the connective paragraph written in Phase 5E.
+   */
   problem:
-    "A trained detection model is only useful once it runs where the plants are. This project takes the model off the workstation and onto edge hardware, with a backend that records what was detected and a web interface to review it.",
+    "MelonVision AI was built to help melon farmers identify the condition of their plants automatically, using an IoT camera and AI in place of manual inspection that needs specialist expertise. The system allows remote monitoring through a web dashboard, so pruning decisions can be made faster and more consistently without having to be in the field.",
   approach: [
     "Converted the detection model to TensorFlow Lite for on-device inference.",
     "Ran inference on ESP32-CAM hardware at the capture point.",
@@ -136,8 +144,14 @@ const melonVisionAi: Project = {
     "Containerised the stack with Docker and deployed it to a Linux VPS.",
     "Integrated the detection history into a web interface.",
   ],
+  /** The owner's own account of the project's main achievement (Detail.txt, Melon §9). */
+  outcome:
+    "Finding and fixing a critical bug in the FOMO decoder that made a single object produce dozens of bounding boxes at once — in one case, 144 false detections from one image. The fix was to implement Connected Component Analysis from scratch, using a breadth-first search with 8-connectivity. That changed how the system understands \"one object\": from one grid cell = one detection, to a cluster of neighbouring cells = one detection with an accurate bounding rectangle.",
   stack: [
-    { label: "Model", items: ["TensorFlow Lite", "AI inference"] },
+    {
+      label: "Model",
+      items: ["MobileNetV2 FOMO", "INT8 quantised", "TensorFlow Lite"],
+    },
     { label: "Build", items: ["FastAPI", "PostgreSQL", "Web integration"] },
     { label: "Deploy", items: ["ESP32-CAM", "Docker", "Linux VPS"] },
   ],
@@ -149,11 +163,7 @@ const melonVisionAi: Project = {
   },
   models: [],
   links: [
-    {
-      label: "GitHub",
-      href: null,
-      note: "Repository exists on the owner's GitHub; the specific URL has not been supplied.",
-    },
+    { label: "GitHub", href: "https://github.com/lycheeuy/MelonVision_AI" },
     {
       label: "Live",
       href: null,
@@ -161,11 +171,8 @@ const melonVisionAi: Project = {
     },
   ],
   pending: [
-    "Project year — the owner gave 20–30 June with no year.",
-    "GitHub repository URL.",
     "Whether the client may be named, and if so the client name — the question was asked but not answered.",
-    "Model architecture behind the TensorFlow Lite build.",
-    "Detection accuracy or any evaluation figures — none are documented.",
+    "Detection accuracy or any evaluation figures — the owner confirms none exist (Detail.txt, Melon §6).",
     "Whether the live deployment may be linked or shown.",
     "Lessons learned / reflection copy for the case study.",
   ],

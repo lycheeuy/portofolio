@@ -303,7 +303,7 @@ export function ProjectDetail({ project }: { project: Project }) {
     ...(project.year ? [{ term: "Year", value: String(project.year) }] : []),
   ];
 
-  /** Papers that record this project as their source. Currently none do. */
+  /** Papers that record this project as their source. */
   const relatedResearch = getResearchForProject(project.slug);
 
   /**
@@ -377,6 +377,15 @@ export function ProjectDetail({ project }: { project: Project }) {
                 </li>
               ))}
             </ol>
+
+            {project.outcome ? (
+              <>
+                <h2 className={`${blockHeading} mt-10`}>Outcome</h2>
+                <p className={`mt-3 max-w-[58ch] ${bodyText}`}>
+                  {project.outcome}
+                </p>
+              </>
+            ) : null}
           </div>
 
           <div className="min-w-0">

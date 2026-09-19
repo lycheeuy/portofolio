@@ -18,17 +18,13 @@ import type { ResearchEntry } from "@/types";
 /**
  * Research log — the `/research` index.
  *
- * Both entries in `src/data/research.ts` are venue-only. Title, expanded
- * conference name, topic, contribution, co-authors, project link, and paper
- * link are all `null`, and `status` is `pending-confirmation` for both, which
- * means it is not known whether they are submitted, accepted, or presented.
- *
- * So this remains a **register, not a publication list**: a ruled ledger of
- * what is confirmed, with the venue as the heading because the venue is the
- * only thing there is. Every field renders only when it is non-null, so the
- * same markup becomes a real entry — title as the heading, venue demoted to
- * metadata — the moment the owner supplies any of it. Nothing is a
- * placeholder for a paper that does not exist.
+ * A ruled ledger of what is confirmed. Every field renders only when it is
+ * non-null: an entry with a title shows it as the heading with the venue
+ * demoted to a metadata line; a venue-only entry shows the acronym as the
+ * heading and nothing invented beneath it. As of Phase 6E both entries carry
+ * a title, conference name, and topic from `Docs/Detail.txt`; `status` is
+ * still `pending-confirmation` for both, which means it is not known whether
+ * they are submitted, accepted, or presented, and no paper link exists yet.
  *
  * Phase 6D turned each row's heading into a link to `/research/[slug]`, where
  * `ResearchDetail` renders the same fields at length. `STATUS_LABEL` and
@@ -48,8 +44,9 @@ const RESEARCH_INDEX = RESEARCH?.index ?? "02";
  * The one capability group describing how the work is researched, evaluated,
  * and written up. It comes from `profile.ts` rather than `research.ts`.
  *
- * Reasoning: with both papers venue-only, the entries alone cannot show that
- * this work was evaluated and communicated, only that two venues exist. This
+ * Reasoning: when both papers were venue-only, the entries alone could not
+ * show that this work was evaluated and communicated, only that two venues
+ * existed; a paper still `pending-confirmation` cannot show it either. This
  * group — hyperparameter experimentation, model evaluation, ROC/AUC, confusion
  * matrix, Grad-CAM, scientific documentation — is documented data that does,
  * and "Research" is its own label in `profile.capabilities`, so the research
@@ -59,6 +56,13 @@ const RESEARCH_INDEX = RESEARCH?.index ?? "02";
 const RESEARCH_PRACTICE = profile.capabilities.find(
   (group) => group.label === "Research",
 );
+
+/**
+ * Whether any entry is still venue-only. The standfirst's second sentence
+ * names what is withheld; once every entry has a title, saying "titles are
+ * listed once settled" under a list of titles would read as a contradiction.
+ */
+const ANY_VENUE_ONLY = research.some((entry) => entry.title === null);
 
 /** Distinct years present in the log, for the standfirst. */
 const YEARS = Array.from(new Set(research.map((entry) => entry.year))).sort(
@@ -180,14 +184,16 @@ export function ResearchLog() {
         headingId="research-heading"
         level={1}
       >
-        {/* Counts and years are read from the data. The second sentence states
-            why the entries are thin, which is the honest thing to say when the
-            alternative is a page of invented titles. */}
+        {/* Counts and years are read from the data. The second sentence names
+            what is still withheld — see `ANY_VENUE_ONLY` — which is the honest
+            thing to say when the alternative is an invented status. */}
         <p className={`mt-6 max-w-[52ch] ${leadText} text-secondary`}>
           {research.length} conference{" "}
           {research.length === 1 ? "venue is" : "venues are"} confirmed
-          {YEAR_RANGE ? ` for ${YEAR_RANGE}` : ""}. Paper titles, topics, and
-          submission state are listed here once they are settled, not before.
+          {YEAR_RANGE ? ` for ${YEAR_RANGE}` : ""}.{" "}
+          {ANY_VENUE_ONLY
+            ? "Paper titles, topics, and submission state are listed here once they are settled, not before."
+            : "Submission state is recorded here once it is settled, not before."}
         </p>
       </SectionHeader>
 

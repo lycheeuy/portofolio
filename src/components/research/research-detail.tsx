@@ -12,15 +12,14 @@ import type { ExternalLink, ResearchEntry } from "@/types";
 /**
  * One research entry, as its own page.
  *
- * Both entries in `src/data/research.ts` are venue-only: title, expanded
- * conference name, topic, contribution, project link, and paper link are all
- * `null`, and `status` is `pending-confirmation`. So this page renders every
- * field conditionally and, when nothing but the venue is known, says so in
- * one line rather than padding the page with an invented abstract.
- *
- * It is written for the entry it will become, not only the entry it is: the
- * moment a title, topic, contribution, or link lands in the data, the same
- * markup renders a real paper page with no edit here.
+ * Every field renders conditionally. Written in Phase 6D when both entries
+ * were venue-only — title, conference name, topic, contribution, project link,
+ * and paper link all `null` — with a one-line note for that case instead of an
+ * invented abstract. Phase 6E supplied the title, conference name, topic,
+ * author position, repository link, and source project for both entries, and
+ * the same markup renders them with no change here; the venue-only note stays
+ * for any future entry that arrives as a venue alone. `status` is still
+ * `pending-confirmation` on both, so the paper link block does not exist yet.
  */
 
 const RESEARCH = getSection("/research");
