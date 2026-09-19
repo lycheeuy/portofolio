@@ -1,5 +1,17 @@
+import Link from "next/link";
 import { PageContainer } from "@/components/layout/page-container";
+import { SectionEyebrow } from "@/components/layout/section-header";
 import { LanyardWrapper } from "@/components/lanyard/lanyard-wrapper";
+import { ActionLink } from "@/components/ui/action-link";
+import {
+  accentDot,
+  arrowStep,
+  colorTransition,
+  metaLabel,
+  monoCaps,
+  monoMeta,
+  smallText,
+} from "@/components/ui/styles";
 import { profile } from "@/data/profile";
 import { site } from "@/data/site";
 
@@ -14,37 +26,28 @@ import { site } from "@/data/site";
  */
 
 const HERO_INDEX =
-  site.sections.find((section) => section.id === "top")?.index ?? "00";
+  site.sections.find((section) => section.href === "/")?.index ?? "00";
 
 const EMAIL = profile.contact.find((channel) => channel.label === "Email");
-
-const metaLabel =
-  "font-mono text-[length:var(--text-label)] uppercase tracking-[var(--tracking-label)] text-muted";
 
 /**
  * Two CTAs, deliberately unequal. The work link is the page's primary action
  * and takes the one solid block in the composition; contact stays a ruled
- * text link. Both are min-h-11 so the tap target reaches 44px even though the
- * label itself is only ~26px tall — the same rule the mobile menu applies to
- * its mono contact links.
+ * text link — `ActionLink`, the same one the rest of the site uses. Both reach
+ * a 44px tap target even though the label itself is only ~26px tall.
+ *
+ * Since Phase 6D both are routes rather than scroll targets, so both go
+ * through `next/link` — a full document request here would tear down and
+ * rebuild the Lanyard's WebGL context on the way out.
+ *
+ * This is the only filled button on the page, so it is the only place the
+ * ink/accent-hover pairing appears; it is not lifted into the shared styles.
  */
-const ctaPrimary =
-  "group inline-flex min-h-11 items-center gap-3 rounded-[var(--radius-xs)] bg-[var(--color-ink)] px-6 font-sans text-[length:var(--text-body)] font-medium text-[var(--color-bg)] transition-colors duration-[var(--duration-fast)] hover:bg-[var(--color-accent-hover)]";
+const ctaPrimary = `group inline-flex min-h-11 items-center gap-3 rounded-[var(--radius-xs)] bg-[var(--color-ink)] px-6 font-sans text-[length:var(--text-body)] font-medium text-[var(--color-bg)] hover:bg-[var(--color-accent-hover)] ${colorTransition}`;
 
-const ctaSecondary =
-  "group inline-flex min-h-11 items-center gap-2 font-sans text-[length:var(--text-body)] font-medium text-ink transition-colors duration-[var(--duration-fast)] hover:text-accent";
+const trajectoryStep = `${monoMeta} text-secondary`;
 
-const ctaSecondaryLabel =
-  "border-b border-[var(--color-border)] pb-0.5 transition-colors duration-[var(--duration-fast)] group-hover:border-[var(--color-accent)]";
-
-const ctaArrow =
-  "transition-transform duration-[var(--duration-normal)] ease-[var(--ease-editorial)] group-hover:translate-x-1";
-
-const trajectoryStep =
-  "font-mono text-[length:var(--text-meta)] tracking-[var(--tracking-mono)] text-secondary";
-
-const colophonValue =
-  "mt-2 font-sans text-[length:var(--text-small)] leading-[var(--leading-body)] text-ink";
+const colophonValue = `mt-2 ${smallText} text-ink`;
 
 /** Factual metadata rendered as a colophon strip below the composition. */
 const COLOPHON = [
@@ -65,16 +68,9 @@ export function Hero() {
       <PageContainer>
         <div className="grid grid-cols-1 gap-12 pt-[var(--spacing-section)] lg:grid-cols-12 lg:gap-8">
           <div data-hero-zone="text" className="flex flex-col justify-center lg:col-span-8">
-            <div className="mb-8 flex items-center gap-4">
-              <span className="font-mono text-[length:var(--text-meta)] tracking-[var(--tracking-mono)] text-muted">
-                {HERO_INDEX}
-              </span>
-              <span
-                aria-hidden="true"
-                className="h-px w-8 bg-[var(--color-border)]"
-              />
-              <span className={metaLabel}>{profile.status}</span>
-            </div>
+            <SectionEyebrow index={HERO_INDEX} className="mb-8">
+              {profile.status}
+            </SectionEyebrow>
 
             <h1
               id="hero-name"
@@ -83,7 +79,7 @@ export function Hero() {
               {profile.displayName}
             </h1>
 
-            <p className="mt-5 font-mono text-[length:var(--text-meta)] uppercase tracking-[var(--tracking-label)] text-secondary">
+            <p className={`mt-4 ${monoCaps} text-secondary`}>
               {profile.fullName}
             </p>
 
@@ -110,26 +106,18 @@ export function Hero() {
             </ol>
 
             <p className="mt-10 flex items-center gap-3">
-              <span
-                aria-hidden="true"
-                className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-accent)]"
-              />
+              <span aria-hidden="true" className={accentDot} />
               <span className={metaLabel}>{profile.availability}</span>
             </p>
 
             <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2">
-              <a href="#work" className={ctaPrimary}>
+              <Link href="/projects" className={ctaPrimary}>
                 View selected work
-                <span aria-hidden="true" className={ctaArrow}>
+                <span aria-hidden="true" className={arrowStep}>
                   →
                 </span>
-              </a>
-              <a href="#contact" className={ctaSecondary}>
-                <span className={ctaSecondaryLabel}>Get in touch</span>
-                <span aria-hidden="true" className={ctaArrow}>
-                  →
-                </span>
-              </a>
+              </Link>
+              <ActionLink href="/contact">Get in touch</ActionLink>
             </div>
           </div>
 
@@ -148,7 +136,7 @@ export function Hero() {
 
         {/* Colophon. Sits below the grid so it never competes with the
             Lanyard column, and clears the canvas's vertical bleed. */}
-        <dl className="grid grid-cols-2 gap-x-8 gap-y-8 border-t border-[var(--color-border)] pt-8 pb-[var(--spacing-block)] mt-[var(--spacing-section)] lg:grid-cols-4">
+        <dl className="mt-[var(--spacing-section)] grid grid-cols-2 gap-x-8 gap-y-8 border-t border-[var(--color-border)] pt-8 pb-[var(--spacing-block)] lg:grid-cols-4">
           {COLOPHON.map((item) => (
             <div key={item.term}>
               <dt className={metaLabel}>{item.term}</dt>
@@ -160,9 +148,15 @@ export function Hero() {
             <div>
               <dt className={metaLabel}>Contact</dt>
               <dd className={colophonValue}>
+                {/* `inline-flex min-h-11` for the 44px target the rest of the
+                    page's links hold — measured at 1440 this was the one link
+                    left at 21px tall, because a colophon value is not an
+                    inline link inside a sentence. Never `inline-block` here:
+                    `--spacing-block` in `@theme` makes Tailwind emit a second
+                    `.inline-block` rule that sets `inline-size`. See §11. */}
                 <a
                   href={EMAIL.href}
-                  className="break-all border-b border-[var(--color-border)] pb-0.5 transition-colors duration-[var(--duration-fast)] hover:border-[var(--color-accent)] hover:text-accent"
+                  className={`inline-flex min-h-11 items-center break-all border-b border-[var(--color-border)] pb-0.5 hover:border-[var(--color-accent)] hover:text-accent ${colorTransition}`}
                 >
                   {EMAIL.value}
                 </a>

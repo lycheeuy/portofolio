@@ -1,9 +1,20 @@
+import Link from "next/link";
 import { Section } from "@/components/layout/section";
+import { SectionHeader } from "@/components/layout/section-header";
+import { ActionLink } from "@/components/ui/action-link";
+import {
+  accentDot,
+  colorTransition,
+  leadText,
+  metaLabel,
+  smallText,
+  tag,
+} from "@/components/ui/styles";
 import { profile } from "@/data/profile";
 import { site } from "@/data/site";
 
 /**
- * About — the `#about` section.
+ * About — the `/about` page.
  *
  * **On the prose.** `profile.ts` has no `bio` field, and its `pending` list
  * records "Personal / 'now' copy" as owner-supplied content that has not
@@ -21,18 +32,18 @@ import { site } from "@/data/site";
  *
  * **On overlap with the Hero.** The Hero already carries location, education,
  * focus areas, trajectory, and availability. About repeats education and
- * location because a reader arriving on the `#about` anchor should not have to
- * scroll up for them, and adds what the Hero does not show at all: the three
+ * location because a reader arriving on `/about` should not have to go back
+ * to the homepage for them, and adds what the Hero does not show at all: the three
  * roles, the completion state of the degree, and the capability groups.
  */
 
-const ABOUT = site.sections.find((section) => section.id === "about");
+const ABOUT = site.sections.find((section) => section.href === "/about");
 const ABOUT_INDEX = ABOUT?.index ?? "03";
 const ABOUT_LABEL = ABOUT?.label ?? "About";
 
 /**
  * Model, Build, and Deploy. The `Research` group is deliberately excluded —
- * `#research` prints it as its Method block, and printing it twice would make
+ * `/research` prints it as its Method block, and printing it twice would make
  * the two sections disagree the moment one is edited. A pointer to that
  * section stands in its place below.
  */
@@ -58,69 +69,30 @@ const BACKGROUND = [
 ];
 
 /* ------------------------------------------------------------------ */
-/* Shared class strings                                                */
+/* Local class strings                                                 */
 /* ------------------------------------------------------------------ */
 
-const metaLabel =
-  "font-mono text-[length:var(--text-label)] uppercase tracking-[var(--tracking-label)] text-muted";
-
 /**
- * 52ch matches the Research standfirst — both are section-opening statements,
- * so they should hold the same measure. It only binds below `lg`, where the
- * two-column grid collapses and the paragraph would otherwise take the full
- * container: at 768 that was ~75 characters per line, the far edge of a
- * comfortable measure. Capped, it lands near 67.
+ * The statement measure. 52ch matches the Research standfirst — both are
+ * section-opening statements, so they hold the same measure. It only binds
+ * below `lg`, where the two-column grid collapses and the paragraph would
+ * otherwise take the full container: at 768 that was ~75 characters per line,
+ * the far edge of a comfortable measure. Capped, it lands near 67.
  */
-const statement =
-  "max-w-[52ch] font-sans text-[length:var(--text-body-lg)] leading-[var(--leading-relaxed)]";
-
-/**
- * Square hairline tag. Third copy of this string — `selected-work.tsx` and
- * `research-log.tsx` hold the other two. It stays duplicated because lifting
- * it into a shared module would mean editing both of those files, which this
- * phase was told not to touch. That is the debt: one shared module, three
- * call sites, whenever a phase is free to change all three at once.
- *
- * Never add `inline-block` — see §11 of the development log. `--spacing-block`
- * in `@theme` makes Tailwind 4 emit a second `.inline-block` rule setting
- * `inline-size`, which pins every tag to that clamp regardless of its text.
- */
-const tag =
-  "max-w-full shrink-0 rounded-[var(--radius-xs)] border border-[var(--color-border)] px-2 py-1 font-mono text-[length:var(--text-label)] tracking-[var(--tracking-mono)] text-secondary";
-
-const inlineLink =
-  "group inline-flex min-h-11 items-center gap-2 font-sans text-[length:var(--text-body)] font-medium text-ink transition-colors duration-[var(--duration-fast)] hover:text-accent";
-
-const inlineLinkLabel =
-  "border-b border-[var(--color-border)] pb-0.5 transition-colors duration-[var(--duration-fast)] group-hover:border-[var(--color-accent)]";
-
-const inlineLinkArrow =
-  "transition-transform duration-[var(--duration-normal)] ease-[var(--ease-editorial)] group-hover:translate-x-1";
+const statement = `max-w-[52ch] ${leadText}`;
 
 /* ------------------------------------------------------------------ */
 
 export function About() {
   return (
     <Section id="about" labelledBy="about-heading">
-      <header className="mb-12 lg:mb-16">
-        <div className="flex items-center gap-4">
-          <span className="font-mono text-[length:var(--text-meta)] tracking-[var(--tracking-mono)] text-muted">
-            {ABOUT_INDEX}
-          </span>
-          <span
-            aria-hidden="true"
-            className="h-px w-8 bg-[var(--color-border)]"
-          />
-          <span className={metaLabel}>{profile.status}</span>
-        </div>
-
-        <h2
-          id="about-heading"
-          className="mt-6 font-display text-[length:var(--text-display)] font-semibold leading-[var(--leading-display)] tracking-[var(--tracking-tight)] text-ink"
-        >
-          {ABOUT_LABEL}
-        </h2>
-      </header>
+      <SectionHeader
+        index={ABOUT_INDEX}
+        meta={profile.status}
+        heading={ABOUT_LABEL}
+        headingId="about-heading"
+        level={1}
+      />
 
       <div className="grid grid-cols-1 gap-x-8 gap-y-12 lg:grid-cols-12">
         <div className="min-w-0 lg:col-span-7">
@@ -153,7 +125,7 @@ export function About() {
         </div>
 
         <div className="min-w-0 lg:col-span-4 lg:col-start-9">
-          <h3 className={metaLabel}>Background</h3>
+          <h2 className={metaLabel}>Background</h2>
           <dl className="mt-4">
             {BACKGROUND.map((item) => (
               <div
@@ -161,10 +133,10 @@ export function About() {
                 className="border-t border-[var(--color-border)] py-4 last:pb-0"
               >
                 <dt className={metaLabel}>{item.term}</dt>
-                <dd className="mt-2 font-sans text-[length:var(--text-small)] leading-[var(--leading-body)] text-ink">
+                <dd className={`mt-2 ${smallText} text-ink`}>
                   {item.value}
                   {item.note ? (
-                    <span className="mt-1 block font-mono text-[length:var(--text-label)] uppercase tracking-[var(--tracking-label)] text-muted">
+                    <span className={`mt-1 block ${metaLabel}`}>
                       {item.note}
                     </span>
                   ) : null}
@@ -177,9 +149,9 @@ export function About() {
 
       <div className="mt-16 border-t border-[var(--color-ink)] pt-8 lg:mt-20">
         <div className="grid grid-cols-1 gap-x-8 gap-y-6 lg:grid-cols-12">
-          <h3 className={`${metaLabel} lg:col-span-3 lg:pt-1.5`}>
+          <h2 className={`${metaLabel} lg:col-span-3 lg:pt-1.5`}>
             Capabilities
-          </h3>
+          </h2>
 
           <div className="min-w-0 lg:col-span-9">
             <dl>
@@ -188,7 +160,7 @@ export function About() {
                   key={group.label}
                   className="flex flex-col gap-2 border-b border-[var(--color-border)] py-4 first:pt-0 sm:flex-row sm:gap-6"
                 >
-                  <dt className={`${metaLabel} sm:w-20 sm:shrink-0 sm:pt-1.5`}>
+                  <dt className={`${metaLabel} sm:w-24 sm:shrink-0 sm:pt-1.5`}>
                     {group.label}
                   </dt>
                   <dd className="flex flex-wrap gap-2">
@@ -202,15 +174,18 @@ export function About() {
               ))}
             </dl>
 
-            {/* The Research group lives in `#research`. Pointing at it keeps
+            {/* The Research group lives on `/research`. Pointing at it keeps
                 one source on the page instead of two that can drift. */}
             {HAS_RESEARCH_GROUP ? (
               <p className="mt-6 font-sans text-[length:var(--text-body)] leading-[var(--leading-body)] text-secondary">
                 Evaluation and documentation methods are listed with the
                 venues, under{" "}
-                <a href="#research" className="text-ink underline decoration-[var(--color-border)] underline-offset-4 transition-colors duration-[var(--duration-fast)] hover:text-accent hover:decoration-[var(--color-accent)]">
+                <Link
+                  href="/research"
+                  className={`text-ink underline decoration-[var(--color-border)] underline-offset-4 hover:text-accent hover:decoration-[var(--color-accent)] ${colorTransition}`}
+                >
                   Research log
-                </a>
+                </Link>
                 .
               </p>
             ) : null}
@@ -222,19 +197,11 @@ export function About() {
           the Hero states the same line but offers nothing to do with it. */}
       <div className="mt-16 flex flex-wrap items-center gap-x-8 gap-y-4 border-t border-[var(--color-border)] pt-8 lg:mt-20">
         <p className="flex items-center gap-3">
-          <span
-            aria-hidden="true"
-            className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-accent)]"
-          />
+          <span aria-hidden="true" className={accentDot} />
           <span className={metaLabel}>{profile.availability}</span>
         </p>
 
-        <a href="#contact" className={inlineLink}>
-          <span className={inlineLinkLabel}>Get in touch</span>
-          <span aria-hidden="true" className={inlineLinkArrow}>
-            →
-          </span>
-        </a>
+        <ActionLink href="/contact">Get in touch</ActionLink>
       </div>
     </Section>
   );

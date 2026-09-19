@@ -1,31 +1,22 @@
-import { SiteHeader } from "@/components/layout/site-header";
-import { SiteFooter } from "@/components/layout/site-footer";
 import { Hero } from "@/components/sections/hero";
-import { SelectedWork } from "@/components/sections/selected-work";
-import { ResearchLog } from "@/components/sections/research-log";
-import { About } from "@/components/sections/about";
-import { Contact } from "@/components/sections/contact";
+import { SiteIndex } from "@/components/sections/site-index";
 
 /**
- * Homepage.
- * Header + Hero + Selected Work + Research log + About + Contact + Footer.
- * Every section on the page is now built; none is a bare anchor.
+ * Home — `/`.
  *
- * `main` is the skip-link target, so it carries tabIndex={-1} to be
- * programmatically focusable without entering the tab order.
+ * The identity page: who this is, where they are, what they do, and where to
+ * go next. Phase 6D moved Selected Work, the Research log, About, and Contact
+ * onto their own routes, so what remains here is the Hero — name, positioning,
+ * trajectory, availability, the Cirebon colophon, and the Lanyard — followed
+ * by the directory that replaces the scroll those four sections used to be.
+ *
+ * The header and footer are rendered by the root layout, not here.
  */
 export default function Home() {
   return (
     <>
-      <SiteHeader />
-      <main id="top" tabIndex={-1} className="outline-none">
-        <Hero />
-        <SelectedWork />
-        <ResearchLog />
-        <About />
-        <Contact />
-      </main>
-      <SiteFooter />
+      <Hero />
+      <SiteIndex />
     </>
   );
 }

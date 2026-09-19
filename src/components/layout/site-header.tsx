@@ -1,35 +1,29 @@
+import Link from "next/link";
 import { PageContainer } from "./page-container";
 import { MobileNav } from "./mobile-nav";
-import { NAV_LINKS } from "./nav-links";
+import { PrimaryNav } from "./primary-nav";
+import { wordmark } from "@/components/ui/styles";
 import { site } from "@/data/site";
 
 /**
- * Sticky editorial header.
+ * Sticky editorial header. Rendered once by the root layout, so it is the same
+ * element across every route and does not re-mount on navigation.
  *
- * Labels come from `site.navigation`; the small mono index beside each label
- * is looked up from `site.sections`, so the archive numbering used in the hero
- * carries into the navigation from one source. Indices are desktop-only —
- * below `lg` there is not enough room for them to read as structure rather
- * than noise.
+ * The nav itself is `PrimaryNav` — a client component, because marking the
+ * current page needs the current path. The header stays a Server Component so
+ * only the link list ships JavaScript.
  */
-const SECTION_INDEX = new Map(
-  site.sections.map((section) => [`#${section.id}`, section.index]),
-);
 
+/**
+ * The skip link is invisible until focused, so it sets its own outline rather
+ * than relying on the global `:focus-visible` rule — it has to paint a
+ * background and a box at the same moment it becomes visible.
+ *
+ * `#top` is the `<main>` on every route, not a homepage section, so the link
+ * stays a same-document anchor rather than a `next/link`.
+ */
 const skipLink =
   "sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-[var(--color-bg)] focus:px-4 focus:py-2 focus:font-sans focus:text-[length:var(--text-small)] focus:text-ink focus:outline focus:outline-2 focus:outline-[var(--color-accent)]";
-
-const wordmark =
-  "inline-flex min-h-11 items-center font-display text-[length:var(--text-h3)] font-semibold text-ink transition-colors duration-[var(--duration-fast)] hover:text-accent";
-
-const navLink =
-  "group flex items-baseline gap-2 py-3 font-sans text-[length:var(--text-small)] text-secondary transition-colors duration-[var(--duration-fast)] hover:text-ink";
-
-const navIndex =
-  "hidden font-mono text-[length:var(--text-label)] tracking-[var(--tracking-mono)] text-[var(--color-border)] transition-colors duration-[var(--duration-fast)] group-hover:text-accent lg:inline";
-
-const navLabel =
-  "border-b border-transparent pb-0.5 transition-colors duration-[var(--duration-fast)] group-hover:border-[var(--color-accent)]";
 
 export function SiteHeader() {
   return (
@@ -40,28 +34,11 @@ export function SiteHeader() {
 
       <PageContainer>
         <div className="flex h-16 items-center justify-between gap-4">
-          <a
-            href="#top"
-            aria-label={`${site.name}, back to top`}
-            className={wordmark}
-          >
+          <Link href="/" aria-label={`${site.name}, home`} className={wordmark}>
             {site.shortName}
-          </a>
+          </Link>
 
-          <nav aria-label="Primary" className="hidden md:block">
-            <ul className="flex items-center gap-7 lg:gap-9">
-              {NAV_LINKS.map((link) => (
-                <li key={link.href}>
-                  <a href={link.href} className={navLink}>
-                    <span aria-hidden="true" className={navIndex}>
-                      {SECTION_INDEX.get(link.href)}
-                    </span>
-                    <span className={navLabel}>{link.label}</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
+          <PrimaryNav />
 
           <MobileNav />
         </div>

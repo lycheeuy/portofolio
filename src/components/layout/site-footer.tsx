@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { PageContainer } from "./page-container";
 import { NAV_LINKS } from "./nav-links";
+import { colorTransition, monoMeta, wordmark } from "@/components/ui/styles";
 import { profile } from "@/data/profile";
 import { site } from "@/data/site";
 
@@ -31,11 +33,9 @@ const SOCIAL = profile.contact.filter(
   (channel) => channel.primary && /^https?:/.test(channel.href),
 );
 
-const footerLink =
-  "inline-flex min-h-11 items-center font-sans text-[length:var(--text-small)] text-secondary transition-colors duration-[var(--duration-fast)] hover:text-ink";
+const footerLink = `inline-flex min-h-11 items-center font-sans text-[length:var(--text-small)] text-secondary hover:text-ink ${colorTransition}`;
 
-const footerMeta =
-  "font-mono text-[length:var(--text-meta)] tracking-[var(--tracking-mono)] text-muted";
+const footerMeta = `${monoMeta} text-muted`;
 
 export function SiteFooter() {
   return (
@@ -43,13 +43,13 @@ export function SiteFooter() {
       <PageContainer>
         <div className="flex flex-col gap-10 pt-12 pb-8 lg:flex-row lg:items-start lg:justify-between lg:gap-16">
           <div>
-            <a
-              href="#top"
-              aria-label={`${site.name}, back to top`}
-              className="inline-flex min-h-11 items-center font-display text-[length:var(--text-h3)] font-semibold text-ink transition-colors duration-[var(--duration-fast)] hover:text-accent"
+            <Link
+              href="/"
+              aria-label={`${site.name}, home`}
+              className={wordmark}
             >
               {site.shortName}
-            </a>
+            </Link>
             <p className={`mt-1 ${footerMeta}`}>{profile.fullName}</p>
           </div>
 
@@ -58,9 +58,9 @@ export function SiteFooter() {
               <ul className="flex flex-col gap-1">
                 {NAV_LINKS.map((link) => (
                   <li key={link.href}>
-                    <a href={link.href} className={footerLink}>
+                    <Link href={link.href} className={footerLink}>
                       {link.label}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>

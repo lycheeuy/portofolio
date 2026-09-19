@@ -178,11 +178,21 @@ export interface SiteConfig {
   pending: string[];
 }
 
-/** Editorial label + index for each homepage section. */
+/**
+ * Editorial label + index for one top-level destination.
+ *
+ * `id` is the DOM id of the section landmark; `href` is the route it now
+ * lives at. The two were the same string while the site was one page
+ * (`#work`); since Phase 6D they are not, so both are recorded here and the
+ * header, the mobile overlay, and the footer all read the pairing from one
+ * place.
+ */
 export interface SectionMeta {
   id: string;
   index: string;
   label: string;
+  /** Route this section is served at. */
+  href: string;
 }
 
 /* ------------------------------------------------------------------ */

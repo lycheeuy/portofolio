@@ -70,3 +70,12 @@ export const research: ResearchEntry[] = [icwt2026, icsmech2026];
 export function getResearchEntry(slug: string): ResearchEntry | undefined {
   return research.find((entry) => entry.slug === slug);
 }
+
+/**
+ * Entries that record `slug` as the project they draw on. Empty for both
+ * projects today — `projectSlug` is `null` on every entry — so the cross-link
+ * on a project page simply does not render until the owner supplies it.
+ */
+export function getResearchForProject(slug: string): ResearchEntry[] {
+  return research.filter((entry) => entry.projectSlug === slug);
+}

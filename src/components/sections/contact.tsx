@@ -1,9 +1,18 @@
 import { Section } from "@/components/layout/section";
+import { SectionHeader } from "@/components/layout/section-header";
+import {
+  arrowStep,
+  colorTransition,
+  leadText,
+  metaLabel,
+  monoMeta,
+  ruledLabel,
+} from "@/components/ui/styles";
 import { profile } from "@/data/profile";
 import { site } from "@/data/site";
 
 /**
- * Contact — the `#contact` section, and the page's closing statement.
+ * Contact — the `/contact` page, and the site's closing statement.
  *
  * Every address comes from `profile.contact`. No URL, handle, or number is
  * written here.
@@ -16,7 +25,7 @@ import { site } from "@/data/site";
  * rather than re-deciding it here.
  */
 
-const CONTACT = site.sections.find((section) => section.id === "contact");
+const CONTACT = site.sections.find((section) => section.href === "/contact");
 const CONTACT_INDEX = CONTACT?.index ?? "04";
 const CONTACT_LABEL = CONTACT?.label ?? "Contact";
 
@@ -37,59 +46,43 @@ const OTHER_CHANNELS = PRIMARY.filter((channel) => channel !== EMAIL);
 const isExternal = (href: string) => /^https?:/.test(href);
 
 /* ------------------------------------------------------------------ */
-/* Shared class strings                                                */
-/* ------------------------------------------------------------------ */
-
-const metaLabel =
-  "font-mono text-[length:var(--text-label)] uppercase tracking-[var(--tracking-label)] text-muted";
-
-/* ------------------------------------------------------------------ */
 
 export function Contact() {
   return (
     <Section id="contact" labelledBy="contact-heading">
-      <header className="max-w-[46ch]">
-        <div className="flex items-center gap-4">
-          <span className="font-mono text-[length:var(--text-meta)] tracking-[var(--tracking-mono)] text-muted">
-            {CONTACT_INDEX}
-          </span>
-          <span
-            aria-hidden="true"
-            className="h-px w-8 bg-[var(--color-border)]"
-          />
-          <span
-            aria-hidden="true"
-            className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-accent)]"
-          />
-          <span className={metaLabel}>{profile.availability}</span>
-        </div>
-
-        <h2
-          id="contact-heading"
-          className="mt-6 font-display text-[length:var(--text-display)] font-semibold leading-[var(--leading-display)] tracking-[var(--tracking-tight)] text-ink"
-        >
-          {CONTACT_LABEL}
-        </h2>
-
+      <SectionHeader
+        index={CONTACT_INDEX}
+        meta={profile.availability}
+        marker
+        heading={CONTACT_LABEL}
+        headingId="contact-heading"
+        level={1}
+        className="max-w-[46ch]"
+      >
         {/* Deliberately not a call to action. The availability line above is
             the offer; this is just an open door. */}
-        <p className="mt-6 font-sans text-[length:var(--text-body-lg)] leading-[var(--leading-relaxed)] text-secondary">
-          Questions about anything on this page are welcome too. An email is
+        <p className={`mt-6 ${leadText} text-secondary`}>
+          Questions about anything on this site are welcome too. An email is
           enough to start.
         </p>
-      </header>
+      </SectionHeader>
 
       {EMAIL ? (
         <div className="mt-12 border-t border-[var(--color-ink)] pt-8 lg:mt-16">
-          <h3 className={metaLabel}>{EMAIL.label}</h3>
+          <h2 className={metaLabel}>{EMAIL.label}</h2>
           {/* break-all rather than break-words: an address is one long token
               with no spaces, so normal wrapping cannot break it and it would
               run past a 375px column. */}
           <a
             href={EMAIL.href}
-            className="group mt-3 inline-flex min-h-11 items-center font-mono text-[length:var(--text-h3)] leading-[var(--leading-heading)] tracking-[var(--tracking-mono)] break-all text-ink transition-colors duration-[var(--duration-fast)] hover:text-accent"
+            className={`group mt-3 inline-flex min-h-11 items-center font-mono text-[length:var(--text-h3)] leading-[var(--leading-heading)] tracking-[var(--tracking-mono)] break-all text-ink hover:text-accent ${colorTransition}`}
           >
-            <span className="border-b border-[var(--color-border)] pb-1 transition-colors duration-[var(--duration-fast)] group-hover:border-[var(--color-accent)]">
+            {/* `pb-1` rather than the shared `ruledLabel`'s `pb-0.5`: this
+                is the one 20-26px link on the page, and a hairline set half a
+                pixel under it reads as a strikethrough at that size. */}
+            <span
+              className={`border-b border-[var(--color-border)] pb-1 group-hover:border-[var(--color-accent)] ${colorTransition}`}
+            >
               {EMAIL.value}
             </span>
           </a>
@@ -105,7 +98,7 @@ export function Contact() {
                 key={channel.label}
                 className="min-w-0 border-b border-[var(--color-border)] py-6"
               >
-                <h3 className={metaLabel}>{channel.label}</h3>
+                <h2 className={metaLabel}>{channel.label}</h2>
                 <a
                   href={channel.href}
                   {...(external
@@ -114,15 +107,10 @@ export function Contact() {
                   /* `relative` so the sr-only note below resolves against
                      this link rather than the initial containing block —
                      see §11 of the development log. */
-                  className="group relative mt-2 inline-flex min-h-11 items-center gap-2 font-mono text-[length:var(--text-meta)] tracking-[var(--tracking-mono)] break-all text-ink transition-colors duration-[var(--duration-fast)] hover:text-accent"
+                  className={`group relative mt-2 inline-flex min-h-11 items-center gap-2 break-all ${monoMeta} text-ink hover:text-accent ${colorTransition}`}
                 >
-                  <span className="border-b border-[var(--color-border)] pb-0.5 transition-colors duration-[var(--duration-fast)] group-hover:border-[var(--color-accent)]">
-                    {channel.value}
-                  </span>
-                  <span
-                    aria-hidden="true"
-                    className="shrink-0 transition-transform duration-[var(--duration-normal)] ease-[var(--ease-editorial)] group-hover:translate-x-1"
-                  >
+                  <span className={ruledLabel}>{channel.value}</span>
+                  <span aria-hidden="true" className={arrowStep}>
                     ↗
                   </span>
                   {/* A link that swaps the tab out from under someone should

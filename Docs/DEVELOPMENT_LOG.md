@@ -91,6 +91,10 @@ ff73396  fix: resolve location contradiction, restore 5D-3 lanyard assets (Phase
 46c6c0a  chore: initialize portfolio project
 ```
 
+Phases 6C and 6D are complete and verified but **not yet committed** — both sit
+in the working tree on `fix/lanyard-5d3-regression`. They should land with the
+rest of the branch; see §9.
+
 ### Phase 5A — Foundation · Complete
 
 - **Objective:** Next.js App Router project with TypeScript strict mode and the
@@ -567,29 +571,238 @@ Everything else followed from that.
 
 ---
 
+### Phase 6C — System Consistency & Polish · Complete
+
+Scoped to consistency. No new section, no new feature, no invented content, no
+dependency, and no Lanyard change of any kind — `lanyard-canvas.tsx`,
+`lanyard-wrapper.tsx`, and `card-artwork.ts` are byte-identical to 6B.
+
+**Audited:** `globals.css` against all eleven components; every heading, body,
+metadata, label, and mono treatment on the page; vertical rhythm from header to
+footer; the six palette roles; every link, hover, focus, and transition; the
+heading tree, landmarks, keyboard path, and target sizes; seven viewport widths
+by DOM geometry; and where UI copy comes from.
+
+**`globals.css` was not edited.** The token layer already covered everything
+the page uses, so the fix for duplication was never a new token — it was the
+same token spelled once instead of five times. Nine tokens are declared and
+currently unused (`--spacing-gutter`, `--radius-none`, `--radius-sm`,
+`--text-stat`, `--tracking-normal`, `--duration-medium`, `--ease-standard`,
+`--color-surface`, `--container-text`); they are kept as the documented scale
+rather than trimmed, and `--color-surface` in particular is a deliberate
+non-use (§11).
+
+**What was actually duplicated was class strings, not values.** Five extractions
+into `src/components/ui/styles.ts`, `src/components/ui/action-link.tsx`, and
+`src/components/layout/section-header.tsx`, each with three or more call sites:
+
+| Lifted | Was written out in |
+|---|---|
+| `tag` — the square hairline chip | `#work`, `#research`, `#about` — the debt §9 recorded |
+| `metaLabel` — 11px tracked caps | all five sections, plus a fourth copy inside About's `dd` |
+| `SectionEyebrow` / `SectionHeader` | Hero + the four `<h2>` sections |
+| `ActionLink` — ruled label + arrow | Hero, `#work`, `#research`, `#about` |
+| `monoMeta` / `monoCaps` / `leadText` / `smallText` / `wordmark` / `arrowStep` / `colorTransition` | two to five sites each |
+
+Net −98 lines across the eight edited components.
+
+**Three real inconsistencies, not just repetition:**
+
+- **Outbound links were only marked outbound in two of six places.** `#contact`
+  and the footer set `target`, `rel="noopener noreferrer"`, and an `sr-only`
+  note; the project and research link lists set none of it. Every `href` in
+  `projects.ts` and `research.ts` is currently `null` so nothing rendered — the
+  moment a repository URL is supplied it would have swapped the tab out
+  silently. `ActionLink` now decides from the URI scheme: in-page gets `→` and
+  the same tab, outbound gets `↗`, a new tab, `rel`, and the note.
+- **The mobile menu could be stranded open at desktop.** The trigger sits in a
+  `md:hidden` wrapper but the panel is portalled to `<body>` with no breakpoint
+  of its own. Widening past `md` with the menu up left a full-screen overlay,
+  no visible control to dismiss it, and `body` still scroll-locked. A
+  `matchMedia("(min-width: 48rem)")` subscription closes it. Verified by
+  driving it: opened at 390, resized to 900, panel gone and the lock released.
+- **One link was a 21px target.** The Hero colophon's email — measured, not
+  guessed — while every other link on the page holds `min-h-11`. Now
+  `inline-flex min-h-11`.
+
+**Spacing normalised, asymmetry kept.** `#work`'s header gap was `mb-14 lg:mb-20`
+against `mb-12 lg:mb-16` in `#research` and `#about`; all three now take the
+`SectionHeader` default. The Hero's `mt-5` under the `<h1>` became `mt-4`,
+About's capability `dt` column matched `#work`'s Stack `dt` at `sm:w-24`, and
+`#research`'s link row went `gap-y-1 → gap-y-2`. Nothing that carries meaning
+changed: Selected Work still opens on `space-y-20 lg:space-y-28` between dense
+case studies while Research stays a tight ruled ledger, and `#contact` still
+takes no gap under its header because its first block carries `mt-12`.
+
+**Colour.** No token changed and none was added. The palette holds: `ink`,
+`bg`, `secondary`, `muted`, `border`, one terracotta. `--color-border` is used
+as a *text* colour in four places (nav index, project index, approach step
+numbers, research entry index) — checked, and every one is `aria-hidden`
+decoration, not content.
+
+**Data integrity.** No copy, URL, figure, date, or claim moved into a component,
+and none was invented. Everything still renders from `src/data/`. The one
+exception is unchanged and already flagged: the About statement paragraphs are
+authored connective copy, owner-pending since 5I. `profile.pending`,
+`site.pending`, and both project/research `pending` arrays are untouched.
+
+**Verified:** `npm run lint` clean, `npx tsc --noEmit` exit 0, `npm run build`
+succeeds with `/` and `/_not-found` static; then a headless-Chrome CDP pass —
+see the Phase 6C run in §7.
+
+### Phase 6D — Information Architecture · Complete
+
+- **Objective:** convert the single long page into a small multi-page
+  portfolio: `/`, `/projects`, `/projects/[slug]`, `/research`,
+  `/research/[slug]`, `/about`, `/contact`.
+- **Verified:** lint clean, `tsc --noEmit` exit 0, build emits 8 routes all
+  prerendered; then a headless-Chrome CDP pass over 9 routes × 7 widths and 24
+  keyboard/overlay checks — see the Phase 6D run in §7. Full report in
+  `Docs/PHASE_6D_REPORT.md`.
+
+**The four anchors became routes, and the data layer says so.** `NAVIGATION` in
+`site.ts` now carries paths rather than `#work`/`#research`/`#about`/`#contact`,
+and `Home` joins it — with five destinations it is one of them, not just the
+wordmark. `SectionMeta` gained an `href`, so the archive index (`00`–`04`) that
+the header, the mobile overlay, and each page opener print still resolves from
+one list; before, the header keyed that map on `#${id}`, which no longer exists.
+`getSection(href)` replaces four separate `sections.find(...)` calls.
+
+**Two labels per destination, deliberately.** `NAVIGATION.label` is the short
+form in a nav bar ("Projects", "Research"); `SECTIONS.label` is the page's own
+heading ("Selected work", "Research log"). They are separate fields rather than
+one, because collapsing them would either put "Selected work" in the nav or
+demote the page's `<h1>` to a category name.
+
+**Header and footer moved into the root layout.** They are identical on every
+route, so rendering them per page would unmount and rebuild them on each
+client-side navigation. `main#top` — the skip-link target — moved with them, so
+the skip link works on all seven routes from one definition.
+
+**The case study moved; it was not rewritten.** `ProjectDetail` in
+`components/projects/` is the body that `selected-work.tsx` used to inline:
+same fields, same order, same render-only-if-populated rule, same two
+scrollable tables with their `min-w-0` and `relative` guards intact.
+`selected-work.tsx` became the selection screen in front of it — index, title,
+summary, dataset line, flattened stack. No project copy was added, removed, or
+edited in either file.
+
+**Research split the same way**, into `research-log.tsx` (the ledger) and
+`components/research/research-detail.tsx`. `STATUS_LABEL` and `SETTLED` moved to
+`components/research/status.ts` because both now need them, and two copies of a
+status vocabulary would disagree the first time one was reworded.
+
+**A research detail page is mostly empty, and says so.** Both entries are
+venue-only — `title`, `conference.name`, `topic`, `contribution`, `projectSlug`,
+and `links` are all `null`. The page renders each field only when present and,
+when the venue and year are the whole entry, prints one line saying exactly
+that. No abstract, no placeholder title, no invented status. The same markup
+becomes a real paper page the moment any field lands.
+
+**Slugs come from the data, not from the brief.** The Phase 6D brief named the
+routes `/projects/thoraxvision` and `/projects/melonvision-ai`. `projects.ts`
+records `tuberculosis-detection` and `melon-detection`, and the brief's own rule
+is that the data layer wins — so those are the routes. The renaming is real
+owner input and it is sitting in the untracked `Docs/Detail.txt`; it is a
+content-ingestion job, not an IA job. See §8.
+
+**`dynamicParams = false`.** Both dynamic segments enumerate their slugs through
+`generateStaticParams` and refuse anything else, so an unknown slug is a 404
+rather than a request-time render of a project that does not exist. All four
+detail pages are prerendered at build.
+
+**`ActionLink` learned the difference between a route and a URL.** Internal
+hrefs now go through `next/link`; outbound ones stay a plain `<a>` with
+`target`, `rel`, and the `sr-only` note the scheme check already decided. This
+matters more than a normal SPA nicety here: a full document request on every
+in-site move would tear down and rebuild the Lanyard's WebGL context.
+`BackLink` is its mirror for detail pages — arrow leading, stepping backwards,
+set in `monoCaps` so leaving the page does not compete with the page.
+
+**The mobile menu is now open *for a path*.** Its links navigate rather than
+scroll, so the overlay has to come down on the way out — including on a back
+gesture the click handler never sees. The first attempt was
+`useEffect(() => setOpen(false), [pathname])`, which `react-hooks/set-state-in-effect`
+correctly rejected: it closes one render late and would flash the menu open for
+a frame on `history.back()`. Storing the path the menu was opened on
+(`openForPath === pathname`) closes it on the same render with no effect at all.
+Verified by driving it: open at 390, `history.back()`, overlay gone and the
+scroll lock released.
+
+**`SectionHeader` gained `level`.** The four openers that were `<h2>` under the
+Hero's `<h1>` are now the only heading on their own page. A prop, not a second
+component — two components that must stay identical below the heading tag would
+only drift.
+
+**New on the homepage: an Index.** With every section moved out, `/` ended at
+the Hero's colophon with no way onward but five small labels in the header. The
+Index is the same destinations at full size, in the same numbering, with one
+factual line each read from the data — `2 projects`, `2 venues confirmed`, the
+education field, the availability line. No description is written in the
+component.
+
+**A styled 404.** `app/not-found.tsx` renders inside the root layout, so an
+unknown slug keeps the header, the footer, and a way back instead of dropping
+the reader on a bare error screen.
+
+**Data integrity.** No copy, figure, URL, date, or claim was invented. The three
+new prose strings are all connective and marked as such in the source: the
+Projects standfirst (written deliberately count-agnostic), the venue-only note
+on a research entry, and the 404 copy. Every `pending` array is untouched.
+
+### Not done in this phase
+
+No Lanyard change of any kind. No new dependency. No token, palette, or type
+scale change. No content edit to `projects.ts`, `research.ts`, or `profile.ts`
+beyond one added lookup helper. `Docs/Detail.txt` was read but deliberately not
+ingested — see §8.
+
+---
+
 ## 4. Current Portfolio Architecture
 
 ```
 src/
-├── app/
-│   ├── layout.tsx          Root layout; three next/font/local families
-│   ├── page.tsx            Homepage: header + hero + empty anchors + footer
+├── app/                    One file per route (Phase 6D)
+│   ├── layout.tsx          Root layout; fonts, title template, header/main/footer
+│   ├── page.tsx            /            Hero + Index
+│   ├── not-found.tsx       404          Styled, inside the layout
+│   ├── projects/
+│   │   ├── page.tsx        /projects            → SelectedWork
+│   │   └── [slug]/page.tsx /projects/[slug]     → ProjectDetail (SSG, 2 slugs)
+│   ├── research/
+│   │   ├── page.tsx        /research            → ResearchLog
+│   │   └── [slug]/page.tsx /research/[slug]     → ResearchDetail (SSG, 2 slugs)
+│   ├── about/page.tsx      /about               → About
+│   ├── contact/page.tsx    /contact             → Contact
 │   ├── globals.css         Entire design system (@theme + base layer)
 │   └── favicon.ico
 ├── components/
 │   ├── layout/             Structural shell
 │   │   ├── page-container.tsx   Max-width + page margin (server)
 │   │   ├── section.tsx          Semantic section + vertical rhythm (server)
-│   │   ├── site-header.tsx      Sticky header + desktop nav (server)
+│   │   ├── site-header.tsx      Sticky header + skip link + wordmark (server)
+│   │   ├── primary-nav.tsx      Desktop nav; aria-current (client, Phase 6D)
 │   │   ├── mobile-nav.tsx       Full-screen overlay menu (client)
 │   │   ├── site-footer.tsx      Identity, nav, socials, © (server, 5J)
-│   │   └── nav-links.ts         Re-exports NAVIGATION from data/site
-│   ├── sections/
+│   │   ├── section-header.tsx   Eyebrow + h1/h2 via `level` (server, 6C/6D)
+│   │   └── nav-links.ts         Re-exports NAVIGATION; `isActiveHref`
+│   ├── sections/           Page bodies
 │   │   ├── hero.tsx             Hero composition (server)
-│   │   ├── selected-work.tsx    #work case studies (server, Phase 5G)
-│   │   ├── research-log.tsx     #research venue ledger (server, Phase 5H)
-│   │   ├── about.tsx            #about profile (server, Phase 5I)
-│   │   └── contact.tsx          #contact channels (server, Phase 5J)
+│   │   ├── site-index.tsx       Homepage directory (server, Phase 6D)
+│   │   ├── selected-work.tsx    /projects index (server)
+│   │   ├── research-log.tsx     /research ledger (server)
+│   │   ├── about.tsx            /about profile (server)
+│   │   └── contact.tsx          /contact channels (server)
+│   ├── projects/
+│   │   └── project-detail.tsx   Full case study + results tables (Phase 6D)
+│   ├── research/
+│   │   ├── research-detail.tsx  One entry, every field optional (Phase 6D)
+│   │   └── status.ts            STATUS_LABEL / SETTLED, shared by both views
+│   ├── ui/                      Cross-section primitives (Phase 6C)
+│   │   ├── styles.ts            Shared class strings (3+ call sites each)
+│   │   ├── action-link.tsx      Ruled action; next/link vs <a> by scheme
+│   │   └── back-link.tsx        Return path out of a detail page (Phase 6D)
 │   └── lanyard/                 Isolated 3D bundle
 │       ├── lanyard-wrapper.tsx  WebGL probe + error boundary (client)
 │       ├── lanyard-canvas.tsx   R3F scene, physics, band (client)
@@ -614,9 +827,17 @@ Architectural rules currently holding:
    imported.
 3. All design values come from tokens — no hard-coded colours or sizes in
    components.
-4. `sections/` holds page content; `layout/` holds reusable structure.
+4. `sections/` holds page bodies and `layout/` reusable structure; a
+   `components/<domain>/` folder (`projects/`, `research/`) holds the views
+   for one content type when it has both an index and a detail page.
+   A `page.tsx` under `app/` resolves the route and its metadata and renders
+   one component — it never holds project or research content itself.
 5. Content lives in `data/`, typed by `types/index.ts`; components receive it
    as props rather than embedding copy.
+6. A class string or markup pattern is lifted into `ui/` only at three or more
+   call sites (Phase 6C). Anything used once stays local to its section, with a
+   comment saying why — the Hero's filled CTA and the Contact email's larger
+   underline are both deliberately not shared.
 
 ---
 
@@ -1323,6 +1544,152 @@ it. It now costs nothing, and resumes cleanly.
 
 ---
 
+### Phase 6C run — 2026-08-26
+
+`npm run lint` clean, `npx tsc --noEmit` exit 0, `npm run build` succeeds —
+compiled, TypeScript passed, 4/4 static pages, `/` and `/_not-found` both
+prerendered static. One lint error was raised and fixed rather than suppressed:
+`react-hooks/set-state-in-effect` on the new breakpoint effect, which was
+calling `setOpen` synchronously in the effect body. The synchronous check was
+unnecessary — only the `md:hidden` trigger sets `open`, so the menu cannot open
+already-desktop — and subscribing alone is correct.
+
+Browser pass over CDP against headless Chrome 151, production build served by
+`next start`, measuring `documentElement.scrollWidth` against `clientWidth`
+plus per-element rects, not screenshots.
+
+**Horizontal overflow — none at any width.**
+
+| Width | scrollWidth / clientWidth | Overflow |
+|---|---|---|
+| 1440 | 1425 / 1425 | 0 |
+| 1280 | 1265 / 1265 | 0 |
+| 1024 | 1009 / 1009 | 0 |
+| 768 | 753 / 753 | 0 |
+| 430 | 430 / 430 | 0 |
+| 390 | 390 / 390 | 0 |
+| 375 | 375 / 375 | 0 |
+
+**Structure @1440.** One `<h1>` (`Alif Reezi`); four `<h2>` (Selected work,
+Research log, About, Contact); `<h3>` under each, `<h4>` only inside a project
+entry. No level is skipped. Landmarks: `header`, `nav{Primary}`, `main`, five
+`section`s each `aria-labelledby` its own visible heading, the two scrollable
+table `region`s, `footer`, `nav{Footer}`.
+
+**Keyboard.** 24 focusables, tabbed through with real `Input.dispatchKeyEvent`
+Tab presses rather than `.focus()` — `:focus-visible` matched on every one, and
+every ring measured `2px solid` at `2px` offset from the global rule. Order
+runs skip link → wordmark → nav → hero CTAs → colophon email → both table
+scroll ports → About → Contact → footer. The scroll ports are reachable, so a
+keyboard user can scroll the metrics tables without a pointer.
+
+**Target sizes.** Two elements measure under 24px and both are correct: the
+skip link at 1×1 while `sr-only` (131×39 once focused), and the "Research log"
+link inside an About sentence — WCAG 2.5.8 exempts a target inline in a block
+of text. Every other link and button is ≥44px tall at every width. The Hero
+colophon email was the one genuine failure at 235×21 and was fixed during this
+run; re-measured, it no longer appears.
+
+**Reduced motion.** With `prefers-reduced-motion: reduce` emulated, the only
+transition duration present anywhere on the page is `0.001s` — the global
+safety net holds across the new shared classes.
+
+**Links.** 17 in-page/`mailto:` links, none carrying `target`. Four outbound
+(LinkedIn and GitHub, in `#contact` and the footer), all four with
+`target="_blank"`, `rel="noopener noreferrer"`, and the "(opens in a new tab)"
+note.
+
+**Mobile menu @390.** Portalled to `<body>`; `role="dialog"`,
+`aria-modal="true"`; focus lands on Close; 8 focusables, none under 44px;
+`body.style.overflow` locked to `hidden`; no overflow. Escape closes it,
+releases the lock, and returns focus to the trigger. Reopened, then widened to
+900px: panel gone, lock released — the stranded-overlay bug is fixed.
+
+### Phase 6D run — 2026-09-02
+
+| Check | Result |
+|---|---|
+| `npm run lint` | Clean — no output, no warnings |
+| `npx tsc --noEmit` | Exit 0 (after `next typegen`; `PageProps<'/projects/[slug]'>` needs generated route types) |
+| `npm run build` | Exit 0 — compiled in 29.1s, 12/12 static pages, 8 routes all prerendered, 4 of them SSG from `generateStaticParams` |
+
+**Route render check.** All nine routes returned 200 with exactly one `<h1>`:
+`/`, `/projects`, `/projects/tuberculosis-detection`,
+`/projects/melon-detection`, `/research`, `/research/icwt-2026`,
+`/research/icsmech-2026`, `/about`, `/contact`. `/projects/thoraxvision` — the
+slug the brief assumed — correctly returns 404 through `dynamicParams = false`.
+
+**Link crawl.** Every `href` on every route, followed: 9 internal routes all
+200, no `#work`/`#research`/`#about`/`#contact` anchor survives anywhere, and
+the only remaining hash is `#top` (the skip link). Three outbound links
+(LinkedIn, GitHub, `mailto:`), all with `target`, `rel`, and the note.
+
+**Responsive — 9 routes × 7 widths = 63 combinations, 0 problems.**
+`documentElement.scrollWidth` equalled `clientWidth` on every one:
+
+| Width | scrollWidth / clientWidth |
+|---|---|
+| 1440 | 1425 / 1425 |
+| 1280 | 1265 / 1265 |
+| 1024 | 1009 / 1009 |
+| 768 | 753 / 753 |
+| 430 | 430 / 430 |
+| 390 | 390 / 390 |
+| 375 | 375 / 375 |
+
+The two `min-w-[34rem]`/`min-w-[38rem]` results tables still scroll inside their
+own port at 375 rather than widening the document — the `min-w-0` and
+`relative` guards from §11 survived the move into `ProjectDetail` intact.
+
+**Heading outlines @1440.** One `<h1>` per route, no skipped level anywhere:
+
+```
+/                                 1 2
+/projects                         1 2 2
+/projects/tuberculosis-detection  1 2 2 2 2 2
+/projects/melon-detection         1 2 2 2 2
+/research                         1 2 2 2
+/research/icwt-2026               1
+/research/icsmech-2026            1
+/about                            1 2 2
+/contact                          1 2 2 2
+```
+
+A research detail page carries a lone `<h1>` because every optional block below
+it is `null` in the data. That is the honest outline for that entry, not a gap.
+
+**Landmarks.** Exactly one `body > header`, one `main`, one `body > footer` on
+every route — confirming the layout move did not double them. Two `nav`s per
+index page (Primary, Footer), three on a detail page (the third being the
+Next-project / Next-entry pager, which carries its own `aria-label`).
+
+**Keyboard and overlay — 24 checks, 0 failed.** Driven with real
+`Input.dispatchKeyEvent`, not `.focus()`:
+
+- First Tab reaches the skip link; it measures 1×1 while `sr-only` and 131×39
+  once focused, with a `rgb(158, 79, 53) solid 2px` ring from the global rule.
+- Desktop nav marks `/projects` as `aria-current="page"` while on
+  `/projects/melon-detection` — a detail page lights its index.
+- Mobile @390: panel opens, `aria-expanded="true"`, focus lands on Close, body
+  scroll locks, 5 links present, the current route marked, Tab stays inside the
+  panel, Escape closes and returns focus to the trigger, lock released.
+- Mobile route change: tapping a link navigates client-side to `/projects`,
+  panel gone, lock released.
+- **Mobile back gesture with the menu open:** `history.back()` → back on `/`
+  with no overlay. This is the case the rejected `useEffect` would have handled
+  one render late.
+- `/projects`: 18 focusables, none unreachable, none without an accessible name.
+
+**Target sizes.** The same two sub-24px elements as the Phase 6C run, both
+still correct and both pre-existing: the `sr-only` skip link, and About's
+"Research log" link inline in a sentence (WCAG 2.5.8 inline exception). Every
+other control is ≥44px.
+
+**Console.** No errors or warnings on any route beyond headless GPU/SwiftShader
+notices. The Lanyard renders on `/` under ANGLE/SwiftShader as before.
+
+---
+
 ## 8. Known Issues / Remaining Work
 
 ### Fixed
@@ -1342,6 +1709,15 @@ it. It now costs nothing, and resumes cleanly.
 - **Card face contrast was 1.06:1 against the page.** Fixed in Phase 6B by
   re-exposing the scene and rebuilding the card's type contrast; measured at
   1.50:1 after.
+- **The three-copy square-tag class string.** Paid off in Phase 6C along with
+  four other patterns; `src/components/ui/styles.ts` is now the one source.
+- **Outbound project/research links carried no `target`, `rel`, or
+  announcement.** Latent — every such `href` is still `null` — but fixed in
+  Phase 6C: `ActionLink` decides from the URI scheme, so the first supplied
+  repository URL behaves like the ones already on the page.
+- **The mobile menu could be left open with no way to close it** after a resize
+  past `md`. Fixed in Phase 6C.
+- **The Hero colophon email was a 21px touch target.** Fixed in Phase 6C.
 
 ### Remaining
 
@@ -1354,6 +1730,28 @@ it. It now costs nothing, and resumes cleanly.
   re-uploads them, so there is no visual effect — dev-only cost. Not causal to
   the regression; left alone to keep the fix minimal.
 - **No Phase 5D-3 doc.** Phases 5C, 5D-1, and 5D-2 each have one; 5D-3 does not.
+
+### Owner input has arrived but is NOT yet ingested — `Docs/Detail.txt`
+
+An untracked `Docs/Detail.txt` in the working tree answers a large share of the
+`pending` list below: final project names (**ThoraxVision**, **MelonVision
+AI**), the MelonVision repository URL and year, its model architecture
+(MobileNetV2 FOMO, INT8, TFLite), both paper titles, both full conference
+names, both topics and author positions, two research repository URLs,
+long-form "about me" copy, and a different final email address from the one in
+`profile.ts`.
+
+**None of it is in `src/data/` yet, and Phase 6D deliberately did not put it
+there.** Phase 6D was scoped to information architecture, and its own rules said
+the data layer is the source of truth and slugs must come from it. Ingesting
+this is a content phase — it changes titles, slugs, and therefore URLs, and it
+raises questions the file does not settle: the file says not to display model
+percentages at all (which would remove the results tables), and the email in it
+differs from the one currently published site-wide. Both are owner decisions,
+not implementation details.
+
+Until then the routes are `/projects/tuberculosis-detection` and
+`/projects/melon-detection`, and the `pending` arrays below stand as written.
 
 ### Owner input still required (blocks parts of the content sections)
 
@@ -1385,8 +1783,13 @@ silently invented. Consolidated here:
 
 - ~~Section components for `#work`, `#research`, `#about`, `#contact`.~~ All
   four are built (Phases 5G–5J), as is the real footer.
-- Per-page metadata, Open Graph, and structured data beyond the root title and
-  description; `site.ts` is the intended source once a domain exists.
+- ~~Per-page metadata beyond the root title and description.~~ Done in Phase
+  6D: a `title` template in the root layout plus a per-route `title` and
+  `description`, each composed from `site.ts`, `profile.ts`, `projects.ts`, or
+  `research.ts`. A research detail page omits `description` rather than invent
+  one, because `topic` is `null`.
+- Open Graph and structured data; `site.ts` is the intended source once a
+  domain exists. Still blocked on `site.url`.
 
 ---
 
@@ -1400,35 +1803,47 @@ once to a deleted branch — leaving it unmerged risks repeating that.
 Selected Work section. 5F was scoped to Hero & Navigation instead, and
 Selected Work became 5G. Both are complete.
 
-**The page is complete.** Phases 5F–5J built every section, and each reads
-from `src/data/`. What is left is not more sections.
+**The site is complete as a structure.** Phases 5F–5J built every section, 6C
+lifted the shared UI, and 6D split the page into seven routes. Every one reads
+from `src/data/`. What is left is not more pages.
 
 **Blocking a real launch:**
 
 - **No production domain.** `site.url` is `null`, so canonical URLs, the
   sitemap, robots, and Open Graph cannot be finalised.
 - **Nothing after 5D-2 is merged to `main`.** Every phase from 5D-3 to 6B is
-  committed on `fix/lanyard-5d3-regression` but not landed. See §3.
+  committed on `fix/lanyard-5d3-regression` but not landed, and 6C and 6D are
+  not even committed. See §3.
 
 **Debt worth paying in one pass, now that no phase is scoped away from
 touching several files:**
 
-- The square-tag class string exists in *three* components
-  (`selected-work.tsx`, `research-log.tsx`, `about.tsx`). Phases 5H and 5I
-  were each told not to edit the others, so it was duplicated twice rather
-  than lifted. One shared module, three call sites.
+- ~~The square-tag class string exists in *three* components.~~ Paid in Phase
+  6C, together with four other patterns that had been copied across sections
+  for the same reason. `src/components/ui/` is the one source now.
 - **The About statement copy is authored, not owner-supplied.** Its claims
   are all traceable, but `profile.pending` still lists personal copy as
-  outstanding. It needs approval or replacement.
+  outstanding. It needs approval or replacement. Phase 6C did not touch it —
+  it is content, and inventing a replacement is exactly what the data layer
+  exists to prevent.
 
-**Content still owner-pending** is unchanged and listed in §8: paper details
-for both venues, repository and deployment URLs, the melon year and
-architecture, the TB metric gaps, graduation year and institution, and any
-work-experience entries. Every one of those renders itself the moment it is
-supplied — `#research` in particular is built to fill in without a code
-change.
+**The next phase is content ingestion, not code.** `Docs/Detail.txt` is sitting
+untracked in the working tree with answers to most of §8's pending list —
+project renames, repository URLs, both paper titles, both conference names,
+topics, author positions, and long-form personal copy. Phase 6D deliberately
+left it alone: it is a content change, it moves slugs and therefore URLs, and it
+carries two owner decisions the file does not settle (whether to drop the model
+percentage tables entirely, and which of two email addresses is canonical).
+Everything downstream of it — `/research` in particular — is already built to
+fill in without a code change.
 
-Phase 5J was explicitly scoped to stop here.
+**Still owner-pending after that file is ingested:** the TB metric gaps
+(ResNet50 accuracy, specificity for all three models, the contradictory VGG19
+F1), the MelonVision detection figures, whether the client may be named, the
+graduation year and institution, work-experience entries, and the production
+domain.
+
+Phase 6D was explicitly scoped to stop here.
 
 ---
 
@@ -1563,6 +1978,31 @@ wrong later. If a section ever does need one, swap muted → secondary
 throughout it and record the exception. Research instead differentiates
 itself by form — a sparse ledger against Selected Work's dense case
 studies — which needs no colour at all.
+
+### `cn()` concatenates; it does not merge
+
+`src/lib/utils.ts` is a six-line class joiner, deliberately — there is no
+`tailwind-merge` in this project. So passing `className="mb-0"` to a component
+whose default is `mb-12 lg:mb-16` produces `"mb-12 lg:mb-16 mb-0"`, and the
+winner is decided by **stylesheet order, not string order**. Tailwind emits
+margin utilities in ascending scale order, so `mb-0` is written first and
+`mb-12` overrides it. The override silently loses.
+
+Found in Phase 6C while giving `SectionHeader` a default gap that `#contact`
+needed to opt out of. The fix is not a smarter `cn` — it is to make the
+conflicting class a *replaceable default* rather than a base to append to:
+
+```tsx
+export function SectionHeader({ className = SECTION_HEADER_GAP, ... }) {
+  return <header className={className}>...
+}
+```
+
+The same trap applies to any pair on one property. `ActionLink`'s `className`
+is additive only because nothing it ships conflicts; the moment it needs a size
+or colour override it will need the same treatment. Where two values on one
+property genuinely differ — the Contact email's `pb-1` against the shared
+`ruledLabel`'s `pb-0.5` — write the string out locally instead of appending.
 
 ### How to catch these
 
