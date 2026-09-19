@@ -2,6 +2,9 @@
 
 Branch `fix/lanyard-5d3-regression` · 2026-09-02 · uncommitted in the working tree
 
+> **Status 2026-09-19:** committed as `ea35364` and merged to `main` in `2a8b959`.
+> §9.3 and §10's closing line are historical. Continued in `PHASE_6E_REPORT.md`.
+
 ---
 
 ## 1. Objective

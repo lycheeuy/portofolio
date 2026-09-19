@@ -1,7 +1,7 @@
 # Development Log
 
 Rolling record of work actually completed and verified on this project.
-Last updated: 2026-08-26.
+Last updated: 2026-09-19.
 
 Companion phase docs live alongside this file in `Docs/`. This log is the
 entry point; those docs carry the per-phase detail.
@@ -79,6 +79,9 @@ training data. `AGENTS.md` requires reading the relevant guide in
 Commit history:
 
 ```
+a6b45ad  chore: ignore Docs/Detail.txt owner-input working file           (main)
+2a8b959  Merge branch 'fix/lanyard-5d3-regression': Phases 5D-3 through 6D and owner decisions
+2eed9a8  content: apply owner decisions — ThoraxVision, MelonVision AI, email, city, hide results
 ea35364  feat: multi-page information architecture (Phase 6C + 6D)
 7ae7682  docs: record the Phase 6B commit hash in the development log
 5929bac  perf(lanyard): legible card, quiet strap, paused when off screen (Phase 6B)
@@ -94,7 +97,10 @@ ff73396  fix: resolve location contradiction, restore 5D-3 lanyard assets (Phase
 ```
 
 Phases 6C and 6D landed together in `ea35364` on `fix/lanyard-5d3-regression`
-(2026-09-19). The branch is still not merged to `main`; see §9.
+(2026-09-19). **The branch was merged to `main` the same day** with `--no-ff`
+as `2a8b959`, landing everything since 5D-2 in one merge commit; `main` and
+`origin/main` are in sync at `a6b45ad`. `fix/lanyard-5d3-regression` and
+`phase-5d-3-lanyard` are fully merged and can be deleted.
 
 ### Phase 5A — Foundation · Complete
 
@@ -178,8 +184,8 @@ Phases 6C and 6D landed together in `ea35364` on `fix/lanyard-5d3-regression`
 left dangling on a deleted branch and was recovered from the reflog; it is now
 preserved on branch `phase-5d-3-lanyard`. Active work is on
 **`fix/lanyard-5d3-regression`** (`5f6db14`, a cherry-pick of 5D-3). The
-strap fix is **committed** as of Phase 6A (`8952031`). Merging the branch into
-`main` is still outstanding.
+strap fix is **committed** as of Phase 6A (`8952031`). The branch was merged
+into `main` on 2026-09-19 (`2a8b959`).
 
 ### Phase 5E — Content & Project Data · Complete
 
@@ -1747,10 +1753,9 @@ notices. The Lanyard renders on `/` under ANGLE/SwiftShader as before.
 
 ### Remaining
 
-- **Phase 5D-3 is not merged to `main`.** `main` is still at 5D-2. Work sits on
-  `fix/lanyard-5d3-regression`, with `phase-5d-3-lanyard` preserving the
-  recovered original commit. Both the 5D-3 work and the strap fix need
-  committing and merging.
+- ~~**Phase 5D-3 is not merged to `main`.**~~ Resolved 2026-09-19: merged in
+  `2a8b959`. `phase-5d-3-lanyard` still preserves the recovered original
+  commit and can now be deleted.
 - **Texture disposal under Strict Mode.** The cleanup in `useDrawnTextures`
   disposes `CanvasTexture`s that live materials still reference. Three.js
   re-uploads them, so there is no visual effect — dev-only cost. Not causal to
@@ -1823,9 +1828,9 @@ silently invented. Consolidated here:
 
 ## 9. Next Phase
 
-**Immediate:** commit the strap fix and land Phase 5D-3 on `main`. The work is
-verified but stranded on a side branch, and the original commit was already lost
-once to a deleted branch — leaving it unmerged risks repeating that.
+~~**Immediate:** commit the strap fix and land Phase 5D-3 on `main`.~~ Done
+2026-09-19 — everything from 5D-3 through the owner decisions is on `main`
+(`2a8b959`) and pushed.
 
 **Note on numbering.** An earlier revision of this log reserved 5F for the
 Selected Work section. 5F was scoped to Hero & Navigation instead, and
@@ -1839,9 +1844,7 @@ from `src/data/`. What is left is not more pages.
 
 - **No production domain.** `site.url` is `null`, so canonical URLs, the
   sitemap, robots, and Open Graph cannot be finalised.
-- **Nothing after 5D-2 is merged to `main`.** Every phase from 5D-3 through
-  6D, plus the 2026-09-19 owner decisions, is committed on
-  `fix/lanyard-5d3-regression` but not landed. See §3.
+- ~~**Nothing after 5D-2 is merged to `main`.**~~ Resolved 2026-09-19; see §3.
 
 **Debt worth paying in one pass, now that no phase is scoped away from
 touching several files:**
