@@ -1,26 +1,22 @@
-import { SiteHeader } from "@/components/layout/site-header";
-import { SiteFooter } from "@/components/layout/site-footer";
-import { Section } from "@/components/layout/section";
 import { Hero } from "@/components/sections/hero";
+import { SiteIndex } from "@/components/sections/site-index";
 
 /**
- * Homepage (Phase 5D-1).
- * Header + Hero + empty anchor targets for future sections.
+ * Home — `/`.
+ *
+ * The identity page: who this is, where they are, what they do, and where to
+ * go next. Phase 6D moved Selected Work, the Research log, About, and Contact
+ * onto their own routes, so what remains here is the Hero — name, positioning,
+ * trajectory, availability, the Cirebon colophon, and the Lanyard — followed
+ * by the directory that replaces the scroll those four sections used to be.
+ *
+ * The header and footer are rendered by the root layout, not here.
  */
 export default function Home() {
   return (
     <>
-      <SiteHeader />
-      <main id="top">
-        <Hero />
-
-        {/* Anchor targets for future sections */}
-        <Section id="work" label="Selected work" />
-        <Section id="research" label="Research log" />
-        <Section id="about" label="About" />
-        <Section id="contact" label="Contact" />
-      </main>
-      <SiteFooter />
+      <Hero />
+      <SiteIndex />
     </>
   );
 }

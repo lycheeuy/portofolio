@@ -1,0 +1,2040 @@
+# Development Log
+
+Rolling record of work actually completed and verified on this project.
+Last updated: 2026-08-26.
+
+Companion phase docs live alongside this file in `Docs/`. This log is the
+entry point; those docs carry the per-phase detail.
+
+---
+
+## 1. Project Overview
+
+### Purpose
+
+Personal portfolio site for **Nashiruddin Alif Alvareezi** ("Alif Reezi"), an
+AI / Machine Learning Engineer with a Biomedical Engineering background,
+working across computer vision, model experimentation, and research.
+
+Creative direction, carried through every phase: **EDITORIAL × ENGINEERING ×
+PERSONAL**. Source brief is `Docs/PRD.txt`.
+
+### Stack
+
+Next.js 16 App Router, React 19, TypeScript, Tailwind CSS 4 (CSS-first, no JS
+config), and a React Three Fiber / Rapier 3D scene for the hero lanyard.
+
+### Current architecture
+
+Server Components by default. Exactly three client components exist, each for a
+concrete reason:
+
+| Component | Why it is a client component |
+|---|---|
+| `mobile-nav.tsx` | Open/close state, Escape key handling, body scroll lock |
+| `lanyard-wrapper.tsx` | WebGL capability probe + error boundary |
+| `lanyard-canvas.tsx` | Three.js / R3F / Rapier scene |
+
+The whole 3D stack sits behind a `next/dynamic({ ssr: false })` boundary, so it
+never enters the server bundle and never blocks first paint.
+
+The homepage is Header + Hero + Selected Work + Research log + About +
+Contact + Footer. **Every section is built**; no bare anchor remains. The
+Hero and both navigations (Phase 5F), `#work` (5G), `#research` (5H),
+`#about` (5I), and `#contact` plus the footer (5J) all read from
+`src/data/`. No copy, URL, or figure is written in a component except the
+About statement, which is flagged in Phase 5I as owner-pending.
+
+---
+
+## 2. Environment
+
+Versions read from the installed tree, not from the semver ranges in
+`package.json`.
+
+| Tool | Version |
+|---|---|
+| Node.js | 24.18.0 |
+| npm | 11.16.0 |
+| Next.js | 16.3.1 (Turbopack) |
+| React / React DOM | 19.2.8 |
+| TypeScript | 5.9.3 |
+| Tailwind CSS | 4.3.3 (`@tailwindcss/postcss` 4.3.3) |
+| ESLint | 9.39.5 (`eslint-config-next` 16.3.1) |
+
+3D stack: `three` 0.185.1, `@react-three/fiber` 9.7.0, `@react-three/drei`
+10.7.8, `@react-three/rapier` 2.2.0, `meshline` 3.3.1.
+
+All installed without `--force` or `--legacy-peer-deps`; React stayed at
+19.2.8.
+
+**Note on Next.js:** this version has breaking changes relative to older
+training data. `AGENTS.md` requires reading the relevant guide in
+`node_modules/next/dist/docs/` before writing code.
+
+---
+
+## 3. Phase Progress
+
+Commit history:
+
+```
+ea35364  feat: multi-page information architecture (Phase 6C + 6D)
+7ae7682  docs: record the Phase 6B commit hash in the development log
+5929bac  perf(lanyard): legible card, quiet strap, paused when off screen (Phase 6B)
+36d8a8f  docs: record the Phase 6A commit hash in the development log
+ff73396  fix: resolve location contradiction, restore 5D-3 lanyard assets (Phase 6A)
+8952031  chore: checkpoint working portfolio before Phase 6A
+5f6db14  fix(lanyard): render in dev, personalize card, shrink model (Phase 5D-3)
+014f2dd  docs: add Phase 5D-2 lanyard integration documentation
+3cb6924  feat: integrate 3D Lanyard ... (Phase 5D-2)
+04e956c  feat: add hero section with asymmetric editorial composition (Phase 5D-1)
+5952f40  feat: project foundation, design system, and page shell (Phase 5A-5C)
+46c6c0a  chore: initialize portfolio project
+```
+
+Phases 6C and 6D landed together in `ea35364` on `fix/lanyard-5d3-regression`
+(2026-09-19). The branch is still not merged to `main`; see §9.
+
+### Phase 5A — Foundation · Complete
+
+- **Objective:** Next.js App Router project with TypeScript strict mode and the
+  path alias in place.
+- **Implemented:** project scaffold, `@/*` → `src/*` alias, `src/lib/utils.ts`
+  (`cn` class joiner), `src/types/index.ts` (`Project`, `ResearchEntry`,
+  `Experience`, `CapabilityGroup`, `NowItem` — declared ahead of the content
+  phases that will consume them).
+- **Decisions:** no `clsx`/`tailwind-merge` dependency; a six-line `cn` covers
+  current needs.
+- **Verified:** builds and typechecks.
+
+### Phase 5B — Design System · Complete
+
+- **Objective:** a complete token layer before any visual work.
+- **Implemented:** `src/app/globals.css` — all tokens in Tailwind 4's `@theme`
+  block, so each is both a utility and a CSS variable. Base layer sets body
+  typography, `::selection`, and `:focus-visible`. A global
+  `prefers-reduced-motion` safety net collapses animation and transition
+  durations to 1ms.
+- **Decisions:** CSS-first Tailwind 4 — no `tailwind.config.js`, no JS config.
+  Fonts self-hosted via `next/font/local` from `public/fonts/` rather than
+  Google Fonts, so there is no third-party request at runtime.
+- **Verified:** contrast ratios recorded inline per colour token (see §6).
+
+### Phase 5C — Page Shell & Navigation · Complete
+
+- **Objective:** structural shell and navigation for all later sections.
+- **Implemented:** `page-container.tsx`, `section.tsx`, `site-header.tsx`,
+  `mobile-nav.tsx`, `site-footer.tsx`, `nav-links.ts`. Empty anchor sections on
+  the homepage.
+- **Decisions:** single `NAV_LINKS` source shared by desktop and mobile nav.
+  Sticky header with `backdrop-blur-sm` over a 92%-opacity background. Mobile
+  menu is a full-screen overlay with Escape-to-close, focus return to the
+  trigger, and body scroll lock. `scroll-padding-top: 5rem` on `html` keeps
+  anchor targets clear of the sticky header.
+- **Verified:** keyboard navigation and anchor behaviour.
+- **Doc:** `Docs/Phase 5C — Page Shell & Navigatio.txt`
+
+### Phase 5D-1 — Hero Composition · Complete
+
+- **Objective:** the hero, composition only — no 3D yet, but a reserved slot
+  for it.
+- **Implemented:** `src/components/sections/hero.tsx`. Asymmetric 12-column
+  grid: 8 columns of type, 4 columns reserved for the visual.
+- **Decisions:** index number `00` + rule + label as a recurring editorial
+  motif. Display name and full legal name are separated (`Alif Reezi` in
+  Fraunces, `Nashiruddin Alif Alvareezi` in mono beneath). Lead paragraph
+  capped at `36ch`.
+- **Verified:** responsive from mobile through desktop.
+- **Doc:** `Docs/Phase 5D-1 — Hero Composition.txt`
+
+### Phase 5D-2 — Lanyard Integration · Complete
+
+- **Objective:** drop the React Bits 3D Lanyard into the hero's reserved zone
+  without harming load, bundle size, or the Server Component architecture.
+- **Implemented:** the three-layer wrapper/canvas/boundary structure, physics
+  scene, drag interaction, quiet fallback.
+- **Decisions:** assets downloaded from GitHub rather than the jsrepo CLI (a
+  known CLI bug corrupts binary assets). Dynamic import with `ssr: false`.
+  Mobile gets reduced DPR (1.5 vs 2) and a coarser physics timestep (1/30 vs
+  1/60).
+- **Verified:** clean install, 0 vulnerabilities, no peer conflicts.
+- **Doc:** `Docs/PHASE_5D-2.md`
+
+### Phase 5D-3 — Card Personalisation & Dev Rendering · Complete
+
+- **Objective:** replace the stock branded card with a personalised credential,
+  make the scene render reliably in dev, and shrink the model.
+- **Implemented:** `card-artwork.ts` (runtime-drawn card and strap textures),
+  matte card material, a `<Suspense>` boundary inside the Canvas, a WebGL
+  capability probe, a `prefers-reduced-motion` branch, and a stripped
+  `card.glb`.
+- **Decisions:** see §5 — this phase carries the most consequential ones.
+- **Verified:** lint, typecheck, build, and browser verification (§7). One
+  regression was found after the fact and fixed; see §5 and §8.
+
+**Branch state — read this before continuing.** Phase 5D-3 is *not* on `main`.
+`main` sits at `014f2dd` (5D-2 + docs). The original 5D-3 commit `fbdba4d` was
+left dangling on a deleted branch and was recovered from the reflog; it is now
+preserved on branch `phase-5d-3-lanyard`. Active work is on
+**`fix/lanyard-5d3-regression`** (`5f6db14`, a cherry-pick of 5D-3). The
+strap fix is **committed** as of Phase 6A (`8952031`). Merging the branch into
+`main` is still outstanding.
+
+### Phase 5E — Content & Project Data · Complete
+
+- **Objective:** move portfolio content out of component literals and into a
+  typed data layer, so the section components built in later phases consume
+  structured data instead of hardcoded text. Data only — no UI.
+- **Implemented:** `src/data/profile.ts`, `projects.ts`, `research.ts`,
+  `site.ts`, and an expanded `src/types/index.ts`.
+- **Sources:** `Docs/User Input Session.txt` (identity, contact, TB metrics,
+  melon timeline, link availability), `Docs/PRD.txt` §1 (project descriptions,
+  technology, research workflow), and the dataset sizes confirmed for this
+  phase — TB 4,784 images, melon 1,250 images.
+- **Decisions:** see §10.
+- **Verified:** `npm run lint` clean, `npx tsc --noEmit` exit 0,
+  `npm run build` exit 0 (compiled 31.3s, TypeScript 9.3s, 4/4 static pages).
+
+### Phase 5F — Hero & Navigation · Complete
+
+- **Objective:** build the real Hero and Navigation on top of the Phase 5E data
+  layer. Scope was fixed to three things — navigation, hero, and the existing
+  Lanyard integration — and nothing else.
+- **Implemented:**
+  - `site-header.tsx` — desktop nav now reads `site.navigation` and pairs each
+    label with its `site.sections` index (`01`–`04`), shown from `lg` up only.
+    Nav links and the wordmark were given 44px+ tap targets.
+  - `mobile-nav.tsx` — full-screen overlay driven by the same data, with a real
+    focus trap, Escape-to-close, focus return to the trigger, body scroll lock,
+    and the owner's `primary` contact channels in the footer of the panel.
+    Portalled to `<body>` because the header's `backdrop-blur-sm` would
+    otherwise become the containing block for `position: fixed`.
+  - `hero.tsx` — the identity section, every string sourced from
+    `profile.ts` / `site.ts`: index `00` + rule + `profile.status`
+    ("Fresh Graduate"), `displayName` as the `h1`, `fullName` in mono beneath,
+    `positioning` as the lead, `trajectory` as an ordered mono sequence,
+    `availability` behind a terracotta dot, two CTAs, and a colophon strip
+    carrying `location`, `education`, `focusAreas`, and the primary email.
+  - `page.tsx` — `main` given `tabIndex={-1}` so the skip link can focus it
+    without putting it in the tab order.
+- **Decisions:**
+  - **Nothing invented.** No experience, metric, company, skill, or URL that is
+    not already in `src/data/` appears in the UI. The Computer Vision and
+    research framing comes from `profile.positioning` and `profile.focusAreas`,
+    both of which already carry it; nothing was added to the data layer to
+    make the hero read better.
+  - **The two CTAs are deliberately unequal.** "View selected work" is the
+    page's primary action and takes the single solid ink block in the whole
+    composition; "Get in touch" stays a ruled text link. Both are `min-h-11`,
+    so the tap target is 44px even though the label box is only ~26px.
+  - **The colophon sits below the grid, not inside the text column.** Location,
+    education, and focus are facts, not narrative — putting them in a ruled
+    `<dl>` under the composition keeps the main column to one idea per line and
+    means the metadata never has to compete with the Lanyard for width.
+  - **Nav indices are `lg`-and-up only.** Below that there is not enough
+    horizontal room for them to read as structure rather than noise.
+  - **No scroll-spy / `aria-current`.** It would require making the header a
+    client component and an observer per section, for an active state on a
+    single-page anchor list. Not worth the cost against the "minimal, no
+    excessive animation" constraint.
+  - **The Lanyard was not touched.** Physics, WebGL fallback, card artwork, and
+    the texture system are exactly as Phase 5D-3 left them. The only
+    integration-side code is the bleed wrapper in the hero: the canvas is
+    allowed to extend past its column so the strap has room to swing, and the
+    bleed is stepped by breakpoint because a fixed `-right-16` at `lg` exceeds
+    the page margin and would push the document into horizontal scroll.
+- **No new dependencies.**
+- **Verified:** see §7 — lint, typecheck, build, and a seven-width browser run.
+
+### Phase 5G — Selected Work · Complete
+
+- **Objective:** build the `#work` section from `src/data/projects.ts` so the
+  two projects read as engineering case studies rather than portfolio cards.
+  Presentation only — the data layer was not touched.
+- **Implemented:**
+  - `src/components/sections/selected-work.tsx` (new, server component). A
+    section header (index `01`, a derived project count, the `h2`), then an
+    ordered list of two `<article>` entries. Each entry is an index rail
+    (large ghosted mono numeral + a `<dl>` of discipline / context / timeline)
+    beside a content column: `h3` title, summary lead, then a two-column
+    technical body — Problem and a numbered Approach list on one side, Dataset
+    and Stack on the other — with Results below when the project has models.
+  - `src/components/layout/section.tsx` — added an optional `labelledBy` prop
+    so a section can name its landmark from the heading a reader can actually
+    see, instead of duplicating that text into `aria-label`. Existing callers
+    are unchanged.
+  - `src/app/page.tsx` — `<SelectedWork />` replaces the empty `#work` anchor.
+- **Decisions:**
+  - **No project copy in the component.** Every string, figure, class name,
+    dataset size, and link comes from `projects.ts`. The component decides
+    layout; it does not know that project 01 is about tuberculosis. A
+    corrected metric or a supplied URL changes the page without touching the
+    file.
+  - **The two entries differ because their data differs.** Tuberculosis
+    Detection carries three benchmarked models, so `models.length > 0` renders
+    the Results block — the research emphasis the brief asked for. Melon Plant
+    Detection carries no evaluation figures but does carry a timeline and a
+    deployment chain that ends on ESP32-CAM, so its weight lands on Approach
+    and on the Deploy stack group. Neither shape is hardcoded per project;
+    both are driven by which fields are populated. That also means the
+    treatment is already correct for a third project nobody has written yet.
+  - **Recorded precision is preserved, not normalised.** The source lists
+    ResNet50 precision as `0.57` and DenseNet121 as `0.5491`. Rendering the
+    first as `0.5700` would claim two digits of precision that were never
+    measured, so figures print exactly as stored. Accuracy is the one
+    conversion — stored as a ratio, shown as a percentage.
+  - **Blank figures render as an em dash that reads as words.** The two gaps
+    the owner left — ResNet50 accuracy and the disputed VGG19 Tuberculosis F1 —
+    show `—` visually with a `sr-only` "Not recorded" beside it. A screen
+    reader announcing a bare dash in a metrics table tells the listener
+    nothing.
+  - **Only links with a real `href` are rendered.** Both of the melon
+    project's links are `href: null` (the repository URL was never supplied,
+    and the deployment is on the client's VPS), so no link row renders at all
+    today. The markup handles them the moment a URL lands. The internal
+    `pending` notes are not surfaced — they are written for whoever maintains
+    the data, not for a visitor.
+  - **Metrics are real tables.** `<table>` with `<caption>`, `scope="col"` and
+    `scope="row"`, inside a focusable `role="region"` scroll container, so a
+    narrow viewport scrolls the table instead of the page and a keyboard user
+    can reach that scroll without a pointer.
+  - **No detail pages, and no fake affordance standing in for one.** Each
+    entry carries an `id` (`work-<slug>`) so it is deep-linkable, but nothing
+    pretends to link to a case study that does not exist. Since the section
+    renders the whole case study inline, there is currently nothing further to
+    click through to.
+- **No new dependencies. The Lanyard and the Hero were not modified.**
+- **Verified:** see §7 — lint, typecheck, build, and a seven-width browser run.
+  Two real layout defects were found and fixed during that run; both are worth
+  reading before the next section is built, and are recorded in §11.
+
+### Phase 5H — Research · Complete
+
+- **Objective:** build the `#research` section from `src/data/research.ts`.
+  Presentation only; the data layer was not touched.
+- **The constraint that shaped everything:** both entries are venue-only. Of
+  every field on `ResearchEntry`, only `slug`, `index`, `year`,
+  `conference.acronym`, `conference.year`, and `status` carry a value. Title,
+  expanded conference name, topic, contribution, `projectSlug`, and `links` are
+  all `null` or empty, and `status` is `pending-confirmation` for both — it is
+  not known whether these are submitted, accepted, or presented. There is no
+  version of this section that can show titles or contributions today without
+  inventing them.
+- **Implemented:**
+  - `src/components/sections/research-log.tsx` (new, server component). A
+    section header (index `02`, venue count, `h2`, a two-sentence standfirst
+    with the count and year read from the data), a ruled `<ol>` ledger of two
+    entries, then a Method block.
+  - Each ledger row is `index / year` in a mono rail, the venue as `h3`, and
+    the status at the outer edge with a marker dot. Topic, contribution,
+    conference name, and links each render only when non-null, so the same
+    markup becomes a full entry the moment anything is supplied.
+  - `src/app/page.tsx` — `<ResearchLog />` replaces the empty `#research`
+    anchor.
+- **Decisions:**
+  - **A register, not a publication list.** With only venues confirmed, an
+    article-per-paper treatment would be two mostly empty blocks pretending to
+    be case studies. A ruled ledger — index, year, venue, status — is honest
+    about what exists and is the more editorial form anyway. It also scales:
+    adding a real paper fills the same row rather than needing a new layout.
+  - **The venue is the heading, and the year is not repeated.** With no title,
+    `h3` is the bare acronym (`ICWT`), because the rail already sets `2026`
+    immediately beside it; an earlier pass rendered `ICWT 2026` next to a
+    `2026` and the row read twice. When a title arrives it takes the heading
+    and the venue drops to the metadata line, where acronym + name + year *is*
+    repeated deliberately, because that pairing is then the citation.
+  - **`pending-confirmation` is worded as "Venue confirmed · details to
+    follow".** It deliberately does not say submitted, accepted, or under
+    review — none of those is known. All six `ResearchStatus` values are
+    mapped, including the five unused ones, so a status change in the data can
+    never fall through to a raw enum string.
+  - **The marker dot only earns colour when the outcome is settled.** Accepted,
+    presented, and published get the terracotta accent; everything else gets a
+    border-grey dot. Both entries are grey today.
+  - **Only links with a real `href` render.** Both entries have empty `links`,
+    so no link renders at all. The markup and its focus states were verified
+    against an injected link (see §7) rather than left unexercised.
+  - **The Method block is the one thing not from `research.ts`, and it is a
+    judgement call.** The brief asked the section to communicate that this work
+    was researched, evaluated, and communicated — which two venue-only rows
+    cannot do. `profile.capabilities` carries a group whose own label is
+    "Research": hyperparameter experimentation, model evaluation, ROC/AUC,
+    confusion matrix, Grad-CAM, scientific documentation. That is documented
+    data saying exactly this, and the research section is its natural home.
+    **Open coupling:** if the About section later wants the same group, one of
+    the two should reference the other rather than both printing it.
+  - **No surface band behind the section.** `--color-surface` was considered to
+    separate Research from Selected Work, and rejected on contrast — see §11.
+  - **The `tag` class string is duplicated from `selected-work.tsx`** rather
+    than extracted, because extracting it would mean editing Selected Work,
+    which this phase was told not to touch. If a third section needs it, lift
+    all three into one module then.
+- **No new dependencies. Hero, Lanyard, Selected Work, project data, and the
+  navigation structure were not modified.**
+- **Verified:** see §7.
+
+### Phase 5I — About · Complete
+
+- **Objective:** build the `#about` section from `src/data/profile.ts`.
+  Presentation only; the data layer was not touched.
+- **Implemented:**
+  - `src/components/sections/about.tsx` (new, server component). A section
+    header (index `03`, `profile.status`, `h2`), a two-paragraph statement
+    beside a Background `<dl>`, a Capabilities block, and a closing line that
+    renders `profile.availability` next to a contact link.
+  - `src/app/page.tsx` — `<About />` replaces the empty `#about` anchor.
+- **Decisions:**
+  - **The prose is authored copy, and it is flagged as such.** `profile.ts`
+    has no `bio` field, and its own `pending` list records "Personal / 'now'
+    copy" as owner-supplied content that has not arrived. So the two statement
+    paragraphs are connective writing, not data. Every *claim* in them traces
+    to a documented field, and the component annotates each at the point of
+    use: role and positioning from `roles` / `positioning`, "fresh graduate"
+    from `status`, the degree from `education`, "medical imaging" and "edge
+    hardware" from `site.description`, and the two project endings from
+    `projects.ts`. Nothing asserts employment, a duration, a client, an
+    achievement, a certification, or a skill that is not already recorded.
+    **The wording is a placeholder the owner should approve or replace; the
+    facts behind it are verified.**
+  - **No pronouns, and not first person.** `profile.ts` does not state
+    pronouns, so the copy avoids them the way the Hero does. First person was
+    rejected separately: it would put words in the owner's mouth on a page
+    they have not reviewed.
+  - **Capability groups are split with `#research`, per the Phase 5H note.**
+    About prints Model, Build, and Deploy; the Research group stays in
+    `#research` as its Method block, and About links to it in a sentence
+    rather than printing a second copy that could drift. The filter keys on
+    the group label, so the split survives a reordering of
+    `profile.capabilities`.
+  - **Overlap with the Hero is deliberate and bounded.** The Hero already
+    carries location, education, focus areas, trajectory, and availability.
+    About repeats education, location, and availability, because a reader
+    landing on the `#about` anchor should not have to scroll up for them — and
+    adds what the Hero shows nowhere: all three `roles`, the degree's
+    completion state, and the capability groups. Trajectory and focus areas
+    are left to the Hero rather than restated.
+  - **The closing makes availability actionable.** The Hero states the same
+    line as a bare label; About pairs it with a link to `#contact`, so the
+    section ends on something to do.
+  - **The `tag` class string is now duplicated a third time.** Phase 5H's note
+    said About was the point to lift it into a shared module — but doing that
+    means editing `selected-work.tsx` and `research-log.tsx`, and this phase
+    was told not to touch either. The debt is recorded rather than paid: one
+    shared module, three call sites, whenever a phase is free to change all
+    three at once.
+- **No new dependencies. Hero, Lanyard, Selected Work, Research, and the
+  navigation were not modified.**
+- **Verified:** see §7.
+
+### Phase 5J — Contact & Footer · Complete
+
+- **Objective:** build `#contact` and the real footer. This closes the page —
+  every section is now built and no bare anchor remains.
+- **Implemented:**
+  - `src/components/sections/contact.tsx` (new, server component). Header
+    (index `04`, `profile.availability` behind an accent dot, `h2`, two lines
+    of copy), the email as the one large action, then LinkedIn and GitHub as a
+    ruled two-column list.
+  - `src/components/layout/site-footer.tsx` — replaced the Phase 5C
+    placeholder. Wordmark linking to `#top` with the full name beneath, the
+    shared `NAV_LINKS` list, the social profiles from `profile.contact`, and a
+    copyright + location bar.
+  - `src/app/page.tsx` — `<Contact />` replaces the last empty anchor; the now
+    unused `Section` import was dropped.
+- **Decisions:**
+  - **The phone number is not rendered anywhere.** It is in `profile.contact`
+    with `primary: false`, and the Phase 5E decision that introduced that flag
+    states the intent directly: the flag exists so the contact section can
+    publish email, LinkedIn, and GitHub "while treating the phone number as a
+    deliberate opt-in rather than default page content". Both components filter
+    on `primary`, which honours that decision instead of re-taking it.
+  - **The email is found by URI scheme, not by label.** `href.startsWith
+    ("mailto:")` is what makes a channel an email; the label is a display
+    string that could be renamed or translated. If no mailto channel exists,
+    the section drops the headline and lists every primary channel instead.
+  - **Social links are the primary channels with an `http(s)` scheme.** That is
+    what separates a profile from a way of reaching someone: `mailto:` and
+    `tel:` belong to `#contact`, not to a footer row of social links. No URL,
+    handle, or address is written in either component.
+  - **External links open in a new tab and say so.** `target="_blank"` with
+    `rel="noopener noreferrer"`, plus an `sr-only` "(opens in a new tab)" —
+    the arrow glyph only tells sighted users, and a link that swaps the tab out
+    from under someone should announce it.
+  - **The copy is an open door, not a call to action.** The availability line
+    above the heading is the offer; the two sentences under it just say
+    questions are welcome and that an email is enough. No "let's build
+    something amazing".
+  - **The email uses `break-all`, not `break-words`.** An address is a single
+    token with no spaces, so normal wrapping cannot break it and it would run
+    past a 375px column. It sits on one line down to 1024 and wraps to two
+    below that.
+  - **The footer year is baked at build time.** `new Date()` is evaluated when
+    the Server Component renders, and the homepage is statically prerendered.
+    A client component purely to keep a footer year live would be the fourth
+    client component on the site and would hydrate on every visit to change one
+    number. It goes stale only until the next deploy.
+  - **The footer nav is labelled.** `aria-label="Footer"` distinguishes it from
+    the header's `Primary` nav, and it reads the same `NAV_LINKS` export, so
+    the two can never disagree.
+- **No new dependencies. Hero, Lanyard, Selected Work, Research, About, and the
+  project and research data were not modified.**
+- **Verified:** see §7.
+
+---
+
+### Phase 6A — Critical Safety & Correctness · Complete
+
+Scoped to P0 safety and correctness only. No redesign, no refactor, no
+consistency cleanup, no dependency change, and no Lanyard appearance or
+physics change.
+
+- **Git safety.** Every uncommitted phase — the strap fix, `src/data/`, and
+  the 5G–5J sections — was captured in checkpoint commit `8952031` on
+  `fix/lanyard-5d3-regression` before anything else was touched. Nothing was
+  reset or deleted. Both stray assets were byte-identical to blobs already in
+  history, so the checkpoint added no new object weight.
+- **Location contradiction resolved.** `src/app/layout.tsx` no longer hardcodes
+  a city. Its description is composed from `site.description` and
+  `profile.location`, so metadata now reads Cirebon, West Java, Indonesia and
+  cannot drift from what the footer and About section render. The now-obsolete
+  conflict notes were dropped from `profile.pending` and `site.pending`.
+- **Lanyard asset restored.** `public/lanyard/card.glb` is back to the
+  committed 5D-3 model: **162,612 bytes (159 KB)**, blob `702b283`, down from
+  the 2,457,784-byte (2.4 MB) copy that had reappeared in the working tree.
+  Verified before the swap that the committed version existed and that
+  `lanyard-canvas.tsx` still resolves the same path (`/lanyard/card.glb`,
+  one `useGLTF` plus one `useGLTF.preload`). The scene file was not modified.
+- **Stray asset removed.** `public/lanyard/lanyard.png` (7,527 bytes) had zero
+  references anywhere in `src/` or `public/` — the strap texture is drawn at
+  runtime in `card-artwork.ts` — and was deleted.
+- **Verified:** `npm run lint` clean, `npx tsc --noEmit` clean, `npm run build`
+  succeeds; `/` and `/_not-found` prerender static. The built
+  `<meta name="description">` reads Cirebon, and no shipped output contains
+  Purwokerto (only the stale Turbopack cache under `.next/cache/`).
+
+---
+
+### Phase 6B — Lanyard Performance & Legibility · Complete
+
+Scoped to the lanyard. No section, layout, type scale, spacing, or copy was
+touched, and no dependency was added. `card.glb` is untouched at 162,612 bytes.
+
+**The card was not low contrast, it was the same colour as the page.** Measured
+off the rendered frame: card face `#ECECEA` against a `#F6F2EB` page — 1.06:1.
+Everything else followed from that.
+
+- **Exposure.** The stock rig was ambient 1 plus four lightformers, one a
+  broadside at intensity 10 that lit the face flat and put a specular streak
+  across the metal clip. Now two soft strip lights and ambient 1.95, which
+  lands the face at `#CAC8C4` — **1.50:1** against the page. Set by
+  measurement, not by eye; the method is in §7.
+- **Type.** Role and focus lines moved to `--color-ink`, sizes up roughly a
+  third (role `0.040 → 0.052`, focus `0.034 → 0.045` of the island height),
+  and the name fits a wider measure. `--color-muted` is gone from the card
+  entirely — it is 4.28:1 on `--color-surface`, under AA (§11), and it was
+  carrying the focus lines. Two secondary hairlines now frame the type block;
+  the old `--color-border` footer rule measured out invisible at this exposure.
+- **Material.** `meshPhysicalMaterial` + clearcoat → `meshStandardMaterial`
+  at roughness 0.85. The clearcoat was reading as laminate rather than card
+  stock, and standard is the cheaper shader. Clip and clamp roughness 0.3 →
+  0.62, so the metal is brushed rather than chromed.
+- **Strap.** Ink webbing → `--color-secondary`. A thin strap at full ink
+  weight had more tonal mass than a card that was barely there, which put the
+  emphasis on the lanyard instead of the credential.
+
+**Performance.** The measured win is the render loop, not the bundle:
+
+- **The canvas kept simulating and drawing at 60fps while the hero was five
+  screens above the viewport.** An `IntersectionObserver` now switches
+  `frameloop` to `"never"` and pauses `<Physics>` when the slot leaves the
+  viewport (200px margin). Script CPU while scrolled away: **6.0% → 0.0%**,
+  and it resumes on return. This is the whole of the runtime saving.
+- `Environment resolution={64}` (from the 256 default) and four lightformers
+  down to two: a smaller cube render target, built on every mount, feeding a
+  blurred environment that a matte surface cannot show detail from anyway.
+- Per-frame allocation removed from the frame loop: `curve.getPoints()` built
+  a fresh array of 33 `Vector3`s every frame and now samples into a reused
+  one; the four scratch vectors and `segmentProps` were being rebuilt on every
+  render.
+- The mobile breakpoint moved from a `resize` listener to `matchMedia`, so
+  dragging a window edge no longer re-renders the scene once per pixel to
+  recompute one boolean.
+- `LanyardCanvas` now renders on the first `requestIdleCallback` rather than
+  during hydration, holding ~3.3 MB of three/drei/rapier off the hydration
+  task. **Measured honestly: this did not move first paint or blocking time**
+  in local testing — `next/dynamic` already defers past FCP, and the profile
+  is dominated by software WebGL. It is kept as insurance for slow devices,
+  not claimed as a win.
+
+**Verified:** lint, typecheck, build; then a headless-Chrome pass over CDP at
+1440 / 1280 / 1024 / 768 / 430 / 390 / 375 — see §7.
+
+---
+
+### Phase 6C — System Consistency & Polish · Complete
+
+Scoped to consistency. No new section, no new feature, no invented content, no
+dependency, and no Lanyard change of any kind — `lanyard-canvas.tsx`,
+`lanyard-wrapper.tsx`, and `card-artwork.ts` are byte-identical to 6B.
+
+**Audited:** `globals.css` against all eleven components; every heading, body,
+metadata, label, and mono treatment on the page; vertical rhythm from header to
+footer; the six palette roles; every link, hover, focus, and transition; the
+heading tree, landmarks, keyboard path, and target sizes; seven viewport widths
+by DOM geometry; and where UI copy comes from.
+
+**`globals.css` was not edited.** The token layer already covered everything
+the page uses, so the fix for duplication was never a new token — it was the
+same token spelled once instead of five times. Nine tokens are declared and
+currently unused (`--spacing-gutter`, `--radius-none`, `--radius-sm`,
+`--text-stat`, `--tracking-normal`, `--duration-medium`, `--ease-standard`,
+`--color-surface`, `--container-text`); they are kept as the documented scale
+rather than trimmed, and `--color-surface` in particular is a deliberate
+non-use (§11).
+
+**What was actually duplicated was class strings, not values.** Five extractions
+into `src/components/ui/styles.ts`, `src/components/ui/action-link.tsx`, and
+`src/components/layout/section-header.tsx`, each with three or more call sites:
+
+| Lifted | Was written out in |
+|---|---|
+| `tag` — the square hairline chip | `#work`, `#research`, `#about` — the debt §9 recorded |
+| `metaLabel` — 11px tracked caps | all five sections, plus a fourth copy inside About's `dd` |
+| `SectionEyebrow` / `SectionHeader` | Hero + the four `<h2>` sections |
+| `ActionLink` — ruled label + arrow | Hero, `#work`, `#research`, `#about` |
+| `monoMeta` / `monoCaps` / `leadText` / `smallText` / `wordmark` / `arrowStep` / `colorTransition` | two to five sites each |
+
+Net −98 lines across the eight edited components.
+
+**Three real inconsistencies, not just repetition:**
+
+- **Outbound links were only marked outbound in two of six places.** `#contact`
+  and the footer set `target`, `rel="noopener noreferrer"`, and an `sr-only`
+  note; the project and research link lists set none of it. Every `href` in
+  `projects.ts` and `research.ts` is currently `null` so nothing rendered — the
+  moment a repository URL is supplied it would have swapped the tab out
+  silently. `ActionLink` now decides from the URI scheme: in-page gets `→` and
+  the same tab, outbound gets `↗`, a new tab, `rel`, and the note.
+- **The mobile menu could be stranded open at desktop.** The trigger sits in a
+  `md:hidden` wrapper but the panel is portalled to `<body>` with no breakpoint
+  of its own. Widening past `md` with the menu up left a full-screen overlay,
+  no visible control to dismiss it, and `body` still scroll-locked. A
+  `matchMedia("(min-width: 48rem)")` subscription closes it. Verified by
+  driving it: opened at 390, resized to 900, panel gone and the lock released.
+- **One link was a 21px target.** The Hero colophon's email — measured, not
+  guessed — while every other link on the page holds `min-h-11`. Now
+  `inline-flex min-h-11`.
+
+**Spacing normalised, asymmetry kept.** `#work`'s header gap was `mb-14 lg:mb-20`
+against `mb-12 lg:mb-16` in `#research` and `#about`; all three now take the
+`SectionHeader` default. The Hero's `mt-5` under the `<h1>` became `mt-4`,
+About's capability `dt` column matched `#work`'s Stack `dt` at `sm:w-24`, and
+`#research`'s link row went `gap-y-1 → gap-y-2`. Nothing that carries meaning
+changed: Selected Work still opens on `space-y-20 lg:space-y-28` between dense
+case studies while Research stays a tight ruled ledger, and `#contact` still
+takes no gap under its header because its first block carries `mt-12`.
+
+**Colour.** No token changed and none was added. The palette holds: `ink`,
+`bg`, `secondary`, `muted`, `border`, one terracotta. `--color-border` is used
+as a *text* colour in four places (nav index, project index, approach step
+numbers, research entry index) — checked, and every one is `aria-hidden`
+decoration, not content.
+
+**Data integrity.** No copy, URL, figure, date, or claim moved into a component,
+and none was invented. Everything still renders from `src/data/`. The one
+exception is unchanged and already flagged: the About statement paragraphs are
+authored connective copy, owner-pending since 5I. `profile.pending`,
+`site.pending`, and both project/research `pending` arrays are untouched.
+
+**Verified:** `npm run lint` clean, `npx tsc --noEmit` exit 0, `npm run build`
+succeeds with `/` and `/_not-found` static; then a headless-Chrome CDP pass —
+see the Phase 6C run in §7.
+
+### Phase 6D — Information Architecture · Complete
+
+- **Objective:** convert the single long page into a small multi-page
+  portfolio: `/`, `/projects`, `/projects/[slug]`, `/research`,
+  `/research/[slug]`, `/about`, `/contact`.
+- **Verified:** lint clean, `tsc --noEmit` exit 0, build emits 8 routes all
+  prerendered; then a headless-Chrome CDP pass over 9 routes × 7 widths and 24
+  keyboard/overlay checks — see the Phase 6D run in §7. Full report in
+  `Docs/PHASE_6D_REPORT.md`.
+
+**The four anchors became routes, and the data layer says so.** `NAVIGATION` in
+`site.ts` now carries paths rather than `#work`/`#research`/`#about`/`#contact`,
+and `Home` joins it — with five destinations it is one of them, not just the
+wordmark. `SectionMeta` gained an `href`, so the archive index (`00`–`04`) that
+the header, the mobile overlay, and each page opener print still resolves from
+one list; before, the header keyed that map on `#${id}`, which no longer exists.
+`getSection(href)` replaces four separate `sections.find(...)` calls.
+
+**Two labels per destination, deliberately.** `NAVIGATION.label` is the short
+form in a nav bar ("Projects", "Research"); `SECTIONS.label` is the page's own
+heading ("Selected work", "Research log"). They are separate fields rather than
+one, because collapsing them would either put "Selected work" in the nav or
+demote the page's `<h1>` to a category name.
+
+**Header and footer moved into the root layout.** They are identical on every
+route, so rendering them per page would unmount and rebuild them on each
+client-side navigation. `main#top` — the skip-link target — moved with them, so
+the skip link works on all seven routes from one definition.
+
+**The case study moved; it was not rewritten.** `ProjectDetail` in
+`components/projects/` is the body that `selected-work.tsx` used to inline:
+same fields, same order, same render-only-if-populated rule, same two
+scrollable tables with their `min-w-0` and `relative` guards intact.
+`selected-work.tsx` became the selection screen in front of it — index, title,
+summary, dataset line, flattened stack. No project copy was added, removed, or
+edited in either file.
+
+**Research split the same way**, into `research-log.tsx` (the ledger) and
+`components/research/research-detail.tsx`. `STATUS_LABEL` and `SETTLED` moved to
+`components/research/status.ts` because both now need them, and two copies of a
+status vocabulary would disagree the first time one was reworded.
+
+**A research detail page is mostly empty, and says so.** Both entries are
+venue-only — `title`, `conference.name`, `topic`, `contribution`, `projectSlug`,
+and `links` are all `null`. The page renders each field only when present and,
+when the venue and year are the whole entry, prints one line saying exactly
+that. No abstract, no placeholder title, no invented status. The same markup
+becomes a real paper page the moment any field lands.
+
+**Slugs come from the data, not from the brief.** The Phase 6D brief named the
+routes `/projects/thoraxvision` and `/projects/melonvision-ai`. `projects.ts`
+records `tuberculosis-detection` and `melon-detection`, and the brief's own rule
+is that the data layer wins — so those are the routes. The renaming is real
+owner input and it is sitting in the untracked `Docs/Detail.txt`; it is a
+content-ingestion job, not an IA job. See §8.
+
+**`dynamicParams = false`.** Both dynamic segments enumerate their slugs through
+`generateStaticParams` and refuse anything else, so an unknown slug is a 404
+rather than a request-time render of a project that does not exist. All four
+detail pages are prerendered at build.
+
+**`ActionLink` learned the difference between a route and a URL.** Internal
+hrefs now go through `next/link`; outbound ones stay a plain `<a>` with
+`target`, `rel`, and the `sr-only` note the scheme check already decided. This
+matters more than a normal SPA nicety here: a full document request on every
+in-site move would tear down and rebuild the Lanyard's WebGL context.
+`BackLink` is its mirror for detail pages — arrow leading, stepping backwards,
+set in `monoCaps` so leaving the page does not compete with the page.
+
+**The mobile menu is now open *for a path*.** Its links navigate rather than
+scroll, so the overlay has to come down on the way out — including on a back
+gesture the click handler never sees. The first attempt was
+`useEffect(() => setOpen(false), [pathname])`, which `react-hooks/set-state-in-effect`
+correctly rejected: it closes one render late and would flash the menu open for
+a frame on `history.back()`. Storing the path the menu was opened on
+(`openForPath === pathname`) closes it on the same render with no effect at all.
+Verified by driving it: open at 390, `history.back()`, overlay gone and the
+scroll lock released.
+
+**`SectionHeader` gained `level`.** The four openers that were `<h2>` under the
+Hero's `<h1>` are now the only heading on their own page. A prop, not a second
+component — two components that must stay identical below the heading tag would
+only drift.
+
+**New on the homepage: an Index.** With every section moved out, `/` ended at
+the Hero's colophon with no way onward but five small labels in the header. The
+Index is the same destinations at full size, in the same numbering, with one
+factual line each read from the data — `2 projects`, `2 venues confirmed`, the
+education field, the availability line. No description is written in the
+component.
+
+**A styled 404.** `app/not-found.tsx` renders inside the root layout, so an
+unknown slug keeps the header, the footer, and a way back instead of dropping
+the reader on a bare error screen.
+
+**Data integrity.** No copy, figure, URL, date, or claim was invented. The three
+new prose strings are all connective and marked as such in the source: the
+Projects standfirst (written deliberately count-agnostic), the venue-only note
+on a research entry, and the 404 copy. Every `pending` array is untouched.
+
+### Not done in this phase
+
+No Lanyard change of any kind. No new dependency. No token, palette, or type
+scale change. No content edit to `projects.ts`, `research.ts`, or `profile.ts`
+beyond one added lookup helper. `Docs/Detail.txt` was read but deliberately not
+ingested — see §8.
+
+### Owner decisions applied · 2026-09-19 · Complete
+
+Five decisions confirmed by the owner, applied as one commit on top of
+`ea35364`. Content-only; no route, component structure, token, or Lanyard
+change, no dependency, and no other item from `Docs/Detail.txt` ingested.
+
+| Decision | Where it landed |
+|---|---|
+| Email → `alifalvareezi1@gmail.com` | `profile.contact[0]` — Hero colophon, Contact, mobile overlay all read from it |
+| Tuberculosis project → **ThoraxVision**, `/projects/thoraxvision`, live at `https://thoraxvision.site/` | `projects.ts`: `slug`, `title`, `links: [{ label: "Live", … }]` |
+| Melon project → **MelonVision AI**, `/projects/melonvision-ai` | `projects.ts`: `slug`, `title` |
+| Location → **Kota Cirebon, West Java, Indonesia** | `profile.location` — Hero, About, footer, root and `/about` metadata |
+| Research percentage results not displayed for now | `SHOW_MODEL_RESULTS = false` in `components/projects/project-detail.tsx`; the `models` arrays in `projects.ts` are byte-identical |
+
+Slugs come from the data layer, so the route files did not change — only their
+comments. `nav-links.ts`, `about.tsx`, `project-detail.tsx`, the README tree,
+and the two empty `public/images/projects/` folders were updated to the new
+names. The historical `tuberculosis-detection` / `melon-detection` slugs are
+not redirected: nothing was ever published at them.
+
+**Not applied, still in `Docs/Detail.txt`:** the MelonVision repository URL,
+year, and architecture; both paper titles, full conference names, topics,
+author positions, and research repository URLs; the long-form about copy. All
+remain in the `pending` arrays for Phase 6E.
+
+---
+
+## 4. Current Portfolio Architecture
+
+```
+src/
+├── app/                    One file per route (Phase 6D)
+│   ├── layout.tsx          Root layout; fonts, title template, header/main/footer
+│   ├── page.tsx            /            Hero + Index
+│   ├── not-found.tsx       404          Styled, inside the layout
+│   ├── projects/
+│   │   ├── page.tsx        /projects            → SelectedWork
+│   │   └── [slug]/page.tsx /projects/[slug]     → ProjectDetail (SSG, 2 slugs)
+│   ├── research/
+│   │   ├── page.tsx        /research            → ResearchLog
+│   │   └── [slug]/page.tsx /research/[slug]     → ResearchDetail (SSG, 2 slugs)
+│   ├── about/page.tsx      /about               → About
+│   ├── contact/page.tsx    /contact             → Contact
+│   ├── globals.css         Entire design system (@theme + base layer)
+│   └── favicon.ico
+├── components/
+│   ├── layout/             Structural shell
+│   │   ├── page-container.tsx   Max-width + page margin (server)
+│   │   ├── section.tsx          Semantic section + vertical rhythm (server)
+│   │   ├── site-header.tsx      Sticky header + skip link + wordmark (server)
+│   │   ├── primary-nav.tsx      Desktop nav; aria-current (client, Phase 6D)
+│   │   ├── mobile-nav.tsx       Full-screen overlay menu (client)
+│   │   ├── site-footer.tsx      Identity, nav, socials, © (server, 5J)
+│   │   ├── section-header.tsx   Eyebrow + h1/h2 via `level` (server, 6C/6D)
+│   │   └── nav-links.ts         Re-exports NAVIGATION; `isActiveHref`
+│   ├── sections/           Page bodies
+│   │   ├── hero.tsx             Hero composition (server)
+│   │   ├── site-index.tsx       Homepage directory (server, Phase 6D)
+│   │   ├── selected-work.tsx    /projects index (server)
+│   │   ├── research-log.tsx     /research ledger (server)
+│   │   ├── about.tsx            /about profile (server)
+│   │   └── contact.tsx          /contact channels (server)
+│   ├── projects/
+│   │   └── project-detail.tsx   Full case study + results tables (Phase 6D)
+│   ├── research/
+│   │   ├── research-detail.tsx  One entry, every field optional (Phase 6D)
+│   │   └── status.ts            STATUS_LABEL / SETTLED, shared by both views
+│   ├── ui/                      Cross-section primitives (Phase 6C)
+│   │   ├── styles.ts            Shared class strings (3+ call sites each)
+│   │   ├── action-link.tsx      Ruled action; next/link vs <a> by scheme
+│   │   └── back-link.tsx        Return path out of a detail page (Phase 6D)
+│   └── lanyard/                 Isolated 3D bundle
+│       ├── lanyard-wrapper.tsx  WebGL probe + error boundary (client)
+│       ├── lanyard-canvas.tsx   R3F scene, physics, band (client)
+│       └── card-artwork.ts      Runtime canvas textures
+├── data/                   Typed content layer (Phase 5E)
+│   ├── profile.ts               Owner identity, capabilities, contact
+│   ├── projects.ts              Tuberculosis + Melon case-study data
+│   ├── research.ts              ICWT 2026 / ICSMech 2026 entries
+│   └── site.ts                  Site config, NAVIGATION, SECTIONS
+├── lib/utils.ts            cn()
+└── types/index.ts          Content interfaces consumed by data/
+
+public/
+├── fonts/                  5 self-hosted variable woff2 files
+└── lanyard/card.glb        159 KB, geometry only (as committed — see §8)
+```
+
+Architectural rules currently holding:
+
+1. Server Components by default; client only where interaction demands it.
+2. The 3D stack is fully isolated under `components/lanyard/` and dynamically
+   imported.
+3. All design values come from tokens — no hard-coded colours or sizes in
+   components.
+4. `sections/` holds page bodies and `layout/` reusable structure; a
+   `components/<domain>/` folder (`projects/`, `research/`) holds the views
+   for one content type when it has both an index and a detail page.
+   A `page.tsx` under `app/` resolves the route and its metadata and renders
+   one component — it never holds project or research content itself.
+5. Content lives in `data/`, typed by `types/index.ts`; components receive it
+   as props rather than embedding copy.
+6. A class string or markup pattern is lifted into `ui/` only at three or more
+   call sites (Phase 6C). Anything used once stays local to its section, with a
+   comment saying why — the Hero's filled CTA and the Contact email's larger
+   underline are both deliberately not shared.
+
+---
+
+## 5. Lanyard Implementation
+
+### Origin
+
+Adapted from the **React Bits** Lanyard component (TypeScript + Tailwind
+variant). React Bits is not an npm package — the source is copied into the
+project and maintained here.
+
+### Layering
+
+```
+Hero (server)
+└── LanyardWrapper (client)
+    ├── WebGL probe → LanyardFallback when unsupported
+    └── LanyardErrorBoundary
+        └── LanyardCanvas (dynamic, ssr: false)
+            └── Canvas → Suspense → Physics → Band
+```
+
+### Three.js / R3F / Rapier
+
+- `<Canvas>` at camera `[0, 0, 20]`, `fov: 20`, transparent clear colour.
+- Physics: gravity `[0, -40, 0]`; three `BallCollider` rope segments chained by
+  `useRopeJoint` (length 1 each) from a fixed anchor, then a `useSphericalJoint`
+  to the card's `CuboidCollider`.
+- Dragging switches the card body to `kinematicPosition` and unprojects the
+  pointer onto the camera plane.
+- The card mesh, clip, and clamp come from `card.glb`; the strap is a `meshline`
+  `MeshLineGeometry` fed each frame from a chordal `CatmullRomCurve3`.
+- Mobile tuning: DPR capped at 1.5, physics timestep 1/30, 16 curve samples
+  instead of 32.
+- The card is `meshStandardMaterial`, roughness 0.85, no metalness and no
+  clearcoat (Phase 6B). Lighting is `ambientLight` 1.95 plus two Lightformers
+  inside an `Environment` at `resolution={64}`.
+- The whole canvas stops when the hero leaves the viewport: an
+  `IntersectionObserver` on the slot switches `frameloop` to `"never"` and
+  pauses `<Physics>` (Phase 6B).
+
+### Custom card artwork (`card-artwork.ts`)
+
+The card face is **drawn at runtime on a 2D canvas** and handed to Three.js as a
+`CanvasTexture`, rather than shipped as an image. It reads the live design
+tokens via `getComputedStyle`, so the credential stays in sync with
+`globals.css` and adds no binary asset to the bundle.
+
+- UV footprints were measured from the model's `TEXCOORD_0` accessor: front face
+  on the left half of the texture, back on the right. Created with
+  `flipY = false` to match the glTF convention.
+- Card texture 1600×1484; letter-spacing applied glyph-by-glyph so tracking is
+  identical across browsers and measurable for auto-fitting.
+- Front: name, terracotta rule, role, focus lines, hairline footer. Top ~14% is
+  left clear because the metal clamp sits over it.
+- Textures are repainted once `document.fonts.ready` resolves, so the card never
+  ships with fallback fonts.
+
+### Strap customisation
+
+512×128 tiling band: solid `--color-secondary` webbing with two hairline
+stripes at 26% and 74%, symmetric so it tiles seamlessly at any repeat. Drawn
+from the same tokens. It was ink until Phase 6B, which gave the strap more
+tonal weight than the card and inverted the intended hierarchy.
+
+### Model
+
+`card.glb` was stripped of its embedded branded texture: **2.4 MB → 159 KB**.
+Only geometry (`card`, `clip`, `clamp`) and the `base` / `metal` material slots
+remain; `base` is overridden with the runtime texture. Verified by parsing the
+GLB JSON chunk — all node and material names the code depends on are intact.
+
+That 159 KB model is what is **committed** at `5f6db14`. The working tree
+currently holds the 2.4 MB 5D-2 model instead — see §8.
+
+### WebGL fallback
+
+R3F creates its renderer asynchronously, so a missing WebGL context rejects a
+promise rather than throwing during render — an error boundary would never see
+it, leaving a dead canvas. A synchronous probe runs up front via
+`useSyncExternalStore`, whose `getServerSnapshot` returns `false`, so the quiet
+fallback renders on the server and through hydration, then flips to the scene
+once support is confirmed. The fallback itself is a thin rule and a terracotta
+dot — deliberately quiet, not an error message.
+
+### Reduced motion
+
+Under `prefers-reduced-motion: reduce`: `frameloop` switches to `"demand"`,
+`<Physics>` is `paused`, rigid bodies use a settled `STILL_SEED` instead of the
+swinging `LIVE_SEED`, pointer handlers are removed entirely, and a `SettleFrames`
+helper requests frames for 2.5s so the environment map, model, and band all land
+in the single still image the user is left with.
+
+### Important decisions
+
+- **The `<Suspense>` boundary inside `<Canvas>` is load-bearing.** `<Physics>`
+  suspends on Rapier's WASM and `useGLTF` suspends on the model. Without an
+  inner boundary that suspension reaches R3F's own `Block` fallback, which makes
+  the `Canvas` component itself throw the promise; remounting it runs
+  `unmountComponentAtNode → renderer.dispose → forceContextLoss` while
+  `configure()` is still in flight, and under Strict Mode the renderer ends up
+  permanently disposed — a live `<canvas>` with a dead context.
+- **Ambient light is `intensity={1}`, not `Math.PI`.** The stock value suits the
+  original metallic card; on a matte card that also picks up the environment it
+  blew the face out to the same brightness as the page.
+
+### Strap smoothing bug — found and fixed
+
+**Symptom:** the lanyard appeared on load, then the strap vanished within
+seconds.
+
+**Root cause:** the band's smoothing lerp was frame-rate unstable. The chase
+factor is `delta * 50`, and `THREE.Vector3.lerp` does not clamp its alpha — so
+any frame slower than 20 ms pushed the factor above 1 and threw the control
+point *past* its target instead of toward it. `clampedDistance` then saturated
+at its own ceiling of 1, leaving the factor at `delta * 50` again, so the error
+compounded rather than corrected. One slow frame walked the strap's control
+points out to ~1e15, where the band left the frustum permanently.
+
+**Why 5D-3 exposed it:** the bug is inherited from the upstream React Bits
+component and was latent in 5D-2. The new inner `<Suspense>` boundary keeps the
+Canvas mounted, which means R3F's render loop is already ticking while Rapier's
+WASM and the model are still landing on the main thread. Measured on the same
+machine and browser:
+
+| Rendering path | max `delta` | outcome |
+|---|---|---|
+| Without inner Suspense (5D-2 path) | 0.043 s | stable |
+| With inner Suspense (5D-3) | 2.07 s at frame 7 | overshoot at frame 3 (alpha 6.26) → diverged |
+
+**Fix** — one line in `lanyard-canvas.tsx`:
+
+```ts
+lerped.lerp(
+  ref.current.translation(),
+  Math.min(1, delta * (minSpeed + clampedDistance * (maxSpeed - minSpeed))),
+);
+```
+
+Capping the factor at 1 keeps every step a convex combination of the two points:
+it can approach the target but never overshoot. At 60 fps the factor is 0.83, so
+normal-speed behaviour is unchanged.
+
+Ruled out during diagnosis, each with evidence: `card-artwork` (divergence
+persisted with 8×8 stub textures), `document.fonts.ready`, the WebGL probe
+(`false → true` only, never back), reduced motion (`false` throughout), React
+remount/keys (each component mounts once), and texture disposal.
+
+---
+
+## 6. Design System
+
+All values below are read from `src/app/globals.css`.
+
+### Fonts
+
+Three self-hosted variable families, loaded with `next/font/local` from
+`public/fonts/` at weight range `100 900`, `display: swap`.
+
+| Role | Family | Used for |
+|---|---|---|
+| `--font-display` | Fraunces (+ italic) | Hero name, headings, editorial statements |
+| `--font-sans` | DM Sans (+ italic) | Body copy, navigation, UI labels |
+| `--font-mono` | JetBrains Mono | Metadata, index numbers, technical labels |
+
+### Colour — "Warm Archive"
+
+Restrained warm-neutral palette with a single terracotta accent. Contrast
+ratios are against `--color-bg`.
+
+| Token | Value | Contrast |
+|---|---|---|
+| `--color-bg` | `#F6F2EB` | warm off-white, page background |
+| `--color-surface` | `#EDE9E1` | section alternation, insets |
+| `--color-ink` | `#1B1815` | 15.84:1 (AAA) |
+| `--color-secondary` | `#6B6560` | 5.15:1 (AA) |
+| `--color-muted` | `#726C66` | 4.64:1 (AA) |
+| `--color-border` | `#D5D0C8` | pencil-line rules |
+| `--color-accent` | `#9E4F35` | 5.19:1 (AA) |
+| `--color-accent-hover` | `#7E3E28` | 7.22:1 (AAA) |
+| `--color-selection` | `#9E4F3526` | terracotta @ ~15% |
+
+### Typographic scale
+
+Fluid via `clamp()`, no JS. `--text-hero` `clamp(3.5rem, 9vw, 6.25rem)`
+(56→100px), `--text-display` (40→72px), `--text-h1` (36→56px), `--text-h2`
+(26→38px), `--text-h3` (20→26px); fixed `--text-body-lg` 18px, `--text-body`
+16px, `--text-small` 14px, `--text-meta` 12px, `--text-label` 11px,
+`--text-stat` 28px.
+
+Line heights run tight-to-open: `--leading-hero` 0.9 → `--leading-relaxed` 1.7.
+Tracking: `--tracking-tight` `-0.02em` for display type, `--tracking-label`
+`0.1em` for uppercase labels, `--tracking-mono` `0.02em`.
+
+### Layout & motion
+
+`--container-max` 80rem (1280px), `--container-text` 42.5rem (680px reading
+column), `--container-pad` `clamp(1.25rem, 5vw, 5rem)`. Section rhythm
+`--spacing-section` `clamp(4rem, 10vw, 8rem)`.
+
+Radii are deliberately minimal — `--radius-sm` 4px is the maximum, keeping the
+feel editorial rather than app-like. Easing pairs `--ease-standard` with
+`--ease-editorial` `cubic-bezier(0.16, 1, 0.3, 1)`; durations 150 / 250 / 300ms.
+
+### Visual direction
+
+Editorial print sensibility applied to an engineering subject: generous white
+space, hairline rules, tracked-out mono metadata, index numbers as a structural
+motif, asymmetric grids, and exactly one accent colour used sparingly.
+
+---
+
+## 7. Verification
+
+Latest run, 2026-08-23, on `fix/lanyard-5d3-regression` with the strap fix
+applied.
+
+| Check | Result |
+|---|---|
+| `npm run lint` | Clean — no output, no warnings |
+| `npx tsc --noEmit` | Exit 0 |
+| `npm run build` | Exit 0 — compiled in 49s, TypeScript 17.3s, 4/4 static pages, routes `/` and `/_not-found` both static |
+
+### Browser verification — performed
+
+Driven through the Chrome DevTools Protocol against real headless Chrome
+(ANGLE/SwiftShader), measuring dark-pixel coverage in the lanyard column
+decoded from screenshots.
+
+| Test | Result |
+|---|---|
+| 16s persistence @ 1440×900 | `9137 → 12532 → 12367 → 12340 → 12332 → 12317 → 12313 → 12313` — settles by t=4s, flat thereafter |
+| Drag | 13651 during drag, 12415 three seconds after release; card follows pointer, strap tracks, physics recovers |
+| Resize | 1100×800 → 11076; back to 1440×900 → 12319 |
+| Mobile 390×844, fresh load | 11529 — strap and card both present |
+| Console errors | **None.** The pre-fix `computeBoundingSphere(): radius is NaN` spam (558 occurrences) is gone |
+
+Screenshots confirmed the strap renders from anchor to clip with the card
+hanging below, at load, after 16s, during drag, and on mobile.
+
+### Phase 5E run - 2026-08-24
+
+Data layer only; no runtime behaviour changed, so no browser re-verification
+was required.
+
+| Check | Result |
+|---|---|
+| `npm run lint` | Clean - no output, no warnings |
+| `npx tsc --noEmit` | Exit 0 |
+| `npm run build` | Exit 0 - compiled 31.3s, TypeScript 9.3s, 4/4 static pages, routes `/` and `/_not-found` both static |
+
+**Caveats:**
+
+- Verification ran under SwiftShader software rendering, not a hardware GPU.
+  Behaviour on real GPU hardware has not been separately confirmed.
+- All three command checks and the browser run were performed against the
+  committed 159 KB `card.glb`. The `public/lanyard/` asset change described in
+  §8 landed afterwards and has not been re-verified.
+
+### Phase 5F run — 2026-08-25
+
+| Check | Result |
+|---|---|
+| `npm run lint` | Clean — no output, no warnings |
+| `npx tsc --noEmit` | Exit 0 |
+| `npm run build` | Exit 0 — compiled 12.3s, TypeScript 2.7s, 4/4 static pages, routes `/` and `/_not-found` both static |
+
+#### Responsive — seven widths, real headless Chrome over CDP
+
+Driven against `next start` (production build, port 3111) in headless Chrome
+with SwiftShader, measuring live `getBoundingClientRect()` geometry rather than
+reading screenshots. Each width was a fresh navigation with a 4s settle so the
+dynamic import, Rapier WASM, and the model had all landed.
+
+| Width | `scrollWidth` / `clientWidth` | Overflow | Navigation | Canvas | Text ↔ Lanyard |
+|---|---|---|---|---|---|
+| 1440 | 1425 / 1425 | none | desktop, 4 links | 405×688 | 32px clear |
+| 1280 | 1265 / 1265 | none | desktop, 4 links | 411×688 | 32px clear |
+| 1024 | 1009 / 1009 | none | desktop, 4 links | 310×688 | 32px clear |
+| 768  | 753 / 753   | none | desktop, 4 links | 691×452 | stacked, 16px clear |
+| 430  | 430 / 430   | none | Menu button      | 387×452 | stacked, 16px clear |
+| 390  | 390 / 390   | none | Menu button      | 350×452 | stacked, 16px clear |
+| 375  | 375 / 375   | none | Menu button      | 335×452 | stacked, 16px clear |
+
+- **No horizontal overflow at any width.** The document was also swept element
+  by element for any box crossing the viewport edge; the worst offender was
+  `null` at all seven widths.
+- **Navigation stays usable.** The desktop list is visible and complete from
+  768 up; below that it is replaced by the Menu button. Nav links measure 50px
+  tall and the wordmark 44px, so both clear the 44px touch minimum at the 768
+  breakpoint where the desktop nav is still shown on a touch device.
+- **Hero text never collides with the Lanyard.** From `lg` up the two are
+  separate grid columns with 32px between the widest line of hero text and the
+  left edge of the canvas. Below `lg` they stack, with the canvas's `-top-8`
+  bleed landing inside the 48px grid gap and leaving 16px of clearance under
+  the CTAs.
+- **Both CTAs stay accessible.** 44px tall at every width; at 390 and 375 they
+  wrap to two rows rather than shrinking.
+- **The Lanyard renders at every width.** Screenshots at 1440, 1280, 1024, 768,
+  and 390 all show the strap running from the anchor to the clip with the card
+  hanging below.
+
+#### Accessibility — measured, not asserted
+
+| Check | Result |
+|---|---|
+| Skip link | First Tab stop on a fresh load; `<a href="#top">`, visible on focus |
+| Heading hierarchy | Exactly one `h1` on the page; no skipped levels (the four empty anchor sections carry `aria-label`, not headings) |
+| Landmarks | `header` / `nav[aria-label="Primary"]` / `main#top` / `footer`; the overlay is `nav[aria-label="Mobile"]` inside `role="dialog"` |
+| Mobile menu | Opens with `aria-expanded="true"`, `role="dialog"`, `aria-modal="true"`; focus moves to Close; body scroll locked |
+| Focus trap | Nine Tab presses from open — Close → 01 Work → 02 Research → 03 About → 04 Contact → Email → LinkedIn → GitHub → Close. Focus never left the panel |
+| Escape | Closes the panel, returns focus to the trigger, releases the scroll lock |
+| Touch targets | Every focusable element in the overlay measured 44px or taller (44 / 83 / 83 / 83 / 83 / 44 / 44 / 44) |
+| Reduced motion | Under `prefers-reduced-motion: reduce` the canvas still paints a settled 405×688 still image, the quiet fallback does not take over, and there is no overflow |
+| Console | Zero errors across all seven widths and the reduced-motion run |
+
+**Caveats:**
+
+- Software rendering again. The Lanyard was exercised under SwiftShader, not
+  a hardware GPU.
+- This run was against the **2.4 MB** `card.glb` currently in the working
+  tree, not the committed 159 KB model (§8). The scene renders from either,
+  since the card face is drawn at runtime.
+
+### Phase 5G run — 2026-08-25
+
+| Check | Result |
+|---|---|
+| `npm run lint` | Clean — no output, no warnings |
+| `npx tsc --noEmit` | Exit 0 |
+| `npm run build` | Exit 0 — 4/4 static pages, routes `/` and `/_not-found` both static |
+
+#### Responsive — seven widths, real headless Chrome over CDP
+
+Against `next start` (production build) in headless Chrome, measuring live
+geometry. Each width was a fresh navigation with a 4s settle.
+
+| Width | `scrollWidth` / `clientWidth` | Overflow | Entries | Title | Results tables | Table scroll |
+|---|---|---|---|---|---|---|
+| 1440 | 1425 / 1425 | none | 2 | 38px | 2 (3 + 6 rows) | not needed |
+| 1280 | 1265 / 1265 | none | 2 | 38px | 2 | not needed |
+| 1024 | 1009 / 1009 | none | 2 | 30.7px | 2 | not needed |
+| 768  | 753 / 753   | none | 2 | 26px | 2 | not needed |
+| 430  | 430 / 430   | none | 2 | 26px | 2 | scrolls in place |
+| 390  | 390 / 390   | none | 2 | 26px | 2 | scrolls in place |
+| 375  | 375 / 375   | none | 2 | 26px | 2 | scrolls in place |
+
+- **No horizontal overflow at any width**, confirmed two ways: `scrollWidth`
+  equals `clientWidth` at all seven, and an element-by-element sweep found no
+  box crossing the viewport edge that was not clipped by an ancestor.
+- **Typography stays readable.** The summary holds 18px at `1.7` leading
+  throughout, measuring roughly 85 characters per line at 1440 down to 37 at
+  375 — inside a comfortable measure at both ends. Titles scale 38 → 26px and
+  the ghosted index numeral 72 → 40px, so the index never competes with the
+  title on a narrow screen.
+- **Hierarchy holds.** At every width each entry renders, in order: index,
+  discipline/context metadata, title, summary, then the five (or four) labelled
+  technical blocks. Below `md` the two technical columns stack rather than
+  compressing.
+- **Metrics tables scroll themselves.** At 375 the model-comparison table is
+  544px inside a 335px port; it scrolls in place, is reachable by keyboard, and
+  the page does not overflow while it is scrolled.
+
+#### `#work` anchor and keyboard
+
+| Check | Result |
+|---|---|
+| Nav anchor | Clicking `01 Work` sets `#work` and lands the section top at 80px against a 65px sticky header — clear, with the `h2` visible |
+| Heading hierarchy | `h1` Alif Reezi → `h2` Selected work → `h3` per project → `h4` per block. One `h1`, no skipped levels |
+| Landmark naming | `#work` is named by `aria-labelledby="work-heading"` — the visible heading, not a duplicated string |
+| Tab order | Both table scroll regions are reachable, in document order, each with a visible 2px focus outline |
+| Table semantics | `<caption>`, `scope="col"` on headers, `scope="row"` on the model name in every row |
+| Blank figures | The two `null` metrics render `—` with an `sr-only` "Not recorded" |
+| Console | Zero errors at all seven widths |
+
+#### Two defects found and fixed during this run
+
+Both were found by measurement, not by reading the diff, and both are the kind
+that look fine in a screenshot at one width.
+
+1. **`sr-only` escaped the table's scroll container.** At 375 the document's
+   `scrollWidth` was 557 against a 375 viewport. No unclipped element appeared
+   to overflow, and `body.scrollWidth` was a clean 375 — only
+   `documentElement.scrollWidth` was wrong. Cause: Tailwind's `sr-only` is
+   `position: absolute`, and an absolutely positioned box is clipped by an
+   ancestor's overflow only if that ancestor is in its containing block chain.
+   With no positioned ancestor, the "Not recorded" labels resolved against the
+   initial containing block, escaped the scroll port, and were laid out at
+   their static position — which for the last column of a 608px table sits far
+   past a 375px viewport. Adding `relative` to the scroll container took
+   `scrollWidth` from 557 to 360.
+
+2. **`inline-block` is not safe in this design system.** Every stack tag was
+   rendering at exactly 48px regardless of its text, so `DenseNet121` spilled
+   out of its own border and collided with the tag beside it. It was not a
+   flex problem — the width survived `shrink-0`, `flex-basis`, and switching
+   the container to plain inline flow. The generated stylesheet had **two**
+   rules: `.inline-block{display:inline-block}` and
+   `.inline-block{inline-size:var(--spacing-block)}`. Because `globals.css`
+   defines `--spacing-block` in `@theme`, Tailwind 4 also reads `inline-block`
+   as the `inline-*` sizing utility with the `block` spacing key, and the
+   second rule wins on source order — `clamp(2rem, 5vw, 3rem)` is exactly 48px
+   at 1440. Dropping the class fixed it; the span is a flex child and was
+   blockified anyway. See §11.
+
+**Caveats:**
+
+- Software rendering (SwiftShader), as with every previous browser run here.
+- Run against the 2.4 MB `card.glb` in the working tree, not the committed
+  159 KB model (§8). Phase 5G does not touch the Lanyard either way.
+
+### Phase 5H run — 2026-08-25
+
+| Check | Result |
+|---|---|
+| `npm run lint` | Clean — no output, no warnings |
+| `npx tsc --noEmit` | Exit 0 |
+| `npm run build` | Exit 0 — 4/4 static pages, routes `/` and `/_not-found` both static |
+
+#### Responsive — seven widths, real headless Chrome over CDP
+
+Against `next start` (production build) in headless Chrome, measuring live
+geometry. Fresh navigation and a 4s settle per width.
+
+| Width | `scrollWidth` / `clientWidth` | Overflow | Rows | `h2` | Venue `h3` | Status |
+|---|---|---|---|---|---|---|
+| 1440 | 1425 / 1425 | none | 2 | 72px | 26px | one line |
+| 1280 | 1265 / 1265 | none | 2 | 72px | 26px | one line |
+| 1024 | 1009 / 1009 | none | 2 | 61.4px | 25.6px | one line |
+| 768  | 753 / 753   | none | 2 | 46.1px | 20px | one line |
+| 430  | 430 / 430   | none | 2 | 40px | 20px | one line |
+| 390  | 390 / 390   | none | 2 | 40px | 20px | one line |
+| 375  | 375 / 375   | none | 2 | 40px | 20px | one line |
+
+- **No horizontal overflow at any width.** `scrollWidth` equals `clientWidth`
+  at all seven, and an element sweep — skipping boxes clipped by an ancestor,
+  the refinement §11 calls for — found no offender at any width.
+- **Titles stay readable.** The standfirst holds 18px at `1.7` throughout. The
+  venue heading scales 26 → 20px and the year rail sits beside it in mono, so
+  the ledger keeps its register reading from 1440 down to 375, stacking below
+  `sm` rather than compressing.
+- **Status fits on one line at every width.** It did not initially: at 1440 the
+  longest label measures ~277px against a three-column track of ~260px and
+  broke across "DETAILS TO / FOLLOW". The status track was widened to four
+  columns and the content track narrowed to six.
+
+#### Long-title wrapping
+
+Every `title` in the data is `null`, so wrapping was exercised by injecting a
+real title into the DOM at runtime — the CSS is tested without inventing
+content in the repo.
+
+| Width | 133-char title | 85-char unbroken token |
+|---|---|---|
+| 1440 | 4 lines, no column or page overflow | contained, no page overflow |
+| 768  | 4 lines, no column or page overflow | contained, no page overflow |
+| 375  | 5 lines, no column or page overflow | contained, no page overflow |
+
+The heading is capped at `34ch` and carries `break-words`, so an unbroken
+token — a long compound or a pasted identifier — breaks inside the column
+rather than widening the document.
+
+#### Anchor, keyboard, focus, reduced motion
+
+| Check | Result |
+|---|---|
+| `#research` anchor | Clicking `02 Research` sets the hash and lands the section top at 80px against a 65px sticky header; the `h2` is visible |
+| Landmark naming | `aria-labelledby="research-heading"` — the visible heading |
+| Heading hierarchy | `h1` → `h2` Research log → `h3` ICWT / ICSMech / Method. No skipped levels; still exactly one `h1` on the page |
+| Tab order | The section has **zero** focusable elements today, because no entry has a resolvable link. Tab passes cleanly through it, which is the honest outcome, not a defect |
+| Focus state | Verified against an injected link: reachable by real Tab keypresses at stop 12, `:focus-visible` matches, outline `2px solid rgb(158, 79, 53)` — `--color-accent` — at 2px offset, and the link measures 44px tall |
+| Reduced motion | Under `prefers-reduced-motion: reduce` every transition in the section collapses to `0.001s` via the global net; the section renders in full with no overflow |
+| Console | Zero errors at all seven widths |
+
+Note on method: an earlier focus check used `element.focus()` and reported
+`outline-style: none`. That was correct behaviour, not a bug — `globals.css`
+sets `:focus:not(:focus-visible) { outline: none }`, and a programmatic focus
+does not satisfy Chrome's `:focus-visible` heuristic. Only a real Tab keypress
+proves the ring, so the check was redone that way.
+
+**Caveats:**
+
+- Software rendering (SwiftShader), as with every previous browser run here.
+- Run against the 2.4 MB `card.glb` in the working tree, not the committed
+  159 KB model (§8). Phase 5H does not touch the Lanyard.
+
+### Phase 5I run — 2026-08-25
+
+| Check | Result |
+|---|---|
+| `npm run lint` | Clean — no output, no warnings |
+| `npx tsc --noEmit` | Exit 0 |
+| `npm run build` | Exit 0 — 4/4 static pages, routes `/` and `/_not-found` both static |
+
+#### Responsive — seven widths, real headless Chrome over CDP
+
+Against `next start` (production build) in headless Chrome, measuring live
+geometry. Fresh navigation and a 4s settle per width.
+
+| Width | `scrollWidth` / `clientWidth` | Overflow | Statement measure | Tags | Links |
+|---|---|---|---|---|---|
+| 1440 | 1425 / 1425 | none | 640px, ~71 cpl | 14, none clipped | 2 |
+| 1280 | 1265 / 1265 | none | 640px, ~71 cpl | 14, none clipped | 2 |
+| 1024 | 1009 / 1009 | none | 516px, ~57 cpl | 14, none clipped | 2 |
+| 768  | 753 / 753   | none | 640px, ~71 cpl | 14, none clipped | 2 |
+| 430  | 430 / 430   | none | 387px, ~43 cpl | 14, none clipped | 2 |
+| 390  | 390 / 390   | none | 350px, ~39 cpl | 14, none clipped | 2 |
+| 375  | 375 / 375   | none | 335px, ~37 cpl | 14, none clipped | 2 |
+
+- **No horizontal overflow at any width.** `scrollWidth` equals `clientWidth`
+  at all seven, and an element sweep — skipping boxes clipped by an ancestor,
+  per §11 — found no offender.
+- **Text stays readable.** Both statement paragraphs hold 18px at `1.7`
+  leading. The measure was capped at `52ch` after a first pass measured ~75
+  characters per line at 768, where the two-column grid collapses and the
+  paragraph would otherwise take the full container; capped, the widest case
+  is ~71. The cap matches the Research standfirst, since both are
+  section-opening statements.
+- **14 capability tags render, none clipped** — Model (6), Build (4), Deploy
+  (4). The Research group is correctly absent; it stays in `#research`.
+- **The Background list renders all three rows** — Education (with the
+  `Completed` status beneath), Roles (all three), Based in — at every width,
+  stacking below `lg`.
+
+#### Anchor, keyboard, focus, reduced motion
+
+| Check | Result |
+|---|---|
+| `#about` anchor | Clicking `03 About` sets the hash and lands the section top at 80px against a 65px sticky header; the `h2` is visible |
+| In-section link | The `#research` pointer actually navigates — hash becomes `#research` and the target lands at 80px, clear of the header |
+| Landmark naming | `aria-labelledby="about-heading"` — the visible heading |
+| Heading hierarchy | `h1` → `h2` About → `h3` Background / Capabilities. No skipped levels; still exactly one `h1` on the page |
+| Keyboard | Both links reachable by real Tab keypresses, in document order |
+| Focus states | Both match `:focus-visible` and paint a 2px solid accent outline at 2px offset |
+| Target size | `Get in touch` is 44px tall. The inline `Research log` link is 21px — it sits inside a sentence, which WCAG 2.5.8 exempts, and boxing it out to 44px would break the prose it belongs to |
+| Reduced motion | Under `prefers-reduced-motion: reduce` every transition in the section collapses to `0.001s` via the global net; the section renders in full with no overflow |
+| Console | Zero errors at all seven widths |
+
+**Caveats:**
+
+- Software rendering (SwiftShader), as with every previous browser run here.
+- Run against the 2.4 MB `card.glb` in the working tree, not the committed
+  159 KB model (§8). Phase 5I does not touch the Lanyard.
+
+### Phase 5J run — 2026-08-25
+
+| Check | Result |
+|---|---|
+| `npm run lint` | Clean — no output, no warnings |
+| `npx tsc --noEmit` | Exit 0 |
+| `npm run build` | Exit 0 — 4/4 static pages, routes `/` and `/_not-found` both static |
+
+#### Responsive — seven widths, real headless Chrome over CDP
+
+Against `next start` (production build) in headless Chrome, measuring live
+geometry. Fresh navigation and a 4s settle per width.
+
+| Width | `scrollWidth` / `clientWidth` | Overflow | Email link | Contact links | Footer links | Footer overflow |
+|---|---|---|---|---|---|---|
+| 1440 | 1425 / 1425 | none | 44px, 1 line | 3 | 7 | none |
+| 1280 | 1265 / 1265 | none | 44px, 1 line | 3 | 7 | none |
+| 1024 | 1009 / 1009 | none | 44px, 1 line | 3 | 7 | none |
+| 768  | 753 / 753   | none | 44px, 2 lines | 3 | 7 | none |
+| 430  | 430 / 430   | none | 51px, 2 lines | 3 | 7 | none |
+| 390  | 390 / 390   | none | 51px, 2 lines | 3 | 7 | none |
+| 375  | 375 / 375   | none | 51px, 2 lines | 3 | 7 | none |
+
+- **No horizontal overflow at any width.** `scrollWidth` equals `clientWidth`
+  at all seven, and an element sweep — skipping boxes clipped by an ancestor,
+  per §11 — found no offender. The 35-character email address wraps rather
+  than widening the page at every narrow width.
+- **The footer stays readable on mobile.** It never overflows its own box; the
+  three column groups stack below `sm`, and the copyright and location lines
+  wrap to two rows at 390 and below. Meta type holds 12px throughout.
+- **Only real data is rendered.** Three links in `#contact` — `mailto:`,
+  LinkedIn, GitHub — and seven in the footer: the `#top` wordmark, four nav
+  anchors, and the two social profiles. Every `href` comes from
+  `profile.contact` or `NAV_LINKS`.
+- **The phone number appears nowhere.** Checked at every width against both
+  the `tel:` scheme and the digits themselves, in the section and the footer.
+
+#### Anchors, links, keyboard, focus, reduced motion
+
+| Check | Result |
+|---|---|
+| `#contact` anchor | Clicking `04 Contact` sets the hash and lands the section top at 80px against a 65px sticky header; the `h2` is visible |
+| Footer navigation | All four footer anchors resolve to a real `<section>` on the page, and the wordmark's `#top` target exists |
+| Semantics | `<footer>` is a direct child of `<body>`, so it is a `contentinfo` landmark; its nav carries `aria-label="Footer"` against the header's `Primary` |
+| Landmark naming | `#contact` is named by `aria-labelledby="contact-heading"` |
+| Heading hierarchy | `h1` → `h2` Contact → `h3` Email / LinkedIn / GitHub. No skipped levels; still exactly one `h1` on the page |
+| Keyboard | All 10 stops across `#contact` and the footer reachable by real Tab keypresses, in document order |
+| Target size | **Every one of the 10 is 44px tall or more** — zero under the minimum |
+| Focus states | All 10 match `:focus-visible` and paint a 2px solid outline at 2px offset |
+| New-tab links | Both external links carry `target="_blank"`, `rel="noopener noreferrer"`, and an `sr-only` "(opens in a new tab)" |
+| Reduced motion | Under `prefers-reduced-motion: reduce` every transition in the section and the footer collapses to `0.001s`; no overflow |
+| Console | Zero errors at all seven widths |
+
+**Caveats:**
+
+- Software rendering (SwiftShader), as with every previous browser run here.
+- Run against the 2.4 MB `card.glb` in the working tree, not the committed
+  159 KB model (§8). Phase 5J does not touch the Lanyard.
+- The footer year read `2026` in this run because that is the build date. It is
+  build-time, not visitor-time — by design, see the Phase 5J decisions.
+
+### Phase 6B run — 2026-08-26
+
+| Check | Result |
+|---|---|
+| `npm run lint` | Clean — no output, no warnings |
+| `npx tsc --noEmit` | Exit 0 |
+| `npm run build` | Exit 0 — 4/4 static pages, routes `/` and `/_not-found` both static |
+| `public/lanyard/card.glb` | 162,612 bytes, unchanged |
+
+Run against `next start` (production build) in headless Chrome driven over CDP
+from a script using only Node built-ins — no test dependency was added to the
+project. The whole before/after comparison is one build stashed against the
+other on the same machine, same server, same flags.
+
+#### Card legibility — measured, not eyeballed
+
+Screenshot the lanyard slot, take the modal colour of the non-page pixels,
+compare it to the page. That is the whole method, and it is what should be
+repeated if the lighting is ever touched again.
+
+| | Before (5D-3) | After (6B) |
+|---|---|---|
+| Card face | `#ECECEA` (236,236,234) | `#CAC8C4` (202,200,196) |
+| Contrast vs `--color-bg` | **1.06:1** | **1.50:1** |
+| Strap | ink, near-black, glossy | `#706862`, 4.89:1 |
+| Role / focus tone | secondary / muted | ink / ink |
+
+1.06:1 is not "low contrast". At that separation the card is the page, which
+is exactly what the audit reported and what the screenshots show.
+
+#### Responsive — seven widths
+
+| Width | `scrollWidth` / `clientWidth` | Overflow | Canvas | WebGL | Console errors |
+|---|---|---|---|---|---|
+| 1440 | 1425 / 1425 | none | 405×688 | yes | none |
+| 1280 | 1265 / 1265 | none | 406×688 | yes | none |
+| 1024 | 1009 / 1009 | none | 305×688 | yes | none |
+| 768  | 753 / 753   | none | 676×452 | yes | none |
+| 430  | 430 / 430   | none | 387×452 | yes | none |
+| 390  | 390 / 390   | none | 350×452 | yes | none |
+| 375  | 375 / 375   | none | 335×452 | yes | none |
+
+- **No horizontal overflow at any width**, and no element sweep offender.
+- **The canvas never overlaps the hero text.** Below `lg` the layout stacks and
+  the canvas starts below the text block; at and above `lg` the two columns do
+  not intersect at all.
+- **The lanyard blocks nothing.** Both hero CTAs hit-test as reachable at all
+  seven widths, at their centre and both corners. Mobile navigation opens from
+  the 44×44 menu button and all four overlay links are reachable at 83px tall.
+  Zero network failures.
+- Three console warnings appear at every width, all pre-existing: two library
+  deprecations (`THREE.Clock`, a Rapier init signature) and one SwiftShader
+  shader-compiler note that only exists under software rendering.
+
+#### Reduced motion, WebGL fallback, drag
+
+| Check | Result |
+|---|---|
+| Reduced motion — still | Two screenshots 1.2s apart are **byte-identical** at 1440 / 768 / 375; the same pair differ in normal motion |
+| Reduced motion — drag inert | Hover and press over the card leave `body.style.cursor` unset and move the card by (0, 0) |
+| No WebGL (`--disable-webgl`) | No `<canvas>`; the quiet rule-and-dot fallback renders; hero headline, lead, and both CTAs intact; **zero console errors, zero network failures** at 1440 / 768 / 375 |
+| Drag — normal motion | Cursor goes unset → `grab` on hover → `grabbing` on press → `grab` on release, and the card centroid follows a commanded (−96, −48) drag by (−96, −45) |
+
+#### Runtime cost
+
+Script time is sampled from `Performance.getMetrics` over a fixed 4s window,
+expressed as a percentage of one core.
+
+| Window | Before | After |
+|---|---|---|
+| Hero on screen | 7.8% | 7.6% |
+| **Scrolled past the hero** | **6.0%** | **0.0%** |
+| Scrolled back to the hero | 6.7% | 6.9% |
+
+The middle row is the point: the scene used to cost almost as much when it was
+five screens off the top of the viewport as it did when someone was looking at
+it. It now costs nothing, and resumes cleanly.
+
+**Caveats — read these before quoting the numbers:**
+
+- Software rendering (SwiftShader), as with every previous browser run here.
+  Absolute CPU percentages are therefore not what a GPU-backed browser would
+  report; the before/after ratio is the meaningful figure.
+- **The idle deferral of `LanyardCanvas` did not measurably improve first
+  paint or blocking time.** Unthrottled, the first heavy chunk starts at 368ms
+  before and 361ms after; at 4× CPU throttle, total blocking time was 5,712ms
+  before and 6,505ms after — inside the run-to-run noise of a 3.4s software
+  WebGL shader compile that dominates both profiles. `next/dynamic` already
+  defers the import past FCP. The change is kept because it moves the work off
+  the hydration task on devices slower than this one, but it is not evidence
+  of a measured improvement and should not be reported as one.
+- Bundle size is unchanged, and was never expected to change: initial scripts
+  574,991 → 575,290 bytes, total resources 1,657,685 → 1,657,865 bytes. The
+  3D chunks are the same ~3.31 MB uncompressed / ~1.12 MB over the wire. This
+  phase changed *when* they run and *how much they cost once running*, not how
+  large they are.
+
+---
+
+---
+
+### Phase 6C run — 2026-08-26
+
+`npm run lint` clean, `npx tsc --noEmit` exit 0, `npm run build` succeeds —
+compiled, TypeScript passed, 4/4 static pages, `/` and `/_not-found` both
+prerendered static. One lint error was raised and fixed rather than suppressed:
+`react-hooks/set-state-in-effect` on the new breakpoint effect, which was
+calling `setOpen` synchronously in the effect body. The synchronous check was
+unnecessary — only the `md:hidden` trigger sets `open`, so the menu cannot open
+already-desktop — and subscribing alone is correct.
+
+Browser pass over CDP against headless Chrome 151, production build served by
+`next start`, measuring `documentElement.scrollWidth` against `clientWidth`
+plus per-element rects, not screenshots.
+
+**Horizontal overflow — none at any width.**
+
+| Width | scrollWidth / clientWidth | Overflow |
+|---|---|---|
+| 1440 | 1425 / 1425 | 0 |
+| 1280 | 1265 / 1265 | 0 |
+| 1024 | 1009 / 1009 | 0 |
+| 768 | 753 / 753 | 0 |
+| 430 | 430 / 430 | 0 |
+| 390 | 390 / 390 | 0 |
+| 375 | 375 / 375 | 0 |
+
+**Structure @1440.** One `<h1>` (`Alif Reezi`); four `<h2>` (Selected work,
+Research log, About, Contact); `<h3>` under each, `<h4>` only inside a project
+entry. No level is skipped. Landmarks: `header`, `nav{Primary}`, `main`, five
+`section`s each `aria-labelledby` its own visible heading, the two scrollable
+table `region`s, `footer`, `nav{Footer}`.
+
+**Keyboard.** 24 focusables, tabbed through with real `Input.dispatchKeyEvent`
+Tab presses rather than `.focus()` — `:focus-visible` matched on every one, and
+every ring measured `2px solid` at `2px` offset from the global rule. Order
+runs skip link → wordmark → nav → hero CTAs → colophon email → both table
+scroll ports → About → Contact → footer. The scroll ports are reachable, so a
+keyboard user can scroll the metrics tables without a pointer.
+
+**Target sizes.** Two elements measure under 24px and both are correct: the
+skip link at 1×1 while `sr-only` (131×39 once focused), and the "Research log"
+link inside an About sentence — WCAG 2.5.8 exempts a target inline in a block
+of text. Every other link and button is ≥44px tall at every width. The Hero
+colophon email was the one genuine failure at 235×21 and was fixed during this
+run; re-measured, it no longer appears.
+
+**Reduced motion.** With `prefers-reduced-motion: reduce` emulated, the only
+transition duration present anywhere on the page is `0.001s` — the global
+safety net holds across the new shared classes.
+
+**Links.** 17 in-page/`mailto:` links, none carrying `target`. Four outbound
+(LinkedIn and GitHub, in `#contact` and the footer), all four with
+`target="_blank"`, `rel="noopener noreferrer"`, and the "(opens in a new tab)"
+note.
+
+**Mobile menu @390.** Portalled to `<body>`; `role="dialog"`,
+`aria-modal="true"`; focus lands on Close; 8 focusables, none under 44px;
+`body.style.overflow` locked to `hidden`; no overflow. Escape closes it,
+releases the lock, and returns focus to the trigger. Reopened, then widened to
+900px: panel gone, lock released — the stranded-overlay bug is fixed.
+
+### Phase 6D run — 2026-09-02
+
+| Check | Result |
+|---|---|
+| `npm run lint` | Clean — no output, no warnings |
+| `npx tsc --noEmit` | Exit 0 (after `next typegen`; `PageProps<'/projects/[slug]'>` needs generated route types) |
+| `npm run build` | Exit 0 — compiled in 29.1s, 12/12 static pages, 8 routes all prerendered, 4 of them SSG from `generateStaticParams` |
+
+**Route render check.** All nine routes returned 200 with exactly one `<h1>`:
+`/`, `/projects`, `/projects/tuberculosis-detection`,
+`/projects/melon-detection`, `/research`, `/research/icwt-2026`,
+`/research/icsmech-2026`, `/about`, `/contact`. `/projects/thoraxvision` — the
+slug the brief assumed — correctly returns 404 through `dynamicParams = false`.
+
+**Link crawl.** Every `href` on every route, followed: 9 internal routes all
+200, no `#work`/`#research`/`#about`/`#contact` anchor survives anywhere, and
+the only remaining hash is `#top` (the skip link). Three outbound links
+(LinkedIn, GitHub, `mailto:`), all with `target`, `rel`, and the note.
+
+**Responsive — 9 routes × 7 widths = 63 combinations, 0 problems.**
+`documentElement.scrollWidth` equalled `clientWidth` on every one:
+
+| Width | scrollWidth / clientWidth |
+|---|---|
+| 1440 | 1425 / 1425 |
+| 1280 | 1265 / 1265 |
+| 1024 | 1009 / 1009 |
+| 768 | 753 / 753 |
+| 430 | 430 / 430 |
+| 390 | 390 / 390 |
+| 375 | 375 / 375 |
+
+The two `min-w-[34rem]`/`min-w-[38rem]` results tables still scroll inside their
+own port at 375 rather than widening the document — the `min-w-0` and
+`relative` guards from §11 survived the move into `ProjectDetail` intact.
+
+**Heading outlines @1440.** One `<h1>` per route, no skipped level anywhere:
+
+```
+/                                 1 2
+/projects                         1 2 2
+/projects/tuberculosis-detection  1 2 2 2 2 2
+/projects/melon-detection         1 2 2 2 2
+/research                         1 2 2 2
+/research/icwt-2026               1
+/research/icsmech-2026            1
+/about                            1 2 2
+/contact                          1 2 2 2
+```
+
+A research detail page carries a lone `<h1>` because every optional block below
+it is `null` in the data. That is the honest outline for that entry, not a gap.
+
+**Landmarks.** Exactly one `body > header`, one `main`, one `body > footer` on
+every route — confirming the layout move did not double them. Two `nav`s per
+index page (Primary, Footer), three on a detail page (the third being the
+Next-project / Next-entry pager, which carries its own `aria-label`).
+
+**Keyboard and overlay — 24 checks, 0 failed.** Driven with real
+`Input.dispatchKeyEvent`, not `.focus()`:
+
+- First Tab reaches the skip link; it measures 1×1 while `sr-only` and 131×39
+  once focused, with a `rgb(158, 79, 53) solid 2px` ring from the global rule.
+- Desktop nav marks `/projects` as `aria-current="page"` while on
+  `/projects/melon-detection` — a detail page lights its index.
+- Mobile @390: panel opens, `aria-expanded="true"`, focus lands on Close, body
+  scroll locks, 5 links present, the current route marked, Tab stays inside the
+  panel, Escape closes and returns focus to the trigger, lock released.
+- Mobile route change: tapping a link navigates client-side to `/projects`,
+  panel gone, lock released.
+- **Mobile back gesture with the menu open:** `history.back()` → back on `/`
+  with no overlay. This is the case the rejected `useEffect` would have handled
+  one render late.
+- `/projects`: 18 focusables, none unreachable, none without an accessible name.
+
+**Target sizes.** The same two sub-24px elements as the Phase 6C run, both
+still correct and both pre-existing: the `sr-only` skip link, and About's
+"Research log" link inline in a sentence (WCAG 2.5.8 inline exception). Every
+other control is ≥44px.
+
+**Console.** No errors or warnings on any route beyond headless GPU/SwiftShader
+notices. The Lanyard renders on `/` under ANGLE/SwiftShader as before.
+
+---
+
+## 8. Known Issues / Remaining Work
+
+### Fixed
+
+- **Strap divergence (Phase 5D-3 regression).** Unclamped lerp alpha sent the
+  band's control points to ~1e15 within seconds of load. Fixed by clamping the
+  chase factor to 1. Verified over 16s plus drag, resize, and mobile.
+  Committed in Phase 6A (`8952031`).
+
+- **5D-2 lanyard assets had reappeared in the working tree.** `card.glb` was
+  the 2.4 MB branded model and `lanyard.png` (7.5 KB) was back as an untracked
+  file, reverting 5D-3's asset reduction. Phase 6A restored the committed
+  162,612-byte `card.glb` and deleted the unreferenced `lanyard.png`.
+- **Location contradiction between metadata and the data layer.** Resolved in
+  Phase 6A — `src/app/layout.tsx` composes its description from `site.ts` and
+  `profile.ts` instead of naming a city.
+- **Card face contrast was 1.06:1 against the page.** Fixed in Phase 6B by
+  re-exposing the scene and rebuilding the card's type contrast; measured at
+  1.50:1 after.
+- **The three-copy square-tag class string.** Paid off in Phase 6C along with
+  four other patterns; `src/components/ui/styles.ts` is now the one source.
+- **Outbound project/research links carried no `target`, `rel`, or
+  announcement.** Latent — every such `href` is still `null` — but fixed in
+  Phase 6C: `ActionLink` decides from the URI scheme, so the first supplied
+  repository URL behaves like the ones already on the page.
+- **The mobile menu could be left open with no way to close it** after a resize
+  past `md`. Fixed in Phase 6C.
+- **The Hero colophon email was a 21px touch target.** Fixed in Phase 6C.
+
+### Remaining
+
+- **Phase 5D-3 is not merged to `main`.** `main` is still at 5D-2. Work sits on
+  `fix/lanyard-5d3-regression`, with `phase-5d-3-lanyard` preserving the
+  recovered original commit. Both the 5D-3 work and the strap fix need
+  committing and merging.
+- **Texture disposal under Strict Mode.** The cleanup in `useDrawnTextures`
+  disposes `CanvasTexture`s that live materials still reference. Three.js
+  re-uploads them, so there is no visual effect — dev-only cost. Not causal to
+  the regression; left alone to keep the fix minimal.
+- **No Phase 5D-3 doc.** Phases 5C, 5D-1, and 5D-2 each have one; 5D-3 does not.
+
+### Owner input has arrived and is PARTLY ingested — `Docs/Detail.txt`
+
+An untracked `Docs/Detail.txt` in the working tree answers a large share of the
+`pending` list below: final project names (**ThoraxVision**, **MelonVision
+AI**), the MelonVision repository URL and year, its model architecture
+(MobileNetV2 FOMO, INT8, TFLite), both paper titles, both full conference
+names, both topics and author positions, two research repository URLs,
+long-form "about me" copy, and a different final email address from the one in
+`profile.ts`.
+
+**On 2026-09-19 the owner confirmed five of these** — the two project names
+and slugs, the ThoraxVision live URL, the email, the city, and hiding the
+percentage tables — and those are now in `src/data/` (see §3). The rest is
+still not, and Phase 6D deliberately did not put it there. Phase 6D was scoped to information architecture, and its own rules said
+the data layer is the source of truth and slugs must come from it. Ingesting
+this is a content phase — it changes titles, slugs, and therefore URLs, and it
+raises questions the file does not settle: the file says not to display model
+percentages at all (which would remove the results tables), and the email in it
+differs from the one currently published site-wide. Both are owner decisions,
+not implementation details.
+
+The routes are now `/projects/thoraxvision` and `/projects/melonvision-ai`;
+the `pending` arrays below stand as written.
+
+### Owner input still required (blocks parts of the content sections)
+
+Recorded in code as `pending` arrays on each data export, so nothing is
+silently invented. Consolidated here:
+
+- **Research — both entries are venue-only.** ICWT 2026 and ICSMech 2026 are
+  confirmed as venues; paper titles, full conference names, topics,
+  contributions, submission state, co-authors, and links are all unknown. The
+  Research section cannot be built beyond a "venue confirmed" treatment until
+  these arrive.
+- **Links.** No GitHub repository URL for either project; the melon live
+  deployment sits on the client's VPS and may not be public. `ExternalLink.href`
+  is `null` with a note rather than a guessed address.
+- **Melon project.** No year (only 20–30 June), no model architecture behind
+  the TFLite build, no evaluation figures, and the "may the client be named?"
+  question was asked but never answered.
+- **TB metrics gaps.** ResNet50 accuracy and specificity for all three models
+  were left blank. VGG19 records F1 `0.5745` for *both* classes, which cannot
+  both be right — the Tuberculosis value is stored as `null` pending
+  correction.
+- **Hero mission statement** — still owner-pending from Phase 5D-1.
+- **Personal / experience content.** No work experience and no "now" copy are
+  documented; `Experience` and `NowItem` remain declared but unpopulated.
+- **Production domain.** `site.url` is `null`, so canonical URLs, sitemap,
+  robots, and Open Graph images cannot be finalised.
+
+### Future planned work
+
+- ~~Section components for `#work`, `#research`, `#about`, `#contact`.~~ All
+  four are built (Phases 5G–5J), as is the real footer.
+- ~~Per-page metadata beyond the root title and description.~~ Done in Phase
+  6D: a `title` template in the root layout plus a per-route `title` and
+  `description`, each composed from `site.ts`, `profile.ts`, `projects.ts`, or
+  `research.ts`. A research detail page omits `description` rather than invent
+  one, because `topic` is `null`.
+- Open Graph and structured data; `site.ts` is the intended source once a
+  domain exists. Still blocked on `site.url`.
+
+---
+
+## 9. Next Phase
+
+**Immediate:** commit the strap fix and land Phase 5D-3 on `main`. The work is
+verified but stranded on a side branch, and the original commit was already lost
+once to a deleted branch — leaving it unmerged risks repeating that.
+
+**Note on numbering.** An earlier revision of this log reserved 5F for the
+Selected Work section. 5F was scoped to Hero & Navigation instead, and
+Selected Work became 5G. Both are complete.
+
+**The site is complete as a structure.** Phases 5F–5J built every section, 6C
+lifted the shared UI, and 6D split the page into seven routes. Every one reads
+from `src/data/`. What is left is not more pages.
+
+**Blocking a real launch:**
+
+- **No production domain.** `site.url` is `null`, so canonical URLs, the
+  sitemap, robots, and Open Graph cannot be finalised.
+- **Nothing after 5D-2 is merged to `main`.** Every phase from 5D-3 through
+  6D, plus the 2026-09-19 owner decisions, is committed on
+  `fix/lanyard-5d3-regression` but not landed. See §3.
+
+**Debt worth paying in one pass, now that no phase is scoped away from
+touching several files:**
+
+- ~~The square-tag class string exists in *three* components.~~ Paid in Phase
+  6C, together with four other patterns that had been copied across sections
+  for the same reason. `src/components/ui/` is the one source now.
+- **The About statement copy is authored, not owner-supplied.** Its claims
+  are all traceable, but `profile.pending` still lists personal copy as
+  outstanding. It needs approval or replacement. Phase 6C did not touch it —
+  it is content, and inventing a replacement is exactly what the data layer
+  exists to prevent.
+
+**The next phase is content ingestion, not code.** `Docs/Detail.txt` is sitting
+untracked in the working tree with answers to most of §8's pending list —
+repository URLs, both paper titles, both conference names, topics, author
+positions, and long-form personal copy. The five owner decisions it needed
+(names, slugs, live URL, email, city, hiding the percentage tables) were
+settled and applied on 2026-09-19; the remaining content is Phase 6E.
+Everything downstream of it — `/research` in particular — is already built to
+fill in without a code change.
+
+**Still owner-pending after that file is ingested:** the TB metric gaps
+(ResNet50 accuracy, specificity for all three models, the contradictory VGG19
+F1), the MelonVision detection figures, whether the client may be named, the
+graduation year and institution, work-experience entries, and the production
+domain.
+
+Phase 6D was explicitly scoped to stop here.
+
+---
+
+## 10. Content Data Layer (Phase 5E)
+
+### Shape
+
+Four modules under `src/data/`, each exporting one typed constant plus, where
+useful, a lookup helper.
+
+| File | Exports | Holds |
+|---|---|---|
+| `profile.ts` | `profile` | Identity, status, location, roles, trajectory, education, capability groups, contact channels |
+| `projects.ts` | `projects`, `getProject()` | Tuberculosis Detection (`01`), Melon Plant Detection (`02`) |
+| `research.ts` | `research`, `getResearchEntry()` | ICWT 2026 (`01`), ICSMech 2026 (`02`) |
+| `site.ts` | `site`, `NAVIGATION`, `SECTIONS` | Site name, title, description, tagline, locale, nav, section index/labels |
+
+`src/types/index.ts` was expanded to match: `ExternalLink`, `Education`,
+`ContactChannel`, `Profile`, `ProjectDataset`, `ClassMetrics`, `ModelResult`,
+`Conference`, `ResearchStatus`, `NavItem`, `SectionMeta`, and `SiteConfig` are
+new; `Project` and `ResearchEntry` grew from three-field stubs into full
+shapes. `CapabilityGroup` is reused unchanged; `Experience` and `NowItem` are
+left as declared-but-unused stubs, since no content exists for them.
+
+### Decisions
+
+**Unknown is a value, not an empty string.** Every field that is known to exist
+but has no documented value is `null`, and the reason is recorded in a
+`pending: string[]` on the same object. That keeps "this project has no GitHub
+link" distinguishable from "the URL has not been supplied yet", and it means the
+gaps travel with the data instead of living only in this log. No metric, date,
+URL, client name, or achievement was inferred.
+
+**Metrics are transcribed, not corrected.** The TB figures are reproduced
+exactly as the owner recorded them. Where a value was left blank (ResNet50
+accuracy, specificity throughout) the field is `null`. Where the source is
+internally inconsistent — VGG19 lists F1 `0.5745` for both classes — the
+suspect value is `null` with the conflict noted, rather than being
+back-computed from precision and recall.
+
+**Navigation moved into the data layer.** `NAVIGATION` now lives in `site.ts`;
+`src/components/layout/nav-links.ts` became a one-line re-export
+(`export { NAVIGATION as NAV_LINKS }`). The header and mobile overlay still
+import from the path they already used and were not touched, so the single
+source of truth from Phase 5C holds while ownership of the labels sits with the
+content layer.
+
+**Dataset sizes are recorded despite an earlier deferral.** The owner's original
+input said the melon dataset size need not be shown; the Phase 5E brief
+confirmed 4,784 TB images and 1,250 melon images as usable. Both are stored.
+Whether they are *rendered* is a decision for the Work section; Phase 5F
+(Hero & Navigation) does not surface them.
+
+**Contact includes the phone number, marked non-primary.** `ContactChannel`
+carries a `primary` flag so the Contact section can publish email, LinkedIn, and
+GitHub while treating the phone number as a deliberate opt-in rather than
+default page content.
+
+**Sections carry editorial indices.** `SECTIONS` in `site.ts` assigns `00`–`04`
+to the hero and the four anchors, extending the index motif the hero already
+uses so later sections stay numbered from one source.
+
+### Not done in this phase
+
+No components were modified except `nav-links.ts` (re-export only). No UI, no
+new sections, no Lanyard changes, no new dependencies, no route or metadata
+changes.
+
+---
+
+## 11. Design System Landmines
+
+Traps that cost real debugging time and will recur in the remaining sections.
+Both were found in Phase 5G.
+
+### `inline-block` means something else here
+
+`globals.css` defines `--spacing-block` in `@theme`. Tailwind 4 turns every
+`--spacing-*` key into a spacing value usable by the sizing utilities, and
+`inline-*` is the utility for `inline-size`. So `inline-block` matches **two**
+utilities and the stylesheet contains both:
+
+```css
+.inline-block{display:inline-block}
+.inline-block{inline-size:var(--spacing-block)}
+```
+
+Same specificity, so source order decides — and the sizing rule wins. Anything
+with `inline-block` gets pinned to `clamp(2rem, 5vw, 3rem)`: 32px at mobile,
+48px at 1440. It looks like a mysterious fixed width that survives every flex
+fix you try, because it is not a flex problem.
+
+The same collision is waiting for any other utility whose value name matches a
+spacing key. The three keys are `section`, `block`, and `gutter`; `--radius-*`,
+`--text-*`, and `--color-*` keys can collide the same way in their own utility
+families.
+
+**Use `inline-flex`, or nothing at all** — a flex or grid child is blockified
+regardless. Reach for arbitrary values (`py-[var(--spacing-section)]`) rather
+than bare utility names when a token is involved, which is what the rest of the
+codebase already does.
+
+### `sr-only` escapes `overflow` containers
+
+Tailwind's `sr-only` is `position: absolute`. An absolutely positioned box is
+clipped by an ancestor's `overflow` only when that ancestor is in its
+containing block chain, so an `sr-only` span inside an `overflow-x-auto`
+container with no positioned ancestor resolves against the initial containing
+block, escapes the scroll port, and is laid out at its static position. Inside
+a wide horizontally scrolled table that position can be hundreds of pixels
+past the viewport, and it silently widens `documentElement.scrollWidth`.
+
+The symptom is deceptive: `body.scrollWidth` looks correct, no visible element
+overflows, and an element sweep finds nothing, because the sweep quite
+reasonably treats the scroll container as a clipping ancestor.
+
+**Any `overflow-*` container that may contain an `sr-only` (or any other
+absolutely positioned descendant) needs `relative`.**
+
+### `--color-surface` cannot carry `--color-muted` text
+
+Considered in Phase 5H for a full-bleed band behind `#research`, to separate
+it from Selected Work, and rejected on contrast. `--color-muted` (`#726C66`)
+is documented at 4.64:1 against `--color-bg`; against `--color-surface`
+(`#EDE9E1`) it falls to **4.28:1**, under the 4.5:1 AA floor — and muted is
+exactly what the 11px tracked mono labels use. `--color-secondary`
+(`#6B6560`) clears it at 4.74:1.
+
+So a surface band is not a drop-in: it forces that section onto a different
+token for every small label, which is both inconsistent and easy to get
+wrong later. If a section ever does need one, swap muted → secondary
+throughout it and record the exception. Research instead differentiates
+itself by form — a sparse ledger against Selected Work's dense case
+studies — which needs no colour at all.
+
+### `cn()` concatenates; it does not merge
+
+`src/lib/utils.ts` is a six-line class joiner, deliberately — there is no
+`tailwind-merge` in this project. So passing `className="mb-0"` to a component
+whose default is `mb-12 lg:mb-16` produces `"mb-12 lg:mb-16 mb-0"`, and the
+winner is decided by **stylesheet order, not string order**. Tailwind emits
+margin utilities in ascending scale order, so `mb-0` is written first and
+`mb-12` overrides it. The override silently loses.
+
+Found in Phase 6C while giving `SectionHeader` a default gap that `#contact`
+needed to opt out of. The fix is not a smarter `cn` — it is to make the
+conflicting class a *replaceable default* rather than a base to append to:
+
+```tsx
+export function SectionHeader({ className = SECTION_HEADER_GAP, ... }) {
+  return <header className={className}>...
+}
+```
+
+The same trap applies to any pair on one property. `ActionLink`'s `className`
+is additive only because nothing it ships conflicts; the moment it needs a size
+or colour override it will need the same treatment. Where two values on one
+property genuinely differ — the Contact email's `pb-1` against the shared
+`ruledLabel`'s `pb-0.5` — write the string out locally instead of appending.
+
+### How to catch these
+
+Neither shows up in a screenshot at one width, and neither fails lint, tsc, or
+the build. What caught them was measuring `documentElement.scrollWidth` against
+`clientWidth` at every target width, and — once a number looked wrong —
+bisecting with live DOM experiments rather than reading the diff. Keep doing
+that for each new section.
