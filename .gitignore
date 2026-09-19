@@ -42,3 +42,6 @@ next-env.d.ts
 
 # Working documents (phase instructions)
 /prompt/
+
+# Owner-input working file (not part of the site)
+/Docs/Detail.txt
