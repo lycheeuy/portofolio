@@ -1,7 +1,7 @@
 # Development Log
 
 Rolling record of work actually completed and verified on this project.
-Last updated: 2026-09-19.
+Last updated: 2026-09-20.
 
 Companion phase docs live alongside this file in `Docs/`. This log is the
 entry point; those docs carry the per-phase detail.
@@ -79,7 +79,9 @@ training data. `AGENTS.md` requires reading the relevant guide in
 Commit history:
 
 ```
-a6b45ad  chore: ignore Docs/Detail.txt owner-input working file           (main)
+934fb15  content: ingest approved case-study and research facts from Detail.txt (Phase 6E)
+c0f65c3  docs: record that Phases 5D-3 through 6D and the owner decisions are merged to main
+a6b45ad  chore: ignore Docs/Detail.txt owner-input working file
 2a8b959  Merge branch 'fix/lanyard-5d3-regression': Phases 5D-3 through 6D and owner decisions
 2eed9a8  content: apply owner decisions — ThoraxVision, MelonVision AI, email, city, hide results
 ea35364  feat: multi-page information architecture (Phase 6C + 6D)
@@ -827,6 +829,34 @@ empty blocks; one `h1` per route; keyboard path on the five changed pages;
 link crawl all 200; old slugs 404; console clean apart from the Lanyard's
 pre-existing Three.js notices. Four subjective presentation candidates were
 listed for the owner rather than applied (report §7).
+
+### Phase 6F — About & Personal Positioning · Complete
+
+Full report: `Docs/PHASE_6F_REPORT.md`.
+
+`/about` rebuilt as six numbered blocks — Profile, Background, Capabilities,
+Research / Building, Direction, Availability / Contact — each an `h2` in an
+index rail with content beside it, on the existing primitives only.
+
+**Content.** The owner's six-section "about me" answer from `Docs/Detail.txt`
+is now `profile.about`, rendered from Indonesian into first-person English
+(full text in the report §3). The two authored third-person paragraphs from
+Phase 5I are retired. The Profile opener is the one sentence written for the
+page, composed clause by clause from data fields. Confirmed and added:
+`education.institution` = Telkom University Purwokerto; `focusAreas` =
+Computer Vision · Machine Learning · Deep Learning · Research (this also
+updates the Hero's Focus line, by design). *Studied at* and *Based in* are
+separate rows and never combined into one string.
+
+**Data.** `Education.institution`, `AboutCopy`, `Profile.about` in
+`types/index.ts`; `profile.pending` drops the institution and the personal
+copy, keeps graduation year, work experience, and the hero statement.
+
+**Verified:** lint, tsc, build; `/about`, `/contact`, `/`, `/projects`,
+`/research` × 7 widths, 0 overflow, 0 empty blocks; outline
+`1 2 2 2 3 2 3 2 2` on `/about`; 22 focusables all named, 0 under 24px;
+console clean apart from the Lanyard's Three.js notices; the build contains
+no "studied in Cirebon" / "lives in Purwokerto" string.
 
 ---
 
@@ -1844,9 +1874,8 @@ silently invented. Consolidated here:
   client be named?" question is still unanswered.
 - **ThoraxVision.** Detail.txt item 10 — what the owner wants highlighted —
   is unanswered; `outcome` is `null`.
-- **About copy.** The six-section "about me" text in Detail.txt is the one
-  owner-supplied block not yet raised for approval; it is About-page content,
-  outside Phase 6E's case-study scope.
+- ~~**About copy.**~~ Ingested in Phase 6F as `profile.about`.
+- **Profile.** Graduation year; work experience; the Hero mission statement.
 - **TB metrics gaps.** ResNet50 accuracy and specificity for all three models
   were left blank. VGG19 records F1 `0.5745` for *both* classes, which cannot
   both be right — the Tuberculosis value is stored as `null` pending
@@ -1903,12 +1932,12 @@ touching several files:**
   it is content, and inventing a replacement is exactly what the data layer
   exists to prevent.
 
-**Phase 6E ingested the case-study and research content; Phase 6F is the
-About page.** `Docs/Detail.txt` (gitignored) still holds the six-section
-"about me" text, which needs the same item-by-item approval and a decision on
-whether it replaces or joins About's authored paragraphs. Also open: the four
-subjective presentation candidates in `PHASE_6E_REPORT.md` §7, and deleting
-the two fully merged side branches.
+**Phases 6E and 6F ingested everything `Docs/Detail.txt` supplies.** Every
+page now reads from confirmed data and nothing on the site is placeholder.
+Phase 6G is launch readiness: a domain and `site.url`, canonical / sitemap /
+robots / Open Graph from `site.ts`, an OG image, the footer copy, the four
+subjective candidates in `PHASE_6E_REPORT.md` §7 if wanted, and deleting the
+two fully merged side branches.
 
 *Previous note, kept for the record:* `Docs/Detail.txt` was sitting
 untracked in the working tree with answers to most of §8's pending list —

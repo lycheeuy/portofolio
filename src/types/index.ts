@@ -36,6 +36,32 @@ export interface Education {
   degree: string;
   field: string;
   status: string;
+  /** Awarding institution, as the owner names it. `null` until confirmed. */
+  institution: string | null;
+}
+
+/**
+ * The owner's own account of themselves, in the owner's voice. Each field is
+ * a list of paragraphs; an empty list means that section has not been
+ * supplied, and the About page renders nothing for it rather than filler.
+ *
+ * The source is the six-question "about me" answer in `Docs/Detail.txt`,
+ * written in Indonesian and rendered into English in `profile.ts`. These are
+ * the only first-person strings on the site.
+ */
+export interface AboutCopy {
+  /** What the owner is most interested in going deeper on right now. */
+  interests: string[];
+  /** Why AI / machine learning / computer vision — the way in. */
+  background: string[];
+  /** The kind of project the owner likes to build. */
+  building: string[];
+  /** What the owner is learning at the moment. */
+  learning: string[];
+  /** Where the owner wants to head after graduating. */
+  direction: string[];
+  /** How the owner works on a project. */
+  approach: string[];
 }
 
 export interface ContactChannel {
@@ -61,6 +87,7 @@ export interface Profile {
   education: Education;
   capabilities: CapabilityGroup[];
   contact: ContactChannel[];
+  about: AboutCopy;
   /** Content the owner has not supplied yet. */
   pending: string[];
 }
