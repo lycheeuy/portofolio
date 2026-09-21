@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ResearchDetail } from "@/components/research/research-detail";
 import { getResearchEntry, research } from "@/data/research";
+import { routeMetadata } from "@/lib/metadata";
 
 /**
  * Research entry — `/research/[slug]`.
@@ -10,11 +11,12 @@ import { getResearchEntry, research } from "@/data/research";
  * `icsmech-2026`. `generateStaticParams` prerenders exactly those two, and
  * `dynamicParams = false` makes any other slug a 404.
  *
- * The page title falls back to the venue acronym and year because `title` is
- * `null` on both entries — a browser tab has to say something, and the venue
- * is what is confirmed. `description` is omitted rather than invented: with
- * `topic` null there is nothing factual to put in it, so the site-level
- * description from the root layout stands.
+ * The page title is the paper title, falling back to the venue acronym and
+ * year for any entry that arrives venue-only — a browser tab has to say
+ * something, and the venue is what is confirmed. `description` is the topic
+ * when there is one and omitted rather than invented when there is not, so
+ * the site-level description from the root layout stands in. Since Phase 6E
+ * both entries carry a title and a topic.
  */
 
 export const dynamicParams = false;
@@ -34,6 +36,7 @@ export async function generateMetadata({
   return {
     title: entry.title ?? `${entry.conference.acronym} ${entry.year}`,
     ...(entry.topic ? { description: entry.topic } : {}),
+    ...routeMetadata(`/research/${entry.slug}`),
   };
 }
 

@@ -36,11 +36,12 @@ import { site } from "@/data/site";
  * the owner has not answered leaves no gap on the page.
  *
  * **On overlap with the Hero.** The Hero already carries location, education,
- * focus, trajectory, and availability. About repeats the first four because a
+ * focus, trajectory, and availability. About repeats all five because a
  * reader arriving on `/about` should not have to go back to the homepage for
  * them, and adds what the Hero does not show: the institution, the three
  * roles, the capability groups, the work and the papers by name, and the
- * owner's own account of all of it.
+ * owner's own account of all of it. (Focus was the one of the five missing
+ * until Phase 6G; it is now a Background row.)
  *
  * **Two places, not one.** The owner studied at `education.institution`
  * (Telkom University Purwokerto) and lives in `location` (Kota Cirebon).
@@ -80,9 +81,11 @@ const HAS_RESEARCH_GROUP = profile.capabilities.some(
 );
 
 /**
- * Education, institution, roles, and location. Everything here is a literal
- * field. Institution is its own row rather than a suffix on Education so the
- * place of study and the place of residence never sit in one string.
+ * Education, institution, roles, focus, and location. Everything here is a
+ * literal field. Institution is its own row rather than a suffix on Education
+ * so the place of study and the place of residence never sit in one string.
+ * Focus is the same `focusAreas` join the Hero colophon prints, so the two
+ * pages cannot name different areas.
  */
 const BACKGROUND = [
   {
@@ -94,6 +97,7 @@ const BACKGROUND = [
     ? [{ term: "Studied at", value: profile.education.institution, note: null }]
     : []),
   { term: "Roles", value: profile.roles.join(" · "), note: null },
+  { term: "Focus", value: profile.focusAreas.join(" · "), note: null },
   { term: "Based in", value: profile.location, note: null },
 ];
 

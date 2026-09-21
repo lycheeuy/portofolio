@@ -464,12 +464,21 @@ export function ProjectDetail({ project }: { project: Project }) {
         {relatedResearch.length > 0 ? (
           <div className="mt-16 border-t border-[var(--color-border)] pt-8 lg:mt-20">
             <h2 className={blockHeading}>Related research</h2>
-            <ul className="mt-3 flex flex-wrap gap-x-6 gap-y-2">
+            {/* One row per paper: the title as the link, and beneath it the
+                venue, year, and the owner's author position when recorded —
+                the same line `/about` prints under each entry. The position
+                is the one documented statement of the owner's role in this
+                project's research, so it belongs where the project is. */}
+            <ul className="mt-3 space-y-4">
               {relatedResearch.map((entry) => (
-                <li key={entry.slug}>
+                <li key={entry.slug} className="min-w-0">
                   <ActionLink href={`${RESEARCH_HREF}/${entry.slug}`}>
                     {entry.title ?? `${entry.conference.acronym} ${entry.year}`}
                   </ActionLink>
+                  <span className={`block ${monoMeta} text-muted`}>
+                    {entry.conference.acronym} {entry.conference.year}
+                    {entry.contribution ? ` · ${entry.contribution}` : ""}
+                  </span>
                 </li>
               ))}
             </ul>

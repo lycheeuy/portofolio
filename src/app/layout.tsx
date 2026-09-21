@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { profile } from "@/data/profile";
 import { site } from "@/data/site";
+import { routeMetadata, siteUrl } from "@/lib/metadata";
 
 const fraunces = localFont({
   src: [
@@ -36,8 +37,23 @@ const jetbrainsMono = localFont({
  * `template` applies to every route that sets its own title; `default` is the
  * homepage's. Both come from `site.ts`, so the tab title and the wordmark
  * cannot disagree.
+ *
+ * Share and crawl metadata (Phase 6G). `openGraph` and `twitter` are set
+ * here so every route inherits `og:type`, `og:site_name`, and the card type;
+ * Next fills `og:title` / `og:description` / `twitter:*` from each route's
+ * own resolved title and description. No `og:image` is declared: the OG image
+ * does not exist yet (`site.pending`), and a tag pointing at a missing file
+ * is worse than none. `metadataBase`, canonical, and `og:url` follow
+ * `site.url` — see `lib/metadata.ts` — and are absent while it is `null`.
+ *
+ * No `robots` field: index/follow is the crawler default, and an explicit
+ * tag here would sit next to the `noindex` Next injects on the 404 route —
+ * two robots tags on one page, one contradicting the other.
  */
+const ORIGIN = siteUrl();
+
 export const metadata: Metadata = {
+  ...(ORIGIN ? { metadataBase: new URL(ORIGIN) } : {}),
   title: {
     default: site.title,
     template: `%s — ${site.name}`,
@@ -45,6 +61,10 @@ export const metadata: Metadata = {
   // Location comes from the data layer so metadata cannot drift from what
   // the footer and About page render.
   description: `${site.description} Based in ${profile.location}.`,
+  authors: [{ name: profile.fullName }],
+  creator: profile.fullName,
+  twitter: { card: "summary" },
+  ...routeMetadata("/"),
 };
 
 export default function RootLayout({

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProjectDetail } from "@/components/projects/project-detail";
 import { getProject, projects } from "@/data/projects";
+import { routeMetadata } from "@/lib/metadata";
 
 /**
  * Project case study — `/projects/[slug]`.
@@ -32,6 +33,7 @@ export async function generateMetadata({
   return {
     title: project.title,
     description: project.summary,
+    ...routeMetadata(`/projects/${project.slug}`),
   };
 }
 

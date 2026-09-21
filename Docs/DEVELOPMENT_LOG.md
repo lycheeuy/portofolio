@@ -1,7 +1,7 @@
 # Development Log
 
 Rolling record of work actually completed and verified on this project.
-Last updated: 2026-09-20.
+Last updated: 2026-09-20 (Phase 6G).
 
 Companion phase docs live alongside this file in `Docs/`. This log is the
 entry point; those docs carry the per-phase detail.
@@ -26,24 +26,26 @@ config), and a React Three Fiber / Rapier 3D scene for the hero lanyard.
 
 ### Current architecture
 
-Server Components by default. Exactly three client components exist, each for a
+Server Components by default. Exactly four client components exist, each for a
 concrete reason:
 
 | Component | Why it is a client component |
 |---|---|
 | `mobile-nav.tsx` | Open/close state, Escape key handling, body scroll lock |
+| `primary-nav.tsx` | Marks the current page with `aria-current` (needs the path; Phase 6D) |
 | `lanyard-wrapper.tsx` | WebGL capability probe + error boundary |
 | `lanyard-canvas.tsx` | Three.js / R3F / Rapier scene |
 
 The whole 3D stack sits behind a `next/dynamic({ ssr: false })` boundary, so it
 never enters the server bundle and never blocks first paint.
 
-The homepage is Header + Hero + Selected Work + Research log + About +
-Contact + Footer. **Every section is built**; no bare anchor remains. The
-Hero and both navigations (Phase 5F), `#work` (5G), `#research` (5H),
-`#about` (5I), and `#contact` plus the footer (5J) all read from
-`src/data/`. No copy, URL, or figure is written in a component except the
-About statement, which is flagged in Phase 5I as owner-pending.
+Since Phase 6D the site is seven routes under one layout — `/`, `/projects`,
+`/projects/[slug]`, `/research`, `/research/[slug]`, `/about`, `/contact` —
+plus a styled 404, `/robots.txt`, and `/sitemap.xml` (Phase 6G). Every page
+reads from `src/data/`. No copy, URL, or figure is written in a component;
+the one sentence composed in a component (the About opener) is built clause
+by clause from data fields. The personal copy is the owner's own since
+Phase 6F.
 
 ---
 
@@ -858,6 +860,54 @@ copy, keeps graduation year, work experience, and the hero statement.
 console clean apart from the Lanyard's Three.js notices; the build contains
 no "studied in Cirebon" / "lives in Purwokerto" string.
 
+### Phase 6G — Content & Credibility Polish · Implemented, at review gate
+
+Full report: `Docs/PHASE_6G_REPORT.md`. Not yet committed.
+
+A read-through of every route as a recruiter would see it, plus the
+metadata a crawler or a share card sees. No visual-system, route, token,
+dependency, or Lanyard change; `profile.ts`, `projects.ts`, and
+`research.ts` untouched — every owner-pending item stays pending.
+
+**Content.** `site.title` → *Alif Reezi — AI / Machine Learning Engineer*
+(the em dash the title template already uses; the role as `profile.roles[0]`
+spells it). `site.description` rewritten from the same documented facts to
+name the focus areas. `/research` description no longer promises titles
+"once settled" above a list of titles — it is composed from `research.ts`
+and branches on whether every entry carries title, topic, and author
+position. `/about` Background gains a **Focus** row (the Hero's
+`focusAreas`, which About had omitted). The project page's Related research
+list now carries the venue, year, and author position under each title —
+the one documented statement of the owner's role in the ThoraxVision papers.
+
+**Metadata.** New `lib/metadata.ts`: `siteUrl()` and `routeMetadata(path)`.
+Every route spreads `routeMetadata` into its `metadata`, so `og:type`,
+`og:site_name`, and — the moment `site.url` is set — `<link rel=canonical>`
+and `og:url` are emitted per route. The root layout adds `authors`,
+`creator`, and `twitter.card: summary`; Next fills `og:title`,
+`og:description`, and the Twitter fields from each route's own resolved
+title and description. No `og:image` (none exists), no `robots` meta (it
+would sit beside the `noindex` Next injects on the 404). New `robots.ts`
+(allow-all) and `sitemap.ts` (every section, project, and research slug),
+both keyed on `site.url`. Verified with a throwaway build at a stand-in
+origin: canonical, `og:url`, the `Sitemap:` line, and nine `<loc>` entries
+all appear; reverted to `null`.
+
+**Housekeeping.** `site.pending` drops the stale "footer is a placeholder"
+line (the real footer landed in 5J). README brought up to date — it still
+listed Motion, Lucide, React Bits via shadcn, Vercel, an eight-client-
+component target, and a PRD-era phase table. Five unreferenced
+create-next-app SVGs removed from `public/`. Stale statements in this log's
+§1, §4, and §9 corrected.
+
+**Verified:** lint, tsc, build (14 static pages); head metadata dumped for
+all nine routes and the 404; headless Chrome over 9 routes × 7 widths — 0
+horizontal overflow, one `h1` per route, no skipped heading level, 0
+unnamed focusables, 0 empty blocks, phone number absent everywhere, the one
+email everywhere; Tab walk on `/about`, `/projects/thoraxvision`,
+`/research` — every stop visible, named, and ringed; console clean apart
+from the Lanyard's three pre-existing Three.js / Rapier notices.
+
 ---
 
 ## 4. Current Portfolio Architecture
@@ -876,6 +926,8 @@ src/
 │   │   └── [slug]/page.tsx /research/[slug]     → ResearchDetail (SSG, 2 slugs)
 │   ├── about/page.tsx      /about               → About
 │   ├── contact/page.tsx    /contact             → Contact
+│   ├── robots.ts           /robots.txt          allow-all; Sitemap line once site.url is set (6G)
+│   ├── sitemap.ts          /sitemap.xml         every route + slug, once site.url is set (6G)
 │   ├── globals.css         Entire design system (@theme + base layer)
 │   └── favicon.ico
 ├── components/
@@ -910,10 +962,12 @@ src/
 │       └── card-artwork.ts      Runtime canvas textures
 ├── data/                   Typed content layer (Phase 5E)
 │   ├── profile.ts               Owner identity, capabilities, contact
-│   ├── projects.ts              Tuberculosis + Melon case-study data
+│   ├── projects.ts              ThoraxVision + MelonVision AI case-study data
 │   ├── research.ts              ICWT 2026 / ICSMech 2026 entries
 │   └── site.ts                  Site config, NAVIGATION, SECTIONS
-├── lib/utils.ts            cn()
+├── lib/
+│   ├── utils.ts                 cn()
+│   └── metadata.ts              siteUrl(), routeMetadata() — canonical / og:url keyed on site.url (6G)
 └── types/index.ts          Content interfaces consumed by data/
 
 public/
@@ -1883,8 +1937,10 @@ silently invented. Consolidated here:
 - **Hero mission statement** — still owner-pending from Phase 5D-1.
 - **Personal / experience content.** No work experience and no "now" copy are
   documented; `Experience` and `NowItem` remain declared but unpopulated.
-- **Production domain.** `site.url` is `null`, so canonical URLs, sitemap,
-  robots, and Open Graph images cannot be finalised.
+- **Production domain.** `site.url` is `null`. Since Phase 6G canonical,
+  `og:url`, the robots `Sitemap:` line, and the sitemap entries are all
+  wired to it and switch on when it is set; the OG image is the other
+  half, and `public/images/og/` is still empty.
 
 ### Future planned work
 
@@ -1895,8 +1951,11 @@ silently invented. Consolidated here:
   `description`, each composed from `site.ts`, `profile.ts`, `projects.ts`, or
   `research.ts`. A research detail page omits `description` rather than invent
   one, because `topic` is `null`.
-- Open Graph and structured data; `site.ts` is the intended source once a
-  domain exists. Still blocked on `site.url`.
+- ~~Open Graph~~ — `og:type`, `og:site_name`, `og:title`, `og:description`,
+  and the Twitter card are emitted on every route since Phase 6G; `og:url`,
+  canonical, the robots sitemap line, and the sitemap itself follow
+  `site.url`. Still missing: the OG image and the domain. Structured data
+  (JSON-LD) is not started.
 
 ---
 
@@ -1926,18 +1985,17 @@ touching several files:**
 - ~~The square-tag class string exists in *three* components.~~ Paid in Phase
   6C, together with four other patterns that had been copied across sections
   for the same reason. `src/components/ui/` is the one source now.
-- **The About statement copy is authored, not owner-supplied.** Its claims
-  are all traceable, but `profile.pending` still lists personal copy as
-  outstanding. It needs approval or replacement. Phase 6C did not touch it —
-  it is content, and inventing a replacement is exactly what the data layer
-  exists to prevent.
+- ~~**The About statement copy is authored, not owner-supplied.**~~ Replaced
+  in Phase 6F by the owner's own six-section copy (`profile.about`).
 
 **Phases 6E and 6F ingested everything `Docs/Detail.txt` supplies.** Every
 page now reads from confirmed data and nothing on the site is placeholder.
-Phase 6G is launch readiness: a domain and `site.url`, canonical / sitemap /
-robots / Open Graph from `site.ts`, an OG image, the footer copy, the four
-subjective candidates in `PHASE_6E_REPORT.md` §7 if wanted, and deleting the
-two fully merged side branches.
+**Phase 6G** (at review gate) did the launch-readiness work that needs no
+domain: share and crawl metadata on every route, robots and sitemap wired
+to `site.url`, and a content-integrity pass. What remains for launch is
+owner input, not code: the domain (set `site.url` and everything lights
+up), the OG image, the four subjective candidates in `PHASE_6E_REPORT.md`
+§7 if wanted, and deleting the two fully merged side branches.
 
 *Previous note, kept for the record:* `Docs/Detail.txt` was sitting
 untracked in the working tree with answers to most of §8's pending list —

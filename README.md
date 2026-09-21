@@ -12,14 +12,16 @@ The site is built as a personal engineering archive rather than a generic develo
 
 | Layer | Technology | Notes |
 |---|---|---|
-| Framework | Next.js 16.3.1 | App Router, fully static generation |
+| Framework | Next.js 16.3.1 | App Router, every route statically prerendered |
 | Language | TypeScript 5 | Strict mode |
-| Styling | Tailwind CSS 4 | CSS-first — no `tailwind.config.js` |
-| Animation | Motion for React | Added in Phase 5C |
-| Interactive | React Bits Lanyard | Added in Phase 5C (via shadcn CLI) |
-| Icons | Lucide React | Added in Phase 5C |
+| Styling | Tailwind CSS 4 | CSS-first — no `tailwind.config.js`; the design system is `src/app/globals.css` |
+| 3D | React Three Fiber · drei · Rapier · meshline | The hero Lanyard only; loaded behind `next/dynamic({ ssr: false })` |
 | Fonts | Fraunces · DM Sans · JetBrains Mono | Self-hosted via `next/font/local` |
-| Deployment | Vercel | GitHub auto-deploy |
+| Deployment | — | No production domain yet; `site.url` in `src/data/site.ts` is `null` until one is chosen |
+
+No animation library, icon set, or UI kit. The Lanyard is adapted from the
+React Bits component source (see `Docs/DEVELOPMENT_LOG.md` §5), not installed
+as a package.
 
 ---
 
@@ -47,55 +49,48 @@ npm run build
 
 ## Project structure
 
-portofolio/
-├── public/
-│ ├── fonts/ Self-hosted variable font files (.woff2)
-│ │ ├── fraunces-variable-normal.woff2
-│ │ ├── fraunces-variable-italic.woff2
-│ │ ├── dm-sans-variable-normal.woff2
-│ │ ├── dm-sans-variable-italic.woff2
-│ │ └── jetbrains-mono-variable-normal.woff2
-│ └── images/
-│ ├── projects/
-│ │ ├── thoraxvision/
-│ │ └── melonvision-ai/
-│ └── og/ Open Graph images
-│
-├── src/
-│ ├── app/ Routes and root layout
-│ │ ├── layout.tsx Root layout, font loading, metadata
-│ │ ├── page.tsx Homepage
-│ │ └── globals.css Tailwind import, design tokens
-│ ├── components/ React components, organized by concern
-│ │ ├── layout/ Navigation, footer
-│ │ ├── sections/ Homepage sections
-│ │ ├── work/ Work list and preview interaction
-│ │ ├── project/ Case study page components
-│ │ ├── research/ Research log entries
-│ │ ├── lanyard/ 3D Lanyard wrapper (lazy-loaded)
-│ │ ├── ui/ Reusable primitives
-│ │ └── seo/ Structured data
-│ ├── data/ Content source of truth (Phase 5B)
-│ ├── lib/ Utility functions
-│ │ └── utils.ts cn() class-name helper
-│ └── types/ TypeScript interfaces
-│ └── index.ts
-│
-├── .env.local.example Documents NEXT_PUBLIC_SITE_URL
-├── next.config.ts
-├── tsconfig.json Alias: @/* → ./src/*
-├── postcss.config.mjs Tailwind 4 PostCSS integration
-└── eslint.config.mjs
+```
+src/
+├── app/                    One file per route
+│   ├── layout.tsx          Root layout: fonts, title template, share/crawl metadata, header + footer
+│   ├── page.tsx            /                    Hero + site index
+│   ├── projects/           /projects, /projects/[slug]
+│   ├── research/           /research, /research/[slug]
+│   ├── about/page.tsx      /about
+│   ├── contact/page.tsx    /contact
+│   ├── not-found.tsx       404, inside the layout
+│   ├── robots.ts           /robots.txt
+│   ├── sitemap.ts          /sitemap.xml (entries appear once `site.url` is set)
+│   └── globals.css         Entire design system (@theme + base layer)
+├── components/
+│   ├── layout/             Header, navs, footer, section primitives
+│   ├── sections/           Page bodies: hero, site index, selected work, research log, about, contact
+│   ├── projects/           Project case-study view
+│   ├── research/           Research entry view + status labels
+│   ├── ui/                 Shared class strings and link primitives
+│   └── lanyard/            Isolated 3D bundle (client components)
+├── data/                   Content source of truth — profile, projects, research, site
+├── lib/                    cn(), metadata helpers
+└── types/index.ts          Content interfaces consumed by data/
 
+public/
+├── fonts/                  Self-hosted variable woff2 files
+├── lanyard/card.glb        Lanyard card geometry
+└── images/og/              Reserved for the Open Graph image (empty — pending)
+```
+
+`Docs/DEVELOPMENT_LOG.md` carries the full per-file tree and the reasoning
+behind it.
 
 ---
 
 ## Architecture principles
 
 - **Static-first.** No database, no API routes, no CMS. All content lives in typed TypeScript files under `src/data/` and is rendered at build time.
-- **Server Components by default.** Client Components are added only where a browser API or interaction requires them (target: 8 total).
+- **Server Components by default.** Client Components exist only where a browser API or interaction requires them — the mobile menu, the desktop nav's current-page marker, and the two Lanyard components.
 - **Minimal dependencies.** A library is added only when CSS or a few lines of code cannot do the job.
-- **The Lanyard is isolated.** The 3D credential card is dynamically imported with SSR disabled, so its Three.js dependency chain never enters the main bundle. A static fallback card always renders first.
+- **The Lanyard is isolated.** The 3D credential card is dynamically imported with SSR disabled, so its Three.js dependency chain never enters the main bundle. A WebGL capability probe and an error boundary guard it.
+- **Nothing is invented.** Every name, figure, URL, and date on the site traces to an owner-supplied document. Anything not yet supplied is `null` in `src/data/` with a `pending` note, and the UI renders nothing for it rather than filler.
 
 ---
 
@@ -115,10 +110,11 @@ Variable font files are sourced from `@fontsource-variable/*` packages (dev depe
 
 ## Environment variables
 
-No secrets are required. Copy `.env.local.example` to `.env.local` for local development:
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
-
-Set this to the production domain before launch — it is used for canonical URLs, the sitemap, and Open Graph metadata.
+None are required, and none are read by the app yet. The production origin
+is `site.url` in `src/data/site.ts`; it is `null` until a domain is chosen,
+and canonical URLs, `og:url`, the sitemap entries, and the robots `Sitemap:`
+line all switch on when it is set. `.env.local.example` is kept for when that
+value is moved to an environment variable at deployment.
 
 ---
 
@@ -136,16 +132,11 @@ Instead: warm off-white background, charcoal text, a single muted terracotta acc
 
 ---
 
-## Implementation phases
+## Development record
 
-| Phase | Scope | Status |
-|---|---|---|
-| 5A | Project initialization & foundation | ✅ Complete |
-| 5B | Design tokens & data layer | ⏳ Next |
-| 5C | Hero & Lanyard | — |
-| 5D | Work, Research, Capabilities sections | — |
-| 5E | Case study pages | — |
-| 5F | Responsive, accessibility, SEO, performance | — |
+`Docs/DEVELOPMENT_LOG.md` is the rolling record of every phase, what it
+changed, how it was verified, and what is still owner-pending. Per-phase
+reports sit beside it in `Docs/`.
 
 ---
 
