@@ -102,12 +102,6 @@ export const profile: Profile = {
       href: "https://github.com/lycheeuy",
       primary: true,
     },
-    {
-      label: "Phone",
-      value: "+62 895 2014 1464",
-      href: "tel:+6289520141464",
-      primary: false,
-    },
   ],
 
   /**

@@ -7,9 +7,8 @@ import { routeMetadata } from "@/lib/metadata";
 /**
  * Contact — `/contact`.
  *
- * `Contact` owns the rendering, including the decision to publish email,
- * LinkedIn, and GitHub while keeping the phone number out. The description is
- * `profile.availability` verbatim.
+ * `Contact` owns the rendering: it publishes every `primary` channel — email,
+ * LinkedIn, and GitHub. The description is `profile.availability` verbatim.
  */
 export const metadata: Metadata = {
   title: getSection("/contact")?.label ?? "Contact",

@@ -113,8 +113,9 @@ Variable font files are sourced from `@fontsource-variable/*` packages (dev depe
 None are required, and none are read by the app yet. The production origin
 is `site.url` in `src/data/site.ts`; it is `null` until a domain is chosen,
 and canonical URLs, `og:url`, the sitemap entries, and the robots `Sitemap:`
-line all switch on when it is set. `.env.local.example` is kept for when that
-value is moved to an environment variable at deployment.
+line all switch on when it is set. There is no `.env` file in the repository:
+`.gitignore` excludes `.env*`, so a `.env.local.example` on a local checkout
+is not tracked and a fresh clone does not receive one.
 
 ---
 

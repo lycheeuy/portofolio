@@ -1,7 +1,7 @@
 # Development Log
 
 Rolling record of work actually completed and verified on this project.
-Last updated: 2026-09-20 (Phase 6G).
+Last updated: 2026-09-21 (Phase 6H).
 
 Companion phase docs live alongside this file in `Docs/`. This log is the
 entry point; those docs carry the per-phase detail.
@@ -81,6 +81,8 @@ training data. `AGENTS.md` requires reading the relevant guide in
 Commit history:
 
 ```
+5bc1766  feat: content and credibility polish — share/crawl metadata, research description, stale-copy sweep (Phase 6G)
+6439cd4  feat: rebuild /about from the owner's own words (Phase 6F)
 934fb15  content: ingest approved case-study and research facts from Detail.txt (Phase 6E)
 c0f65c3  docs: record that Phases 5D-3 through 6D and the owner decisions are merged to main
 a6b45ad  chore: ignore Docs/Detail.txt owner-input working file
@@ -102,9 +104,10 @@ ff73396  fix: resolve location contradiction, restore 5D-3 lanyard assets (Phase
 
 Phases 6C and 6D landed together in `ea35364` on `fix/lanyard-5d3-regression`
 (2026-09-19). **The branch was merged to `main` the same day** with `--no-ff`
-as `2a8b959`, landing everything since 5D-2 in one merge commit; `main` and
-`origin/main` are in sync at `a6b45ad`. `fix/lanyard-5d3-regression` and
-`phase-5d-3-lanyard` are fully merged and can be deleted.
+as `2a8b959`, landing everything since 5D-2 in one merge commit. As of
+2026-09-21 `origin/main` is at `6439cd4` (Phase 6F) and local `main` is one
+commit ahead at `5bc1766` (Phase 6G, not yet pushed). `fix/lanyard-5d3-regression`
+and `phase-5d-3-lanyard` are fully merged and can be deleted.
 
 ### Phase 5A — Foundation · Complete
 
@@ -860,9 +863,10 @@ copy, keeps graduation year, work experience, and the hero statement.
 console clean apart from the Lanyard's Three.js notices; the build contains
 no "studied in Cirebon" / "lives in Purwokerto" string.
 
-### Phase 6G — Content & Credibility Polish · Implemented, at review gate
+### Phase 6G — Content & Credibility Polish · Complete
 
-Full report: `Docs/PHASE_6G_REPORT.md`. Not yet committed.
+Full report: `Docs/PHASE_6G_REPORT.md`. Committed as `5bc1766` on `main`
+(2026-09-21).
 
 A read-through of every route as a recruiter would see it, plus the
 metadata a crawler or a share card sees. No visual-system, route, token,
@@ -907,6 +911,49 @@ unnamed focusables, 0 empty blocks, phone number absent everywhere, the one
 email everywhere; Tab walk on `/about`, `/projects/thoraxvision`,
 `/research` — every stop visible, named, and ringed; console clean apart
 from the Lanyard's three pre-existing Three.js / Rapier notices.
+
+### Phase 6H — Final QA & Launch Readiness · Audit complete, at review gate
+
+Full report: `Docs/PHASE_6H_REPORT.md`. Not yet committed. Result: **PASS
+WITH NOTES.**
+
+An audit-only pass over a fresh production build (`next build` +
+`next start`), not a feature phase. No code, data, style, route,
+dependency, or Lanyard change; no owner decision taken; nothing deployed.
+
+**Checked.** Git baseline (clean tree on `main` at `5bc1766`; one commit
+ahead of `origin/main`). All 9 routes + 404 + `robots.txt` + `sitemap.xml`
+return the intended status; the two pre-decision slugs and an arbitrary
+path 404 inside the layout. Every `href` in `src/` and in the rendered HTML
+resolves — 10 internal targets, 6 external URLs fetched (5 × 200, LinkedIn
+999 = bot block), one `mailto:`. No stale email, slug, name, or location;
+no placeholder, `undefined`/`null` leak, or invented figure in any
+rendered page; `SHOW_MODEL_RESULTS` still hides the ThoraxVision tables;
+research venue/year/author position identical on every page that prints
+them. Head metadata dumped for all routes: coherent titles and
+descriptions, OG and Twitter tags, no fabricated canonical / `og:url` /
+sitemap host while `site.url` is null, Next's `noindex` alone on the 404.
+Headless Chrome, 9 routes × 7 widths (375–1440): 0 horizontal overflow, one
+`h1`, no skipped heading level, 0 unnamed focusables, 0 empty blocks, phone
+absent, 0 exceptions, 0 failed requests, 0 hydration messages; the three
+pre-existing Lanyard deprecation warnings on `/` only. Tab walks on `/`,
+`/about`, `/projects/thoraxvision`; mobile menu is a labelled modal dialog
+that traps focus, locks scroll, and returns focus on Escape. Every tracked
+asset is referenced; every dependency is used or (fontsource) documented as
+the font source. `.env*` ignored, no secrets, no local paths.
+
+**Fixed.** README "Environment variables" claimed `.env.local.example` "is
+kept" — it is gitignored and untracked. Sentence corrected.
+
+**Fixed, on the owner's instruction.** The phone number was in
+`src/data/profile.ts` (a `Phone` channel, `primary: false`, never rendered)
+and `Docs/User Input Session.txt`, both tracked in a publicly reachable
+repository. Both removed; no replacement field; `ContactChannel.primary`
+and its filters stay, and the three public channels render exactly as
+before (checked in the built HTML). Three comments that described the phone
+as "kept out" updated. A repo-wide grep finds no occurrence. Git history is
+not rewritten — that is a separate decision; `5bc1766` and earlier still
+carry the value.
 
 ---
 
@@ -1990,12 +2037,15 @@ touching several files:**
 
 **Phases 6E and 6F ingested everything `Docs/Detail.txt` supplies.** Every
 page now reads from confirmed data and nothing on the site is placeholder.
-**Phase 6G** (at review gate) did the launch-readiness work that needs no
+**Phase 6G** (`5bc1766`) did the launch-readiness work that needs no
 domain: share and crawl metadata on every route, robots and sitemap wired
-to `site.url`, and a content-integrity pass. What remains for launch is
-owner input, not code: the domain (set `site.url` and everything lights
-up), the OG image, the four subjective candidates in `PHASE_6E_REPORT.md`
-§7 if wanted, and deleting the two fully merged side branches.
+to `site.url`, and a content-integrity pass. **Phase 6H** (at review gate)
+audited the result end to end and found nothing blocking. What remains for
+launch is owner input, not code: the domain (set `site.url` and everything
+lights up), the OG image, the four subjective candidates in
+`PHASE_6E_REPORT.md` §7 if wanted, whether to rewrite history now that the
+phone number is out of the working tree, pushing `main`, and deleting the
+two fully merged side branches.
 
 *Previous note, kept for the record:* `Docs/Detail.txt` was sitting
 untracked in the working tree with answers to most of §8's pending list —

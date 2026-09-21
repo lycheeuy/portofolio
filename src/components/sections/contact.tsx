@@ -17,12 +17,12 @@ import { site } from "@/data/site";
  * Every address comes from `profile.contact`. No URL, handle, or number is
  * written here.
  *
- * **The phone number is deliberately not rendered.** It is in the data with
- * `primary: false`, and the Phase 5E decision that introduced that flag says
- * exactly why: the flag exists so the contact section can publish email,
- * LinkedIn, and GitHub "while treating the phone number as a deliberate opt-in
- * rather than default page content". Filtering on `primary` honours that
- * rather than re-deciding it here.
+ * **Only `primary` channels are rendered.** The flag was introduced in Phase
+ * 5E so the contact section could publish email, LinkedIn, and GitHub while
+ * keeping anything else out of default page content. The phone number that
+ * once sat behind it was removed from the repository in Phase 6H (it was
+ * never rendered); the filter stays so a future non-public channel is handled
+ * the same way.
  */
 
 const CONTACT = site.sections.find((section) => section.href === "/contact");

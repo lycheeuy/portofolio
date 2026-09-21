@@ -25,9 +25,9 @@ const YEAR = new Date().getFullYear();
 /**
  * Social profiles: the publishable channels that point somewhere on the web.
  * Filtering on the URI scheme is what separates a profile from a way of
- * contacting someone — `mailto:` and `tel:` belong to `#contact`, not to a
- * footer row of social links. `primary` keeps the phone number out regardless,
- * per the Phase 5E decision.
+ * contacting someone — `mailto:` belongs to `#contact`, not to a footer row
+ * of social links. `primary` keeps any non-public channel out regardless, per
+ * the Phase 5E decision.
  */
 const SOCIAL = profile.contact.filter(
   (channel) => channel.primary && /^https?:/.test(channel.href),
