@@ -3,7 +3,7 @@ import { SectionEyebrow } from "@/components/layout/section-header";
 import { ActionLink } from "@/components/ui/action-link";
 import { BackLink } from "@/components/ui/back-link";
 import { bodyText, metaLabel, monoMeta, smallText } from "@/components/ui/styles";
-import { SETTLED, STATUS_LABEL } from "./status";
+import { SETTLED, statusLine } from "./status";
 import { getProject } from "@/data/projects";
 import { research } from "@/data/research";
 import { getSection } from "@/data/site";
@@ -18,8 +18,11 @@ import type { ExternalLink, ResearchEntry } from "@/types";
  * invented abstract. Phase 6E supplied the title, conference name, topic,
  * author position, repository link, and source project for both entries, and
  * the same markup renders them with no change here; the venue-only note stays
- * for any future entry that arrives as a venue alone. `status` is still
- * `pending-confirmation` on both, so the paper link block does not exist yet.
+ * for any future entry that arrives as a venue alone. Since 2026-09-21 the
+ * status line carries the owner-confirmed publication state and platform
+ * ("Published · IEEE Xplore · 2026"). The ICSMech entry's Links block lists
+ * the confirmed IEEE Xplore paper ahead of its repository; the ICWT entry
+ * has no public paper URL yet, so its block lists the repository only.
  */
 
 const RESEARCH = getSection("/research");
@@ -116,7 +119,7 @@ export function ResearchDetail({ entry }: { entry: ResearchEntry }) {
                 settled ? "bg-[var(--color-accent)]" : "bg-[var(--color-border)]"
               }`}
             />
-            <span className={metaLabel}>{STATUS_LABEL[entry.status]}</span>
+            <span className={metaLabel}>{statusLine(entry)}</span>
           </p>
         </header>
 
@@ -171,7 +174,7 @@ export function ResearchDetail({ entry }: { entry: ResearchEntry }) {
             className={`mt-16 max-w-[52ch] border-t border-[var(--color-border)] pt-8 ${smallText} text-muted lg:mt-20`}
           >
             The venue and the year are all that is settled for this entry. The
-            title, topic, contribution, and any paper link are published here
+            title, topic, contribution, and any paper link are listed here
             once they are confirmed, not before.
           </p>
         ) : null}

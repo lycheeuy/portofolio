@@ -36,6 +36,7 @@ import type {
  * `SHOW_MODEL_RESULTS`). MelonVision AI carries no evaluation figures but does
  * carry a timeline and a deployment chain ending on ESP32-CAM hardware, so its
  * weight falls on approach and stack. Neither shape is hardcoded per project.
+ * Since 2026-09-21 both carry an Outcome and a Lessons-learned block.
  */
 
 const WORK = getSection("/projects");
@@ -384,6 +385,23 @@ export function ProjectDetail({ project }: { project: Project }) {
                 <p className={`mt-3 max-w-[58ch] ${bodyText}`}>
                   {project.outcome}
                 </p>
+              </>
+            ) : null}
+
+            {/* Lessons learned (owner data finalisation, 2026-09-21). One
+                paragraph per lesson, in the same measure as Problem and
+                Outcome; conditional on the list so a project without any
+                renders no heading over nothing. */}
+            {project.lessons.length > 0 ? (
+              <>
+                <h2 className={`${blockHeading} mt-10`}>Lessons learned</h2>
+                <div className="mt-3 space-y-4">
+                  {project.lessons.map((lesson) => (
+                    <p key={lesson} className={`max-w-[58ch] ${bodyText}`}>
+                      {lesson}
+                    </p>
+                  ))}
+                </div>
               </>
             ) : null}
           </div>

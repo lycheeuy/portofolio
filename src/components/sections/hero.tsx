@@ -49,12 +49,25 @@ const trajectoryStep = `${monoMeta} text-secondary`;
 
 const colophonValue = `mt-2 ${smallText} text-ink`;
 
-/** Factual metadata rendered as a colophon strip below the composition. */
+/**
+ * The mission line: Fraunces italic between the positioning and the career
+ * direction, the slot 5D-1 reserved for it. Same measure as the positioning
+ * paragraph so the two read as one column of statement.
+ */
+const missionLine = `mt-6 max-w-[38ch] font-display text-[length:var(--text-body-lg)] italic leading-[var(--leading-relaxed)] text-ink`;
+
+/**
+ * Factual metadata rendered as a colophon strip below the composition.
+ * `degree` already names the field ("Bachelor of Biomedical Engineering"),
+ * so it stands alone with the graduation year when one is recorded.
+ */
 const COLOPHON = [
   { term: "Based in", value: profile.location },
   {
     term: "Education",
-    value: `${profile.education.field} — ${profile.education.degree}`,
+    value: profile.education.graduationYear
+      ? `${profile.education.degree}, ${profile.education.graduationYear}`
+      : profile.education.degree,
   },
   { term: "Focus", value: profile.focusAreas.join(" · ") },
 ];
@@ -86,6 +99,16 @@ export function Hero() {
             <p data-hero-lead="" className="mt-8 max-w-[38ch] font-sans text-[length:var(--text-body-lg)] leading-[var(--leading-relaxed)] text-secondary">
               {profile.positioning}
             </p>
+
+            {/* Owner-approved mission statement (2026-09-21), in the line
+                5D-1 reserved between positioning and direction. Rendered only
+                when set, so the composition is unchanged if it is ever
+                withdrawn. */}
+            {profile.mission ? (
+              <p data-hero-mission="" className={missionLine}>
+                {profile.mission}
+              </p>
+            ) : null}
 
             {/* Stated career direction. An ordered list because the sequence
                 is the content; the arrows are decoration over that order. */}

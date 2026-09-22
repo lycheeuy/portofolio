@@ -38,6 +38,8 @@ export interface Education {
   status: string;
   /** Awarding institution, as the owner names it. `null` until confirmed. */
   institution: string | null;
+  /** Year the degree was completed. `null` until confirmed. */
+  graduationYear: number | null;
 }
 
 /**
@@ -79,6 +81,18 @@ export interface Profile {
   location: string;
   /** Short factual positioning line. Not a marketing tagline. */
   positioning: string;
+  /**
+   * The Hero mission statement, in the owner's approved wording. `null`
+   * until chosen; the Hero reserves the line and renders nothing for it.
+   */
+  mission: string | null;
+  /**
+   * How the owner's professional experience is described. The owner is a
+   * fresh graduate with no formal employment to document, so this is a
+   * label — "Independent projects" — not an employer, title, or period.
+   * `null` renders no row.
+   */
+  experience: string | null;
   roles: string[];
   focusAreas: string[];
   /** Stated career direction, in order. */
@@ -139,6 +153,12 @@ export interface Project {
    * words. `null` until supplied — never summarised from the approach.
    */
   outcome: string | null;
+  /**
+   * Lessons learned, one paragraph each, grounded in what the project
+   * actually did. An empty list means none are written yet and the case
+   * study renders no block for it.
+   */
+  lessons: string[];
   stack: CapabilityGroup[];
   dataset: ProjectDataset | null;
   models: ModelResult[];
@@ -153,12 +173,15 @@ export interface Project {
 /**
  * `pending-confirmation` means the venue is confirmed but the submission
  * state is not. It is deliberately not defaulted to "accepted".
+ * `in-publication` is the owner's wording for a paper that is past
+ * submission but not yet published; it is neither "accepted" nor "published".
  */
 export type ResearchStatus =
   | "pending-confirmation"
   | "in-preparation"
   | "submitted"
   | "accepted"
+  | "in-publication"
   | "presented"
   | "published";
 
@@ -179,6 +202,12 @@ export interface ResearchEntry {
   topic: string | null;
   contribution: string | null;
   status: ResearchStatus;
+  /**
+   * Publication platform the status refers to — "IEEE Xplore" for a
+   * published paper, "IEEE" for one in the publication process. `null`
+   * when the owner has not named one; the status line then omits it.
+   */
+  platform: string | null;
   /** `Project.slug` this work draws on, when the link is documented. */
   projectSlug: string | null;
   links: ExternalLink[];

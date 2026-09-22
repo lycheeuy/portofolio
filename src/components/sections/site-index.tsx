@@ -23,7 +23,7 @@ import { SECTIONS } from "@/data/site";
  * (`01`–`04`) the header's mono indices use.
  *
  * The line under each label is a count or a status read from the data, never
- * a description written here: "2 projects", "2 venues", the education field,
+ * a description written here: "2 projects", "2 papers", the education field,
  * the availability line. If the data changes, the directory changes; if a
  * fact is not in the data, the row simply carries no line.
  */
@@ -37,7 +37,7 @@ const DESTINATIONS = SECTIONS.filter((section) => section.href !== "/");
  */
 const META: Record<string, string | undefined> = {
   "/projects": `${projects.length} ${projects.length === 1 ? "project" : "projects"}`,
-  "/research": `${research.length} ${research.length === 1 ? "venue" : "venues"} confirmed`,
+  "/research": `${research.length} conference ${research.length === 1 ? "paper" : "papers"}`,
   "/about": `${profile.education.field} · ${profile.roles.length} roles`,
   "/contact": profile.availability,
 };

@@ -44,8 +44,14 @@ import { site } from "@/data/site";
  * until Phase 6G; it is now a Background row.)
  *
  * **Two places, not one.** The owner studied at `education.institution`
- * (Telkom University Purwokerto) and lives in `location` (Kota Cirebon).
- * Both are rendered, in separate rows, under separate terms.
+ * (Telkom University Purwokerto) and lives in `location` (Cirebon). Both
+ * are rendered, in separate rows, under separate terms.
+ *
+ * **Experience.** The owner is a fresh graduate with no formal employment to
+ * document (confirmed 2026-09-21). `profile.experience` carries the agreed
+ * label — "Independent projects" — as a Background row, and block 04 lists
+ * the projects themselves as the evidence. No employer, title, or period is
+ * implied anywhere on the page.
  */
 
 const ABOUT = site.sections.find((section) => section.href === "/about");
@@ -81,22 +87,29 @@ const HAS_RESEARCH_GROUP = profile.capabilities.some(
 );
 
 /**
- * Education, institution, roles, focus, and location. Everything here is a
- * literal field. Institution is its own row rather than a suffix on Education
- * so the place of study and the place of residence never sit in one string.
- * Focus is the same `focusAreas` join the Hero colophon prints, so the two
- * pages cannot name different areas.
+ * Education, institution, roles, experience, focus, and location. Everything
+ * here is a literal field. Institution is its own row rather than a suffix on
+ * Education so the place of study and the place of residence never sit in
+ * one string. `degree` already names the field, so it stands alone, with the
+ * status and graduation year as its note. Focus is the same `focusAreas`
+ * join the Hero colophon prints, so the two pages cannot name different
+ * areas.
  */
 const BACKGROUND = [
   {
     term: "Education",
-    value: `${profile.education.field} — ${profile.education.degree}`,
-    note: profile.education.status,
+    value: profile.education.degree,
+    note: [profile.education.status, profile.education.graduationYear]
+      .filter(Boolean)
+      .join(" · "),
   },
   ...(profile.education.institution
     ? [{ term: "Studied at", value: profile.education.institution, note: null }]
     : []),
   { term: "Roles", value: profile.roles.join(" · "), note: null },
+  ...(profile.experience
+    ? [{ term: "Experience", value: profile.experience, note: null }]
+    : []),
   { term: "Focus", value: profile.focusAreas.join(" · "), note: null },
   { term: "Based in", value: profile.location, note: null },
 ];

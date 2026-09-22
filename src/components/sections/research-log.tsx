@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Section } from "@/components/layout/section";
 import { SectionHeader } from "@/components/layout/section-header";
-import { SETTLED, STATUS_LABEL } from "@/components/research/status";
+import { SETTLED, statusLine, statusSummary } from "@/components/research/status";
 import {
   arrowStep,
   colorTransition,
@@ -22,14 +22,18 @@ import type { ResearchEntry } from "@/types";
  * non-null: an entry with a title shows it as the heading with the venue
  * demoted to a metadata line; a venue-only entry shows the acronym as the
  * heading and nothing invented beneath it. As of Phase 6E both entries carry
- * a title, conference name, and topic from `Docs/Detail.txt`; `status` is
- * still `pending-confirmation` for both, which means it is not known whether
- * they are submitted, accepted, or presented, and no paper link exists yet.
+ * a title, conference name, and topic from `Docs/Detail.txt`; since the
+ * owner data finalisation of 2026-09-21 each carries its own publication
+ * state and platform — published on IEEE Xplore, in the publication process
+ * with IEEE — and the status column prints exactly that. The published
+ * paper's IEEE Xplore link is on its detail page; the index rows carry no
+ * outbound links.
  *
  * Phase 6D turned each row's heading into a link to `/research/[slug]`, where
- * `ResearchDetail` renders the same fields at length. `STATUS_LABEL` and
- * `SETTLED` moved to `@/components/research/status` so the index and the
- * detail page cannot word a status differently.
+ * `ResearchDetail` renders the same fields at length. The status wording,
+ * `SETTLED`, and the composed status line live in
+ * `@/components/research/status` so the index and the detail page cannot
+ * word a status differently.
  *
  * The Method block is the one thing here not drawn from `research.ts`. See the
  * note above `RESEARCH_PRACTICE`.
@@ -59,10 +63,15 @@ const RESEARCH_PRACTICE = profile.capabilities.find(
 
 /**
  * Whether any entry is still venue-only. The standfirst's second sentence
- * names what is withheld; once every entry has a title, saying "titles are
- * listed once settled" under a list of titles would read as a contradiction.
+ * names what is withheld while that is so; once every entry has a title and
+ * a status, it states the statuses instead.
  */
 const ANY_VENUE_ONLY = research.some((entry) => entry.title === null);
+
+/** "1 published · 1 in publication process" — counted from the data. */
+const STATUS_SUMMARY = statusSummary(research);
+
+const PAPER_NOUN = research.length === 1 ? "paper" : "papers";
 
 /** Distinct years present in the log, for the standfirst. */
 const YEARS = Array.from(new Set(research.map((entry) => entry.year))).sort(
@@ -154,8 +163,9 @@ function ResearchRow({ entry }: { entry: ResearchEntry }) {
 
         {/* Status. Left-aligned in the flow on narrow screens, pushed to the
             outer edge of the ledger from lg. Four columns rather than three:
-            at 1440 the longest label is ~277px against a 260px three-column
-            track, so it broke across "DETAILS TO / FOLLOW". */}
+            at 1440 the longest line ("In publication process · IEEE · 2026")
+            needs the width, and the 6E label broke across two lines in a
+            three-column track. */}
         <p className="flex items-baseline gap-2 sm:col-span-9 sm:col-start-4 lg:col-span-4 lg:col-start-9 lg:justify-end">
           <span
             aria-hidden="true"
@@ -164,7 +174,7 @@ function ResearchRow({ entry }: { entry: ResearchEntry }) {
             }`}
           />
           <span className={`${metaLabel} lg:text-right`}>
-            {STATUS_LABEL[entry.status]}
+            {statusLine(entry)}
           </span>
         </p>
       </article>
@@ -179,21 +189,20 @@ export function ResearchLog() {
     <Section id="research" labelledBy="research-heading">
       <SectionHeader
         index={RESEARCH_INDEX}
-        meta={`${research.length} ${research.length === 1 ? "venue" : "venues"}`}
+        meta={`${research.length} ${PAPER_NOUN}`}
         heading={RESEARCH_LABEL}
         headingId="research-heading"
         level={1}
       >
-        {/* Counts and years are read from the data. The second sentence names
-            what is still withheld — see `ANY_VENUE_ONLY` — which is the honest
-            thing to say when the alternative is an invented status. */}
+        {/* Counts, years, and statuses are read from the data. While any
+            entry is venue-only the second sentence names what is withheld —
+            see `ANY_VENUE_ONLY`; otherwise it states the statuses. */}
         <p className={`mt-6 max-w-[52ch] ${leadText} text-secondary`}>
-          {research.length} conference{" "}
-          {research.length === 1 ? "venue is" : "venues are"} confirmed
-          {YEAR_RANGE ? ` for ${YEAR_RANGE}` : ""}.{" "}
+          {research.length} conference {PAPER_NOUN}
+          {YEAR_RANGE ? ` for ${YEAR_RANGE}` : ""}
           {ANY_VENUE_ONLY
-            ? "Paper titles, topics, and submission state are listed here once they are settled, not before."
-            : "Submission state is recorded here once it is settled, not before."}
+            ? ". Paper titles, topics, and publication state are listed here once they are settled, not before."
+            : `: ${STATUS_SUMMARY}.`}
         </p>
       </SectionHeader>
 

@@ -1,7 +1,7 @@
 # Development Log
 
 Rolling record of work actually completed and verified on this project.
-Last updated: 2026-09-21 (Phase 6H).
+Last updated: 2026-09-21 (Owner Data Finalization).
 
 Companion phase docs live alongside this file in `Docs/`. This log is the
 entry point; those docs carry the per-phase detail.
@@ -81,6 +81,7 @@ training data. `AGENTS.md` requires reading the relevant guide in
 Commit history:
 
 ```
+60ecd70  docs: final QA and launch-readiness audit (Phase 6H)
 5bc1766  feat: content and credibility polish — share/crawl metadata, research description, stale-copy sweep (Phase 6G)
 6439cd4  feat: rebuild /about from the owner's own words (Phase 6F)
 934fb15  content: ingest approved case-study and research facts from Detail.txt (Phase 6E)
@@ -105,8 +106,7 @@ ff73396  fix: resolve location contradiction, restore 5D-3 lanyard assets (Phase
 Phases 6C and 6D landed together in `ea35364` on `fix/lanyard-5d3-regression`
 (2026-09-19). **The branch was merged to `main` the same day** with `--no-ff`
 as `2a8b959`, landing everything since 5D-2 in one merge commit. As of
-2026-09-21 `origin/main` is at `6439cd4` (Phase 6F) and local `main` is one
-commit ahead at `5bc1766` (Phase 6G, not yet pushed). `fix/lanyard-5d3-regression`
+2026-09-21 `main` and `origin/main` are in sync at `60ecd70` (Phase 6H). `fix/lanyard-5d3-regression`
 and `phase-5d-3-lanyard` are fully merged and can be deleted.
 
 ### Phase 5A — Foundation · Complete
@@ -912,10 +912,10 @@ email everywhere; Tab walk on `/about`, `/projects/thoraxvision`,
 `/research` — every stop visible, named, and ringed; console clean apart
 from the Lanyard's three pre-existing Three.js / Rapier notices.
 
-### Phase 6H — Final QA & Launch Readiness · Audit complete, at review gate
+### Phase 6H — Final QA & Launch Readiness · Complete
 
-Full report: `Docs/PHASE_6H_REPORT.md`. Not yet committed. Result: **PASS
-WITH NOTES.**
+Full report: `Docs/PHASE_6H_REPORT.md`. Committed as `60ecd70` and pushed
+(2026-09-21). Result: **PASS WITH NOTES.**
 
 An audit-only pass over a fresh production build (`next build` +
 `next start`), not a feature phase. No code, data, style, route,
@@ -954,6 +954,61 @@ before (checked in the built HTML). Three comments that described the phone
 as "kept out" updated. A repo-wide grep finds no occurrence. Git history is
 not rewritten — that is a separate decision; `5bc1766` and earlier still
 carry the value.
+
+### Owner Data Finalization — Final Portfolio Content · Implemented, at review gate
+
+Full report: `Docs/OWNER_DATA_FINALIZATION_REPORT.md`. Not yet committed.
+
+The owner's confirmed decisions, applied to the data layer and the few
+components that had to learn a new field. Content and data only: no
+visual-system token, Lanyard, route, dependency, or metadata-origin change;
+`site.url` stays `null`; nothing inferred.
+
+**Profile.** Hero mission statement in the owner's exact wording, rendered
+in the Fraunces-italic line 5D-1 reserved between positioning and career
+direction. Degree "Bachelor of Biomedical Engineering" with graduation year
+2026 (Hero colophon "…, 2026"; About note "Completed · 2026"). Location
+"Cirebon, West Java, Indonesia". First career step "AI / ML Engineer".
+LinkedIn URL as the owner gave it. No formal employment exists: a new
+`profile.experience = "Independent projects"` renders as an About
+Background row, and the projects themselves remain the evidence.
+`profile.pending` is now empty.
+
+**ThoraxVision.** Public repository linked (`github.com/lycheeuy/thoraxvision`
+— the owner's `.git` clone form redirects there). Owner-approved `outcome`
+(screening research; web interface for inference; no clinical claim). Four
+lessons learned, each tied to a recorded step. Dates stay undisplayed and
+the model figures stay hidden, by decision — both dropped from `pending`.
+
+**MelonVision AI.** Four lessons learned grounded in the documented build
+and the FOMO-decoder fix. Client unnamed, no live URL; the `href: null`
+Live note stays as data and renders nothing.
+
+**Research.** ICSMech 2026 is `published` on IEEE Xplore; ICWT 2026 is
+`in-publication` (new `ResearchStatus`, label "In publication process")
+with IEEE — never "accepted". A `platform` field and a `statusLine()`
+helper compose "Published · IEEE Xplore · 2026" / "In publication process ·
+IEEE · 2026" for the index and the detail page; `statusSummary()` feeds the
+index standfirst, the `/research` description, and the home index row
+("2 conference papers"). Co-authors are not displayed. The ICSMech paper's
+IEEE Xplore URL (`https://ieeexplore.ieee.org/document/11647113`, confirmed
+2026-09-22) is linked as "Paper" on its entry page, ahead of the
+repository; the ICWT paper has no public paper / DOI URL yet, so its entry
+links the repository only.
+
+**6E subjective items.** A — paper-specific status (above). B — Timeline and
+Year kept as two facts. C — the "not documented" dataset notes moved off
+the page into `pending`. D — 404 title untouched.
+
+**Types.** `Education.graduationYear`, `Profile.mission`,
+`Profile.experience`, `Project.lessons`, `ResearchEntry.platform`,
+`ResearchStatus` `in-publication`. `ProjectDetail` gains a Lessons-learned
+block after Outcome, conditional on the list.
+
+**Verified:** lint, tsc, build (14 pages); every decision found in the
+built HTML of its page; headless Chrome 9 routes × 7 widths — 0 overflow,
+one `h1`, no skipped level, 0 unnamed focusables, phone absent, 0
+exceptions / failed requests; the Lanyard's two pre-existing notices only.
 
 ---
 
@@ -1962,28 +2017,35 @@ Recorded in code as `pending` arrays on each data export, so nothing is
 silently invented. Consolidated here:
 
 - **Research — both entries.** Title, conference name, topic, author
-  position, repository link, and source project are in (Phase 6E). Still
-  unknown: conference host/location, submission state, co-authors, and a
-  paper / DOI / presentation link. `status` stays `pending-confirmation`.
-- **Links.** ThoraxVision's repository is not public (Detail.txt); its live
-  site is linked. MelonVision's repository is linked (Phase 6E); its live
-  deployment sits on the client's VPS and whether it may be shown is still
-  open. `ExternalLink.href` is `null` with a note rather than a guessed
-  address.
-- **MelonVision AI.** Year, architecture, purpose, and achievement are in
-  (Phase 6E). The owner confirms no evaluation figures exist. The "may the
-  client be named?" question is still unanswered.
-- **ThoraxVision.** Detail.txt item 10 — what the owner wants highlighted —
-  is unanswered; `outcome` is `null`.
+  position, repository link, source project (Phase 6E), and publication
+  state and platform (Owner Data Finalization: ICSMech published on IEEE
+  Xplore, ICWT in the publication process with IEEE) are in; the ICSMech
+  paper's IEEE Xplore URL is linked. Still unknown: conference host/location
+  for both, and a paper / DOI link for ICWT once it is published. Co-authors
+  are not displayed, by decision.
+- **Links.** ThoraxVision's repository and live site are both linked
+  (repository confirmed public in the Owner Data Finalization). MelonVision's
+  repository is linked (Phase 6E); its live deployment is not to be linked,
+  by decision. `ExternalLink.href` is `null` with a note rather than a
+  guessed address.
+- **MelonVision AI.** Year, architecture, purpose, achievement (Phase 6E),
+  and lessons learned (Owner Data Finalization) are in. The owner confirms
+  no evaluation figures exist. The client is not to be named, by decision.
+- **ThoraxVision.** `outcome` and lessons learned are in (Owner Data
+  Finalization); dates are not to be displayed, by decision.
 - ~~**About copy.**~~ Ingested in Phase 6F as `profile.about`.
-- **Profile.** Graduation year; work experience; the Hero mission statement.
+- ~~**Profile.** Graduation year; work experience; the Hero mission
+  statement.~~ All three settled in the Owner Data Finalization: 2026;
+  "Independent projects" (no formal employment exists); the approved
+  sentence.
 - **TB metrics gaps.** ResNet50 accuracy and specificity for all three models
   were left blank. VGG19 records F1 `0.5745` for *both* classes, which cannot
   both be right — the Tuberculosis value is stored as `null` pending
   correction.
-- **Hero mission statement** — still owner-pending from Phase 5D-1.
-- **Personal / experience content.** No work experience and no "now" copy are
-  documented; `Experience` and `NowItem` remain declared but unpopulated.
+- ~~**Hero mission statement**~~ — applied in the Owner Data Finalization.
+- **Personal / experience content.** The owner has no formal employment to
+  document; `profile.experience` carries "Independent projects". No "now"
+  copy exists; `Experience` and `NowItem` remain declared but unpopulated.
 - **Production domain.** `site.url` is `null`. Since Phase 6G canonical,
   `og:url`, the robots `Sitemap:` line, and the sitemap entries are all
   wired to it and switch on when it is set; the OG image is the other
@@ -2039,13 +2101,16 @@ touching several files:**
 page now reads from confirmed data and nothing on the site is placeholder.
 **Phase 6G** (`5bc1766`) did the launch-readiness work that needs no
 domain: share and crawl metadata on every route, robots and sitemap wired
-to `site.url`, and a content-integrity pass. **Phase 6H** (at review gate)
-audited the result end to end and found nothing blocking. What remains for
-launch is owner input, not code: the domain (set `site.url` and everything
-lights up), the OG image, the four subjective candidates in
-`PHASE_6E_REPORT.md` §7 if wanted, whether to rewrite history now that the
-phone number is out of the working tree, pushing `main`, and deleting the
-two fully merged side branches.
+to `site.url`, and a content-integrity pass. **Phase 6H** (`60ecd70`)
+audited the result end to end and found nothing blocking. The **Owner Data
+Finalization** (at review gate) then applied the owner's final decisions:
+mission statement, degree and graduation year, location wording,
+"Independent projects", ThoraxVision repository / outcome / lessons,
+MelonVision lessons, both papers' publication state, and the four 6E
+candidates. What remains for launch is the domain (set `site.url` and
+everything lights up), the OG image, the ICWT paper URL when it exists,
+whether to rewrite history for the phone number, and deleting the two fully
+merged side branches.
 
 *Previous note, kept for the record:* `Docs/Detail.txt` was sitting
 untracked in the working tree with answers to most of §8's pending list —

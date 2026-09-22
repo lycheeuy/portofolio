@@ -4,22 +4,30 @@ import type { Profile } from "@/types";
  * Owner profile.
  *
  * Every field below traces to `Docs/User Input Session.txt`, `Docs/PRD.txt`,
- * `Docs/DEVELOPMENT_LOG.md`, or the owner's input in `Docs/Detail.txt` as
+ * `Docs/DEVELOPMENT_LOG.md`, the owner's input in `Docs/Detail.txt` as
  * confirmed on 2026-09-19 (final email, city) and in Phase 6F (institution,
- * focus areas, and the `about` copy). Nothing is inferred. Items the owner
- * has not supplied are listed in `pending` rather than filled in.
+ * focus areas, and the `about` copy), or the owner data finalisation of
+ * 2026-09-21 (mission statement, degree wording, graduation year, location
+ * wording, first trajectory step, LinkedIn URL, "Independent projects" as
+ * the experience label). Nothing is inferred. Items the owner has not
+ * supplied are listed in `pending` rather than filled in.
  *
  * Two places, both correct, not to be conflated: the owner *studied* at
- * Telkom University Purwokerto (`education.institution`) and *lives* in Kota
+ * Telkom University Purwokerto (`education.institution`) and *lives* in
  * Cirebon (`location`).
  */
 export const profile: Profile = {
   displayName: "Alif Reezi",
   fullName: "Nashiruddin Alif Alvareezi",
   status: "Fresh Graduate",
-  location: "Kota Cirebon, West Java, Indonesia",
+  location: "Cirebon, West Java, Indonesia",
   positioning:
     "AI / Machine Learning Engineer working across computer vision, model experimentation, and research.",
+  /** Owner-approved wording, 2026-09-21. Replaces the five 5D-1 options. */
+  mission:
+    "I build practical AI systems and turn research into working software, with a focus on computer vision, machine learning, and deep learning.",
+  /** Owner decision, 2026-09-21: no formal employment history exists. */
+  experience: "Independent projects",
   roles: [
     "AI / Machine Learning Engineer",
     "Fullstack Developer",
@@ -32,17 +40,24 @@ export const profile: Profile = {
     "Deep Learning",
     "Research",
   ],
+  /** Owner wording, 2026-09-21; the first step was "AI Engineer" before. */
   trajectory: [
-    "AI Engineer",
+    "AI / ML Engineer",
     "Machine Learning Engineer",
     "Applied AI / Generative AI",
   ],
   availability: "Available for AI / ML Engineer roles",
+  /**
+   * `degree` is the owner's wording (2026-09-21) and already names the
+   * field, so the Hero and About print `degree` alone; `field` is kept for
+   * the sentences that need the discipline on its own.
+   */
   education: {
-    degree: "Bachelor's degree (S1)",
+    degree: "Bachelor of Biomedical Engineering",
     field: "Biomedical Engineering",
     status: "Completed",
     institution: "Telkom University Purwokerto",
+    graduationYear: 2026,
   },
 
   /**
@@ -93,7 +108,7 @@ export const profile: Profile = {
     {
       label: "LinkedIn",
       value: "in/nashiruddinalifalvareezi",
-      href: "https://www.linkedin.com/in/nashiruddinalifalvareezi/",
+      href: "https://linkedin.com/in/nashiruddinalifalvareezi/",
       primary: true,
     },
     {
@@ -144,9 +159,10 @@ export const profile: Profile = {
     ],
   },
 
-  pending: [
-    "Hero mission statement — five options remain owner-pending (Phase 5D-1).",
-    "Graduation year.",
-    "Work experience entries — none are documented yet.",
-  ],
+  /**
+   * Empty as of 2026-09-21: the mission statement and graduation year are
+   * supplied, and the owner has confirmed there is no formal employment
+   * history to document — `experience` carries the agreed label instead.
+   */
+  pending: [],
 };

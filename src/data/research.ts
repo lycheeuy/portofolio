@@ -6,12 +6,12 @@ import type { ResearchEntry } from "@/types";
  * Two venues are confirmed for 2026: ICWT and ICSMech. Phase 6E ingested the
  * owner's answers from `Docs/Detail.txt`, item by item: paper titles, full
  * conference names, topics, author positions, repository links, and the
- * project both papers draw on (ThoraxVision). Everything else — submission
- * state, host/location, co-authors, a paper or DOI link — is still not
- * documented, so those fields stay `null` with the gap listed in `pending`.
- *
- * `status` is `pending-confirmation` for both: the venue is confirmed, but it
- * is not known whether the papers are submitted, accepted, or presented.
+ * project both papers draw on (ThoraxVision). On 2026-09-21 the owner
+ * confirmed the publication state of each: the ICSMech paper is published on
+ * IEEE Xplore (paper URL confirmed 2026-09-22 and linked); the ICWT paper is
+ * in the publication process with IEEE and has no public paper URL yet, so
+ * none is linked for it. Co-authors are not displayed, by decision. Host and
+ * location are still not documented and stay in `pending`.
  *
  * Conference names are stored without the trailing year — `conference.year`
  * carries it, and the UI composes "acronym · name · year" itself.
@@ -31,7 +31,9 @@ const icwt2026: ResearchEntry = {
   topic:
     "Comparing VGG19 and DenseNet121 for tuberculosis classification on a local chest X-ray dataset, with experiments focused on batch size, model generalization, and performance differences between architectures.",
   contribution: "Second author",
-  status: "pending-confirmation",
+  /** Owner, 2026-09-21: in the publication process with IEEE — not accepted, not published. */
+  status: "in-publication",
+  platform: "IEEE",
   projectSlug: "thoraxvision",
   links: [
     {
@@ -41,9 +43,7 @@ const icwt2026: ResearchEntry = {
   ],
   pending: [
     "Conference host and location.",
-    "Submission state — submitted, accepted, or presented.",
-    "Co-authors.",
-    "Paper, DOI, or presentation link.",
+    "Paper or DOI link, once published.",
   ],
 };
 
@@ -61,20 +61,22 @@ const icsmech2026: ResearchEntry = {
   topic:
     "Developing and optimizing a DenseNet121-based model for tuberculosis detection using 4,784 local chest X-ray images, with a focus on generalization, class imbalance, and model interpretability.",
   contribution: "First author",
-  status: "pending-confirmation",
+  /** Owner, 2026-09-21: published on IEEE Xplore. */
+  status: "published",
+  platform: "IEEE Xplore",
   projectSlug: "thoraxvision",
+  /** The paper first, then the repository. Paper URL confirmed by the owner on 2026-09-22. */
   links: [
+    {
+      label: "Paper",
+      href: "https://ieeexplore.ieee.org/document/11647113",
+    },
     {
       label: "Repository",
       href: "https://github.com/lycheeuy/my_research/tree/main/ICSMech2026",
     },
   ],
-  pending: [
-    "Conference host and location.",
-    "Submission state — submitted, accepted, or presented.",
-    "Co-authors.",
-    "Paper, DOI, or presentation link.",
-  ],
+  pending: ["Conference host and location."],
 };
 
 export const research: ResearchEntry[] = [icwt2026, icsmech2026];
