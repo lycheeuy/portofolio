@@ -4,11 +4,11 @@ import { getSection } from "@/data/site";
 import { routeMetadata } from "@/lib/metadata";
 
 /**
- * Projects index — `/projects`.
+ * Projects index: `/projects`.
  *
  * `SelectedWork` owns the rendering; this file only names the route and its
  * metadata. The description is the section's own purpose stated once, not a
- * claim about either project — those come from `projects.ts` on the detail
+ * claim about either project; those come from `projects.ts` on the detail
  * pages.
  */
 export const metadata: Metadata = {

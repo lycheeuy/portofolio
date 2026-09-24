@@ -16,7 +16,7 @@ import * as THREE from "three";
 
    The owner's cut-out portrait is the one raster asset the card draws. It is
    loaded once, drawn into the reserved column on the front face, and the card
-   repaints when it arrives — the same mechanism the webfonts already use. If
+   repaints when it arrives, the same mechanism the webfonts already use. If
    it never arrives the card paints exactly as it did before it existed.
    --------------------------------------------------------------------------- */
 
@@ -77,24 +77,18 @@ function readTokens(): Tokens {
 
 /* --- portrait -------------------------------------------------------------
    The asset is a background-removed cut-out, already trimmed to the figure, so
-   it is drawn with no frame and no backdrop: the transparency composites onto
-   the card stock and the figure reads as printed on it. It is fitted, never
-   cropped or stretched — the drawn box is derived from the file's own ratio.  */
+   what is drawn is the person and nothing else: the transparency around him
+   becomes the ground of the portrait window on the card. He is scaled from the
+   window's width alone, so the ratio is always the file's: the window crops,
+   it never squeezes.                                                          */
 
 const PHOTO_SRC = "/images/profile/alif-lanyard.png";
-
-/** The reserved column, as fractions of the front face's content box. */
-const PHOTO_TOP = 0.545;
-const PHOTO_BOTTOM = 0.845;
-const PHOTO_MAX_W = 0.27;
-/** Clear space between the figure and the metadata column beside it. */
-const PHOTO_GUTTER = 0.04;
 
 let photo: HTMLImageElement | null = null;
 let photoLoad: Promise<void> | null = null;
 
 /**
- * Resolves when the portrait is decoded, or immediately when it cannot be —
+ * Resolves when the portrait is decoded, or immediately when it cannot be:
  * a missing or failed image is not an error the card should surface, so the
  * promise always resolves and `photo` simply stays null.
  */
@@ -220,15 +214,143 @@ function uvRect(uv: typeof FRONT_UV): Rect {
 /** Focus terms, in the order the hero lists them. Wrapped, never reworded. */
 const FOCUS_TERMS = ["COMPUTER VISION", "RESEARCH"] as const;
 
-/** Baseline step of the focus block — the gap it has always used. */
-const FOCUS_LEADING = 0.063;
+/** Separator when the focus terms fit on one line, as the hero sets them. */
+const FOCUS_SEPARATOR = " · ";
 
 /**
- * Front of the credential. Composition is anchored on a single left margin —
- * a header rule under the clamp, the name, a short terracotta rule, role,
- * then a row holding the focus metadata with the portrait standing at its
- * right, and a footer row under a second hairline. The top ~14% stays clear
- * because the model's metal clamp sits over it.
+ * Front-face composition.
+ *
+ * Every value is a fraction of the front face's height, and every horizontal
+ * measure a fraction of its content width, so the whole face scales with the
+ * texture. Two layouts, chosen by whether the portrait decoded:
+ *
+ * `WITH_PHOTO` is the card as it is meant to be read: the portrait takes the
+ * top half, and the type is a caption block under it: name, accent rule, role,
+ * one line of focus, then the status row. `TEXT_ONLY` is the fallback, and its
+ * numbers are the ones the card used before it had a photograph at all, so a
+ * failed image leaves a composition that was designed rather than a gap.
+ *
+ * `focusCentre` is the middle of the focus block rather than its first
+ * baseline: the terms set on one line when they fit and stack when they do
+ * not, and centring keeps the block in the same place either way.
+ */
+interface FrontLayout {
+  /** Portrait window, or null for the text-only fallback. */
+  photo: { top: number; height: number } | null;
+  /** Hairline above the name. */
+  rule: number;
+  nameSize: number;
+  nameBaseline: number;
+  accentBaseline: number;
+  roleSize: number;
+  roleBaselines: readonly [number, number];
+  focusSize: number;
+  focusCentre: number;
+  focusLeading: number;
+  footerRule: number;
+  footerSize: number;
+  footerBaseline: number;
+}
+
+const WITH_PHOTO: FrontLayout = {
+  photo: { top: 0.16, height: 0.45 },
+  rule: 0.652,
+  nameSize: 0.068,
+  nameBaseline: 0.722,
+  accentBaseline: 0.752,
+  roleSize: 0.038,
+  roleBaselines: [0.806, 0.851],
+  focusSize: 0.029,
+  focusCentre: 0.907,
+  focusLeading: 0.04,
+  footerRule: 0.936,
+  footerSize: 0.028,
+  footerBaseline: 0.97,
+};
+
+const TEXT_ONLY: FrontLayout = {
+  photo: null,
+  rule: 0.168,
+  nameSize: 0.105,
+  nameBaseline: 0.278,
+  accentBaseline: 0.321,
+  roleSize: 0.052,
+  roleBaselines: [0.437, 0.503],
+  focusSize: 0.045,
+  focusCentre: 0.6695,
+  focusLeading: 0.063,
+  footerRule: 0.852,
+  footerSize: 0.031,
+  footerBaseline: 0.918,
+};
+
+/**
+ * How wide the figure is drawn inside the portrait window, as a fraction of
+ * it, and how far its head sits below the window's top edge.
+ *
+ * The asset is a standing figure trimmed to its own outline: drawn whole it
+ * would be a thumbnail on a card this shape, and stretched to fill the window
+ * it would not be him any more. So it is enlarged past the window instead and
+ * the window clips it (the head-and-shoulders crop an ID photograph has),
+ * with the scale taken from the width, so the ratio is the file's throughout.
+ */
+const FIGURE_WIDTH = 0.84;
+const FIGURE_TOP = 0.04;
+
+/**
+ * The portrait window: a plate of page cream on the card stock, the figure
+ * enlarged inside it and clipped to its edges, and a hairline round it.
+ *
+ * The plate is what makes the cut-out read as a photograph printed on the
+ * card rather than a sticker on it; the transparency around the figure
+ * becomes the photograph's own ground, one step lighter than the stock.
+ */
+function drawPortrait(
+  ctx: CanvasRenderingContext2D,
+  t: Tokens,
+  window: Rect,
+  image: HTMLImageElement,
+): void {
+  ctx.fillStyle = t.bg;
+  ctx.fillRect(window.x, window.y, window.w, window.h);
+
+  const scale = (window.w * FIGURE_WIDTH) / image.naturalWidth;
+  const figureW = image.naturalWidth * scale;
+  const figureH = image.naturalHeight * scale;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(window.x, window.y, window.w, window.h);
+  ctx.clip();
+  ctx.drawImage(
+    image,
+    window.x + (window.w - figureW) / 2,
+    window.y + window.h * FIGURE_TOP,
+    figureW,
+    figureH,
+  );
+  ctx.restore();
+
+  // Hairline, at the weight the rules use and a third of their tone: enough to
+  // close the plate, not enough to read as a box drawn round a face.
+  ctx.save();
+  ctx.globalAlpha = 0.35;
+  ctx.strokeStyle = t.secondary;
+  ctx.lineWidth = Math.max(1, window.h * 0.004);
+  ctx.strokeRect(window.x, window.y, window.w, window.h);
+  ctx.restore();
+}
+
+/**
+ * Front of the credential: the portrait, then the type as its caption:
+ * a hairline, the name, a short terracotta rule, the role, one line of focus,
+ * and the status row under a second hairline. Everything is anchored on a
+ * single left margin, and reads top to bottom in that order.
+ *
+ * The photograph carries the card and the type is set to be read under it, at
+ * roughly half the size it took when it was the whole composition. The top
+ * ~14% stays clear because the model's metal clamp sits over it, so the
+ * portrait starts just below that line.
  *
  * Everything is set in `--color-ink` or `--color-secondary`. `--color-muted`
  * is deliberately not used here: it measures 4.28:1 on `--color-surface`,
@@ -242,95 +364,117 @@ function drawFront(ctx: CanvasRenderingContext2D, t: Tokens): void {
   const right = r.x + r.w - padX;
   const contentW = right - left;
 
+  const portrait =
+    photo && photo.naturalWidth > 0 && photo.naturalHeight > 0 ? photo : null;
+  const layout = portrait ? WITH_PHOTO : TEXT_ONLY;
+
   ctx.textBaseline = "alphabetic";
   ctx.textAlign = "left";
 
-  // Header rule, just below the clamp, paired with the footer rule below to
-  // frame the type block. Both are secondary, not border: the card renders at
-  // roughly four fifths of its albedo, and a page-weight hairline measured at
-  // that exposure is simply not there.
-  ctx.fillStyle = t.secondary;
-  ctx.fillRect(left, r.y + r.h * 0.168, contentW, Math.max(1, r.h * 0.0018));
+  if (portrait && layout.photo) {
+    drawPortrait(
+      ctx,
+      t,
+      {
+        x: left,
+        y: r.y + r.h * layout.photo.top,
+        w: contentW,
+        h: r.h * layout.photo.height,
+      },
+      portrait,
+    );
+  }
 
-  // Name — display face, tracked slightly open so it reads as a credential
+  // Hairline over the type, paired with the footer rule below it to frame the
+  // block. Both are secondary, not border: the card renders at roughly four
+  // fifths of its albedo, and a page-weight hairline measured at that exposure
+  // is simply not there.
+  ctx.fillStyle = t.secondary;
+  ctx.fillRect(left, r.y + r.h * layout.rule, contentW, Math.max(1, r.h * 0.0018));
+
+  // Name: display face, tracked slightly open so it reads as a credential
   // rather than a repeat of the hero headline.
   const nameTracking = 0.015;
-  const nameSize = fitSize(ctx, "ALIF REEZI", t.display, "600", r.h * 0.105, nameTracking, contentW);
+  const nameSize = fitSize(
+    ctx,
+    "ALIF REEZI",
+    t.display,
+    "600",
+    r.h * layout.nameSize,
+    nameTracking,
+    contentW,
+  );
   ctx.font = `600 ${nameSize}px ${t.display}`;
   ctx.fillStyle = t.ink;
-  drawTracked(ctx, "ALIF REEZI", left, r.y + r.h * 0.278, nameSize * nameTracking);
+  drawTracked(ctx, "ALIF REEZI", left, r.y + r.h * layout.nameBaseline, nameSize * nameTracking);
 
   // The one accent mark on the card: the same short rule the hero uses.
   ctx.fillStyle = t.accent;
-  ctx.fillRect(left, r.y + r.h * 0.321, contentW * 0.19, Math.max(2, r.h * 0.006));
+  ctx.fillRect(
+    left,
+    r.y + r.h * layout.accentBaseline,
+    contentW * 0.19,
+    Math.max(2, r.h * 0.006),
+  );
 
-  // Role — ink, not secondary. At the size the card renders on screen this is
+  // Role: ink, not secondary. At the size the card renders on screen this is
   // the line most likely to disappear, so it takes the full-contrast tone and
   // is fitted so the long first line can never run past the margin.
-  const roleSize = fitSize(ctx, "AI / MACHINE LEARNING", t.sans, "500", r.h * 0.052, 0.09, contentW);
+  const roleSize = fitSize(
+    ctx,
+    "AI / MACHINE LEARNING",
+    t.sans,
+    "500",
+    r.h * layout.roleSize,
+    0.09,
+    contentW,
+  );
   const roleTracking = roleSize * 0.09;
   ctx.font = `500 ${roleSize}px ${t.sans}`;
   ctx.fillStyle = t.ink;
-  drawTracked(ctx, "AI / MACHINE LEARNING", left, r.y + r.h * 0.437, roleTracking);
-  drawTracked(ctx, "ENGINEER", left, r.y + r.h * 0.503, roleTracking);
+  drawTracked(ctx, "AI / MACHINE LEARNING", left, r.y + r.h * layout.roleBaselines[0], roleTracking);
+  drawTracked(ctx, "ENGINEER", left, r.y + r.h * layout.roleBaselines[1], roleTracking);
 
-  // Portrait. The figure is bottom-aligned on the footer rule so it stands on
-  // it rather than floating, and fitted by its own ratio inside the reserved
-  // column — the drawn box follows the file, so the person is never stretched
-  // and nothing is cropped away. No frame and no plate behind it: the cut-out's
-  // transparency composites straight onto the card stock.
-  let metaW = contentW;
-
-  if (photo && photo.naturalWidth > 0 && photo.naturalHeight > 0) {
-    const scale = Math.min(
-      (contentW * PHOTO_MAX_W) / photo.naturalWidth,
-      (r.h * (PHOTO_BOTTOM - PHOTO_TOP)) / photo.naturalHeight,
-    );
-    const photoW = photo.naturalWidth * scale;
-    const photoH = photo.naturalHeight * scale;
-    const photoX = right - photoW;
-    ctx.drawImage(photo, photoX, r.y + r.h * PHOTO_BOTTOM - photoH, photoW, photoH);
-    metaW = photoX - contentW * PHOTO_GUTTER - left;
-  }
-
-  // Focus — mono metadata, the same register as the hero's focus list. It
+  // Focus: mono metadata, the same register as the hero's focus list. It
   // stays a step under the role through size and family, not tone: this is the
   // smallest type that still has to be read, and at the size the card occupies
   // on screen a lighter grey is the difference between metadata and smudge.
   //
-  // The size is fixed rather than fitted: the portrait takes a quarter of the
-  // row, so the column beside it is too narrow for "COMPUTER VISION" on one
-  // line, and shrinking the smallest type on the card to force it would put it
-  // under the footer. It wraps instead, and the block stays centred on the
-  // baseline pair it used before the portrait — with no portrait the column is
-  // wide, nothing wraps, and the two lines land exactly where they always did.
-  const focusSize = r.h * 0.045;
+  // One line with the hero's separator when the terms fit, stacked when they
+  // do not. The block is centred rather than hung from its first baseline, so
+  // either shape sits in the same place.
+  const focusSize = r.h * layout.focusSize;
   const focusTracking = focusSize * 0.13;
   ctx.font = `400 ${focusSize}px ${t.mono}`;
   ctx.fillStyle = t.ink;
 
-  const focusLines = wrapTracked(ctx, FOCUS_TERMS, focusTracking, metaW);
-  const focusStart = 0.638 - ((focusLines.length - 2) * FOCUS_LEADING) / 2;
+  const joined = FOCUS_TERMS.join(FOCUS_SEPARATOR);
+  const focusLines =
+    trackedWidth(ctx, joined, focusTracking) <= contentW
+      ? [joined]
+      : wrapTracked(ctx, FOCUS_TERMS, focusTracking, contentW);
+  const focusTop =
+    layout.focusCentre - ((focusLines.length - 1) * layout.focusLeading) / 2;
   focusLines.forEach((line, index) => {
     drawTracked(
       ctx,
       line,
       left,
-      r.y + r.h * (focusStart + index * FOCUS_LEADING),
+      r.y + r.h * (focusTop + index * layout.focusLeading),
       focusTracking,
     );
   });
 
   // Footer
   ctx.fillStyle = t.secondary;
-  ctx.fillRect(left, r.y + r.h * 0.852, contentW, Math.max(1, r.h * 0.0018));
+  ctx.fillRect(left, r.y + r.h * layout.footerRule, contentW, Math.max(1, r.h * 0.0018));
 
-  const footSize = r.h * 0.031;
+  const footSize = r.h * layout.footerSize;
   const footTracking = footSize * 0.13;
   ctx.font = `400 ${footSize}px ${t.mono}`;
   ctx.fillStyle = t.secondary;
-  drawTracked(ctx, "FRESH GRADUATE", left, r.y + r.h * 0.918, footTracking);
-  drawTracked(ctx, "2026", right, r.y + r.h * 0.918, footTracking, "right");
+  drawTracked(ctx, "FRESH GRADUATE", left, r.y + r.h * layout.footerBaseline, footTracking);
+  drawTracked(ctx, "2026", right, r.y + r.h * layout.footerBaseline, footTracking, "right");
 }
 
 /** Back of the credential: card stock, one hairline, the full legal name. */

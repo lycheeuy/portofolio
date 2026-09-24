@@ -14,12 +14,12 @@ import { getSection } from "@/data/site";
 import type { Project } from "@/types";
 
 /**
- * Selected work — the `/projects` index.
+ * Selected work: the `/projects` index.
  *
  * Before Phase 6D this component printed both case studies in full on the
  * homepage. The case study now lives at `/projects/[slug]`, rendered by
  * `ProjectDetail`, and this file is the selection screen in front of it: for
- * each project, what it is, what it was for, and what it is built from —
+ * each project, what it is, what it was for, and what it is built from:
  * enough to choose between two, and nothing that the detail page then repeats
  * at length.
  *
@@ -56,8 +56,8 @@ function ProjectRow({ project }: { project: Project }) {
   ];
 
   /**
-   * The stack flattened into one row of tags. Group labels — Model, Build,
-   * Deploy — are the detail page's structure; on an index they would be three
+   * The stack flattened into one row of tags. Group labels (Model, Build,
+   * Deploy) are the detail page's structure; on an index they would be three
    * headings over two or three tags each, which is scaffolding for a glance.
    */
   const stackItems = project.stack.flatMap((group) => group.items);
@@ -145,12 +145,12 @@ export function SelectedWork() {
         headingId="work-heading"
         level={1}
       >
-        {/* Generic on purpose. The two entries below differ — one ends at
-            evaluation figures, one at hardware in the field — but a standfirst
+        {/* Generic on purpose. The two entries below differ (one ends at
+            evaluation figures, one at hardware in the field), but a standfirst
             that names both by shape would have to be rewritten the moment a
             third project lands. The claim here is true of every entry. */}
         <p className={`mt-6 max-w-[52ch] ${leadText} text-secondary`}>
-          Work carried past the training run — to evaluation figures and
+          Work carried past the training run: to evaluation figures and
           conference material, or to a deployed application on hardware. Open
           an entry for the full case study.
         </p>

@@ -43,7 +43,7 @@ export function MobileNav() {
    * path it was opened on gets that for free: when the route changes,
    * `openForPath` no longer matches and the panel is closed on the very same
    * render. A `useEffect` that called `setOpen(false)` on `pathname` would do
-   * the same thing one render later — and would open the menu for a frame on
+   * the same thing one render later, and would open the menu for a frame on
    * a back gesture. It is also what `react-hooks/set-state-in-effect` is
    * warning about.
    *
@@ -70,7 +70,7 @@ export function MobileNav() {
    * breakpoint is the fix; focus is not returned to the trigger because at
    * that width the trigger is display:none and cannot take it.
    *
-   * Subscribing is enough — there is no need to test `matches` on mount. The
+   * Subscribing is enough; there is no need to test `matches` on mount. The
    * only thing that sets `open` is the trigger, and the trigger does not exist
    * at or above this width, so the menu can never open already-desktop.
    */
@@ -141,7 +141,7 @@ export function MobileNav() {
 
       {/* Portalled to <body>. The header sets `backdrop-blur-sm`, and a
           backdrop-filter makes that element the containing block for any
-          `position: fixed` descendant — rendered in place, `inset-0` would
+          `position: fixed` descendant. Rendered in place, `inset-0` would
           resolve to the 64px header strip instead of the viewport. */}
       {open
         ? createPortal(

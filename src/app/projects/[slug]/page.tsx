@@ -5,7 +5,7 @@ import { getProject, projects } from "@/data/projects";
 import { routeMetadata } from "@/lib/metadata";
 
 /**
- * Project case study — `/projects/[slug]`.
+ * Project case study: `/projects/[slug]`.
  *
  * Slugs come from `projects.ts` and nowhere else: `thoraxvision` and
  * `melonvision-ai`. `generateStaticParams` prerenders exactly those two

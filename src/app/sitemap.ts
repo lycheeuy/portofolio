@@ -10,7 +10,7 @@ import { siteUrl } from "@/lib/metadata";
  * A new project or paper in `data/` reaches the sitemap without an edit here.
  *
  * A sitemap entry must be an absolute URL, so while `site.url` is `null` this
- * returns an empty set — the file exists and is well-formed, and fills in the
+ * returns an empty set: the file exists and is well-formed, and fills in the
  * moment a domain is chosen. `lastModified`, `changeFrequency`, and
  * `priority` are omitted: none of the three is recorded anywhere, and a
  * made-up date is worse than no date.

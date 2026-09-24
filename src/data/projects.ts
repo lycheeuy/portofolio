@@ -8,7 +8,7 @@ import type { Project } from "@/types";
  * dataset sizes confirmed for Phase 5E, and the owner input in
  * `Docs/Detail.txt` as confirmed on 2026-09-19 (display names, slugs, the
  * ThoraxVision live URL), in Phase 6E (MelonVision repository, year,
- * architecture, purpose, and achievement — the two prose fields are English
+ * architecture, purpose, and achievement; the two prose fields are English
  * renderings of the owner's Indonesian answers, approved item by item), and
  * in the owner data finalisation of 2026-09-21 (ThoraxVision repository and
  * outcome, both projects' lessons learned, the decisions not to display
@@ -56,7 +56,7 @@ const thoraxVision: Project = {
     "Accuracy on its own said little about a two-class chest X-ray problem where the classes were not balanced. Per-class precision, recall, and F1, ROC-AUC, and the confusion matrix each showed a different side of the same model, and a decision about which backbone to keep had to rest on all of them together.",
     "Preprocessing and augmentation changed how the models behaved, not just how well they scored. What was done to the images before training had to be treated as part of the experiment and recorded with it.",
     "Comparing DenseNet121, ResNet50, and VGG19 under one evaluation protocol was what made the comparison mean anything. Running the variants systematically, with the same data and the same metrics, mattered more than any single result.",
-    "Training a model and serving it are different engineering problems. Connecting the trained classifier to a web interface for inference raised questions — input handling, model loading, response shape — that the training notebooks never had to answer.",
+    "Training a model and serving it are different engineering problems. Connecting the trained classifier to a web interface for inference raised questions (input handling, model loading, response shape) that the training notebooks never had to answer.",
   ],
   stack: [
     { label: "Model", items: ["PyTorch", "DenseNet121", "ResNet50", "VGG19"] },
@@ -86,8 +86,8 @@ const thoraxVision: Project = {
 
   /**
    * Figures are reproduced exactly as recorded in
-   * `Docs/User Input Session.txt`. Values the owner left blank there —
-   * ResNet50 accuracy, specificity for every model — are `null`, not derived.
+   * `Docs/User Input Session.txt`. Values the owner left blank there (
+   * ResNet50 accuracy, specificity for every model) are `null`, not derived.
    *
    * Not displayed for now, by owner decision (2026-09-19): the figures stay
    * here untouched, and `SHOW_MODEL_RESULTS` in
@@ -147,10 +147,10 @@ const thoraxVision: Project = {
    */
   pending: [
     "Paper / DOI link for the ICWT 2026 paper once it is published (the ICSMech 2026 paper is linked from its research entry).",
-    "Dataset class distribution — not documented; kept off the page.",
-    "ResNet50 accuracy — left blank in the owner's figures.",
-    "Specificity for all three models — left blank in the owner's figures.",
-    "VGG19 Tuberculosis F1 — the source lists 0.5745 for both classes, which cannot both be right; awaiting the correct value.",
+    "Dataset class distribution: not documented; kept off the page.",
+    "ResNet50 accuracy: left blank in the owner's figures.",
+    "Specificity for all three models: left blank in the owner's figures.",
+    "VGG19 Tuberculosis F1: the source lists 0.5745 for both classes, which cannot both be right; awaiting the correct value.",
   ],
 };
 
@@ -180,17 +180,17 @@ const melonVisionAi: Project = {
   ],
   /** The owner's own account of the project's main achievement (Detail.txt, Melon §9). */
   outcome:
-    "Finding and fixing a critical bug in the FOMO decoder that made a single object produce dozens of bounding boxes at once — in one case, 144 false detections from one image. The fix was to implement Connected Component Analysis from scratch, using a breadth-first search with 8-connectivity. That changed how the system understands \"one object\": from one grid cell = one detection, to a cluster of neighbouring cells = one detection with an accurate bounding rectangle.",
+    "Finding and fixing a critical bug in the FOMO decoder that made a single object produce dozens of bounding boxes at once; in one case, 144 false detections from one image. The fix was to implement Connected Component Analysis from scratch, using a breadth-first search with 8-connectivity. That changed how the system understands \"one object\": from one grid cell = one detection, to a cluster of neighbouring cells = one detection with an accurate bounding rectangle.",
   /**
    * Each paragraph is tied to the documented build: the ESP32-CAM capture
    * path, the FastAPI / PostgreSQL service, the on-device TFLite inference,
    * and the FOMO decoder fix described in `outcome`. No figure is quoted.
    */
   lessons: [
-    "A model is one part of a camera workflow. Getting the ESP32-CAM to capture, run the quantised model, and report each detection into the FastAPI service — with PostgreSQL keeping the history the dashboard reads — was as much of the project as the model was.",
+    "A model is one part of a camera workflow. Getting the ESP32-CAM to capture, run the quantised model, and report each detection into the FastAPI service (with PostgreSQL keeping the history the dashboard reads) was as much of the project as the model was.",
     "What a model outputs is not yet a detection. The FOMO grid gave one cell per activation, and turning that into application-level results took post-processing the model itself never provided.",
     "The critical bug lived in that post-processing, not in the model. One plant producing dozens of boxes was the decoder reading every active grid cell as its own object; implementing Connected Component Analysis with a breadth-first search over 8-connected neighbours made a cluster of cells one detection with one bounding rectangle.",
-    "Debugging inference on a constrained device meant reasoning about the whole path — capture, quantised model, decoder, API — rather than any one stage, because the wrong output could have come from any of them.",
+    "Debugging inference on a constrained device meant reasoning about the whole path (capture, quantised model, decoder, API) rather than any one stage, because the wrong output could have come from any of them.",
   ],
   stack: [
     {
@@ -221,11 +221,11 @@ const melonVisionAi: Project = {
   /**
    * Decided 2026-09-21, so not pending: the client is not named, and no live
    * URL is added. The `Live` link stays `href: null` with its note, which is
-   * data only — the page renders no row for a link without an address.
+   * data only; the page renders no row for a link without an address.
    */
   pending: [
-    "Detection accuracy or any evaluation figures — the owner confirms none exist (Detail.txt, Melon §6).",
-    "Dataset class breakdown — not documented; kept off the page.",
+    "Detection accuracy or any evaluation figures: the owner confirms none exist (Detail.txt, Melon §6).",
+    "Dataset class breakdown: not documented; kept off the page.",
   ],
 };
 

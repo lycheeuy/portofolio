@@ -13,7 +13,7 @@ import { site } from "@/data/site";
  * written here, and there are no build badges.
  *
  * **On the year.** `new Date()` is evaluated when this Server Component
- * renders, and the homepage is statically prerendered — so the year is baked
+ * renders, and the homepage is statically prerendered, so the year is baked
  * at build time, not read from the visitor's clock. That is the intended
  * trade: a client component purely to keep a footer year live would be the
  * fourth client component on the site, and it would hydrate on every visit to
@@ -25,7 +25,7 @@ const YEAR = new Date().getFullYear();
 /**
  * Social profiles: the publishable channels that point somewhere on the web.
  * Filtering on the URI scheme is what separates a profile from a way of
- * contacting someone — `mailto:` belongs to `#contact`, not to a footer row
+ * contacting someone; `mailto:` belongs to `#contact`, not to a footer row
  * of social links. `primary` keeps any non-public channel out regardless, per
  * the Phase 5E decision.
  */

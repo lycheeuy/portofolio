@@ -24,7 +24,7 @@ import * as THREE from "three";
 import { createBandTexture, createCardTexture, loadCardPhoto } from "./card-artwork";
 
 // Next.js: assets are served from /public rather than imported as modules.
-// Only the geometry is taken from the model — the card face and the strap are
+// Only the geometry is taken from the model; the card face and the strap are
 // drawn from the site's design tokens in card-artwork.ts.
 const CARD_GLB = "/lanyard/card.glb";
 
@@ -34,7 +34,7 @@ declare module "@react-three/fiber" {
   interface ThreeElements {
     // These are runtime-extended (via extend()) third-party elements. The
     // generated ThreeElement types over-constrain constructor args, so we
-    // type them permissively — the props used below are valid at runtime.
+    // type them permissively; the props used below are valid at runtime.
     meshLineGeometry: Record<string, unknown>;
     meshLineMaterial: Record<string, unknown>;
   }
@@ -119,14 +119,14 @@ export default function Lanyard({
         {/* Exposure is set by measurement, not by taste: screenshot the slot,
             take the modal colour of the card, compare it to the page.
 
-            The old setup — ambient 1 plus four lightformers, one of them a
-            broadside at intensity 10 — put the card face at #ECECEA against a
+            The old setup (ambient 1 plus four lightformers, one of them a
+            broadside at intensity 10) put the card face at #ECECEA against a
             #F6F2EB page. That is 1.06:1. The card was not subtly low
             contrast, it was the same colour as the paper behind it.
 
             Two lightformers do much less of the lifting than four did, so
             ambient has to rise to compensate; what matters is where the face
-            lands, and 1.95 puts it at #CAC8C4 — 1.50:1, reading as card stock
+            lands, and 1.95 puts it at #CAC8C4, 1.50:1, reading as card stock
             in soft light rather than as a hole in the page. Going brighter
             walks back toward the old problem; going darker turns warm stock
             grey and drops the whole scene out of the palette. */}
@@ -373,14 +373,14 @@ function Band({
           Math.min(1, lerped.distanceTo(ref.current.translation())),
         );
         // The chase factor is `delta * 50`, so it passes 1 as soon as a frame
-        // takes longer than 20ms — and THREE.Vector3.lerp does not clamp its
+        // takes longer than 20ms, and THREE.Vector3.lerp does not clamp its
         // alpha, so above 1 the point is thrown *past* its target instead of
         // drawn towards it. `clampedDistance` then saturates at its own
         // ceiling of 1, which leaves the factor at `delta * 50` for the next
         // frame too, so the error compounds instead of correcting: one slow
         // frame is enough to walk the strap's control points out to 1e15,
         // where the band leaves the frustum and the lanyard is simply gone.
-        // Startup reliably supplies that slow frame — the Suspense boundary
+        // Startup reliably supplies that slow frame: the Suspense boundary
         // above keeps the Canvas mounted, so this loop is already ticking
         // while Rapier's WASM and the model are still landing on the main
         // thread (measured: a 2.1s frame at frame 7). Capping the factor at 1
@@ -467,7 +467,7 @@ function Band({
               />
             </mesh>
             {/* The clip and clamp share one material instance from the GLB,
-                so this roughness applies to both. Brushed, not chromed — a
+                so this roughness applies to both. Brushed, not chromed: a
                 mirror-finish clip out-sparkles everything on the card. */}
             <mesh
               geometry={nodes.clip.geometry}

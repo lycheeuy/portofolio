@@ -11,7 +11,7 @@ import { SECTIONS } from "@/data/site";
  *
  * The small mono index beside each label is looked up from `SECTIONS`, so the
  * archive numbering used on each page carries into the navigation from one
- * source. Indices are desktop-only — below `lg` there is not enough room for
+ * source. Indices are desktop-only: below `lg` there is not enough room for
  * them to read as structure rather than noise.
  *
  * A client component only because the current route decides which item is
@@ -57,7 +57,7 @@ export function PrimaryNav() {
                 {/* Transparent until hover, unlike the `ruledLabel` the pages
                     use: a visible hairline under all five nav items would draw
                     a second rule directly beneath the header's own. The
-                    current page keeps its rule permanently — that is what
+                    current page keeps its rule permanently; that is what
                     marks it. */}
                 <span
                   className={`border-b pb-0.5 ${colorTransition} ${

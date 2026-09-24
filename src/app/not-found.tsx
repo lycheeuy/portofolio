@@ -4,7 +4,7 @@ import { ActionLink } from "@/components/ui/action-link";
 import { leadText } from "@/components/ui/styles";
 
 /**
- * 404 — reached by `notFound()` from a project or research slug that is not in
+ * 404, reached by `notFound()` from a project or research slug that is not in
  * the data, and by any unmatched URL.
  *
  * Rendered inside the root layout, so it keeps the header, the footer, and the

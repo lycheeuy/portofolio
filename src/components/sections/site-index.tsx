@@ -13,7 +13,7 @@ import { research } from "@/data/research";
 import { SECTIONS } from "@/data/site";
 
 /**
- * The homepage's directory — the four destinations the site now has, listed
+ * The homepage's directory: the four destinations the site now has, listed
  * as an archive contents page.
  *
  * It exists because Phase 6D moved every section onto its own route. Without

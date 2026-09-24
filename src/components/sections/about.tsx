@@ -20,19 +20,19 @@ import { research } from "@/data/research";
 import { site } from "@/data/site";
 
 /**
- * About — the `/about` page.
+ * About: the `/about` page.
  *
  * Six numbered blocks, in the order a reader would ask the questions: who,
  * where from, what with, what on, where to, and how to reach them. Each
  * block is a `<h2>` under the page's `<h1>`, with an index rail on the left
- * and the content on the right — the same split the Capabilities row used
+ * and the content on the right, the same split the Capabilities row used
  * before Phase 6F, now applied to the whole page.
  *
  * **On the prose.** Since Phase 6F the personal copy is the owner's own:
  * `profile.about` holds the six answers from `Docs/Detail.txt`, rendered
  * into English and kept in first person because the original is. The only
  * sentence written here is the opening line of Profile, and every clause in
- * it is a data field — see the annotation at the point of use. Each
+ * it is a data field (see the annotation at the point of use). Each
  * `profile.about` section renders only if it has paragraphs, so a section
  * the owner has not answered leaves no gap on the page.
  *
@@ -50,7 +50,7 @@ import { site } from "@/data/site";
  *
  * **Experience.** The owner is a fresh graduate with no formal employment to
  * document (confirmed 2026-09-21). `profile.experience` carries the agreed
- * label — "Independent projects" — as a Background row, and block 04 lists
+ * label, "Independent projects", as a Background row, and block 04 lists
  * the projects themselves as the evidence. No employer, title, or period is
  * implied anywhere on the page.
  */
@@ -64,7 +64,7 @@ const RESEARCH_HREF = site.sections.find((s) => s.href === "/research")?.href ??
 
 /**
  * The headline contact is whichever primary channel is an email, found by
- * URI scheme — the same rule `contact.tsx` uses, so the two pages cannot
+ * URI scheme, the same rule `contact.tsx` uses, so the two pages cannot
  * name different addresses.
  */
 const EMAIL = profile.contact.find(
@@ -72,7 +72,7 @@ const EMAIL = profile.contact.find(
 );
 
 /**
- * Model, Build, and Deploy. The `Research` group is deliberately excluded —
+ * Model, Build, and Deploy. The `Research` group is deliberately excluded:
  * `/research` prints it as its Method block, and printing it twice would make
  * the two sections disagree the moment one is edited. A pointer to that
  * section stands in its place below.
@@ -120,7 +120,7 @@ const BACKGROUND = [
 /* ------------------------------------------------------------------ */
 
 /**
- * The opening statement measure. 52ch matches the Research standfirst — both
+ * The opening statement measure. 52ch matches the Research standfirst; both
  * are section-opening statements, so they hold the same measure.
  */
 const statement = `max-w-[52ch] ${leadText}`;
@@ -136,12 +136,18 @@ const inlineLink = `text-ink underline decoration-[var(--color-border)] underlin
 
 /**
  * One numbered block: index and `<h2>` in the left rail, content on the
- * right. The heading is set as a label rather than a subheading — these are
+ * right. The heading is set as a label rather than a subheading: these are
  * the same eleven-pixel tracked-out terms the page's `dt`s use, and the reason
  * they are `<h2>` is the outline, not the type.
  *
- * `aside` is optional and sits under the label in the rail — the margin
+ * `aside` is optional and sits under the label in the rail; the margin
  * column, empty for every other block, is where the portrait goes.
+ *
+ * The rail is four columns of twelve against the body's eight, which together
+ * are the whole grid: before the portrait it was three, and the twelfth column
+ * was slack at the right. The body column is the same eight columns either
+ * way, so no measure changed; the rail simply took the slack, and with it the
+ * width the portrait needed to stop reading as a thumbnail.
  */
 function AboutBlock({
   index,
@@ -161,7 +167,7 @@ function AboutBlock({
       aria-labelledby={id}
       className="grid grid-cols-1 gap-x-8 gap-y-6 border-t border-[var(--color-border)] pt-8 lg:grid-cols-12"
     >
-      <div className="lg:col-span-3 lg:pt-1.5">
+      <div className="lg:col-span-4 lg:pt-1.5">
         <div className="flex items-baseline gap-4">
           <span aria-hidden="true" className={`${monoMeta} text-muted`}>
             {index}
@@ -184,22 +190,22 @@ function AboutBlock({
  * few percent of height and nothing else, so the figure stays whole, and
  * `object-position` biases what is trimmed towards the feet rather than the
  * head. The hairline and 2px radius are the tokens the design system reserves
- * for images; nothing else is added — no shadow, no filter, no overlay.
+ * for images; nothing else is added: no shadow, no filter, no overlay.
  *
  * Width is capped below `lg`, where the rail is a full-width row and an
  * uncapped portrait would open the page on a picture instead of the writing.
- * At `lg` it takes the rail's own width (~256px at the container maximum),
+ * At `lg` it takes the rail's own width (~352px at the container maximum),
  * which is what `sizes` describes to the browser.
  */
 function Portrait() {
   return (
-    <div className="relative aspect-[4/5] w-full max-w-[13rem] overflow-hidden rounded-[var(--radius-xs)] border border-[var(--color-border)] bg-[var(--color-surface)] lg:max-w-none">
+    <div className="relative aspect-[4/5] w-full max-w-[14rem] overflow-hidden rounded-[var(--radius-xs)] border border-[var(--color-border)] bg-[var(--color-surface)] sm:max-w-[17rem] lg:max-w-[18rem]">
       <Image
         src="/images/profile/alif-portrait.jpg"
         alt={`${profile.displayName}, standing outdoors in sunlight, taking a phone call.`}
         fill
-        sizes="(min-width: 1024px) 256px, 208px"
-        className="object-cover object-[50%_30%]"
+        sizes="(min-width: 1024px) 288px, (min-width: 640px) 272px, 224px"
+        className="object-cover object-[50%_28%]"
       />
     </div>
   );
@@ -241,7 +247,7 @@ export function About() {
       />
 
       <div className="space-y-16 lg:space-y-20">
-        {/* 01 — Profile */}
+        {/* 01 · Profile */}
         <AboutBlock
           index="01"
           heading="Profile"
@@ -252,7 +258,7 @@ export function About() {
               `status` (lower-cased), `education.field`, `education.institution`
               when present, and `location`. Nothing else is asserted. */}
           <p className={`${statement} text-ink`}>
-            {profile.displayName} — {profile.fullName} — is an{" "}
+            {profile.displayName}, {profile.fullName}, is an{" "}
             {profile.roles[0]} and a {profile.status.toLowerCase()} in{" "}
             {profile.education.field}
             {profile.education.institution
@@ -264,7 +270,7 @@ export function About() {
           <Prose paragraphs={about.interests} className="mt-8" />
         </AboutBlock>
 
-        {/* 02 — Background */}
+        {/* 02 · Background */}
         <AboutBlock index="02" heading="Background" id="about-background">
           <dl className="grid grid-cols-1 gap-x-8 sm:grid-cols-2">
             {BACKGROUND.map((item) => (
@@ -288,7 +294,7 @@ export function About() {
           <Prose paragraphs={about.background} className="mt-8" />
         </AboutBlock>
 
-        {/* 03 — Capabilities */}
+        {/* 03 · Capabilities */}
         <AboutBlock index="03" heading="Capabilities" id="about-capabilities">
           <dl>
             {CAPABILITY_GROUPS.map((group) => (
@@ -331,7 +337,7 @@ export function About() {
           ) : null}
         </AboutBlock>
 
-        {/* 04 — Research / Building */}
+        {/* 04 · Research / Building */}
         <AboutBlock
           index="04"
           heading="Research / Building"
@@ -394,7 +400,7 @@ export function About() {
           ) : null}
         </AboutBlock>
 
-        {/* 05 — Direction */}
+        {/* 05 · Direction */}
         <AboutBlock index="05" heading="Direction" id="about-direction">
           {/* The same ordered list the Hero renders: the sequence is the
               content, the arrows are decoration over that order. */}
@@ -417,7 +423,7 @@ export function About() {
           <Prose paragraphs={about.direction} className="mt-8" />
         </AboutBlock>
 
-        {/* 06 — Availability / Contact */}
+        {/* 06 · Availability / Contact */}
         <AboutBlock
           index="06"
           heading="Availability / Contact"

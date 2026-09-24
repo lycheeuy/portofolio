@@ -6,7 +6,7 @@ import { accentDot, metaLabel, monoMeta, sectionHeading } from "@/components/ui/
  * The index strip that opens every section: archive number, a hairline rule,
  * an optional accent marker, and one tracked-out label.
  *
- * Five call sites — the Hero plus the four `<h2>` sections — each wrote this
+ * Five call sites (the Hero plus the four `<h2>` sections) each wrote this
  * out before Phase 6C, which is how the rule ended up as `h-px w-8` in all
  * five by luck rather than by construction. The Hero uses it on its own
  * because its heading is the page `<h1>` at hero scale, not a section opener.
@@ -18,7 +18,7 @@ export function SectionEyebrow({
   children,
 }: {
   index: string;
-  /** Accent dot before the label — reserved for availability. */
+  /** Accent dot before the label, reserved for availability. */
   marker?: boolean;
   className?: string;
   children: ReactNode;
@@ -43,7 +43,7 @@ const SECTION_HEADER_GAP = "mb-12 lg:mb-16";
  * `level` chooses the heading element. Phase 6D split the single page into
  * six routes, so the four openers that were `<h2>` under the Hero's `<h1>`
  * are now the first and only heading on their own page. Nothing else about
- * them changed — the eyebrow, the rule, the type, and the gap are the same —
+ * them changed (the eyebrow, the rule, the type, and the gap are the same),
  * so this is a prop rather than a second component: two components that must
  * stay identical below the heading tag would only drift.
  *
@@ -53,12 +53,12 @@ const SECTION_HEADER_GAP = "mb-12 lg:mb-16";
  * The `mt-6` between eyebrow and heading is fixed here. The gap under the
  * header is the `className` default: `#work` previously used `mb-14 lg:mb-20`
  * against `mb-12 lg:mb-16` in `#research` and `#about`, and the three now share
- * one value. Sections still differ where the difference is the content — a
- * dense case study against a sparse ledger — not the gap under a heading.
+ * one value. Sections still differ where the difference is the content (a
+ * dense case study against a sparse ledger), not the gap under a heading.
  *
  * `className` *replaces* that default rather than adding to it, because
  * `cn` concatenates and Tailwind resolves a conflict by stylesheet order, not
- * by string order — appending `mb-0` to `mb-12` would lose. `#contact` is the
+ * by string order: appending `mb-0` to `mb-12` would lose. `#contact` is the
  * one caller that needs no gap (its first block carries its own `mt-12`) and a
  * measure instead, so it passes its own string.
  */
@@ -73,7 +73,7 @@ export function SectionHeader({
   children,
 }: {
   index: string;
-  /** Eyebrow label — a count, a status, an availability line. */
+  /** Eyebrow label: a count, a status, an availability line. */
   meta: ReactNode;
   marker?: boolean;
   heading: ReactNode;

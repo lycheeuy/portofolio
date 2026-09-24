@@ -5,14 +5,14 @@ import { getResearchEntry, research } from "@/data/research";
 import { routeMetadata } from "@/lib/metadata";
 
 /**
- * Research entry — `/research/[slug]`.
+ * Research entry: `/research/[slug]`.
  *
  * Slugs come from `research.ts` and nowhere else: `icwt-2026` and
  * `icsmech-2026`. `generateStaticParams` prerenders exactly those two, and
  * `dynamicParams = false` makes any other slug a 404.
  *
  * The page title is the paper title, falling back to the venue acronym and
- * year for any entry that arrives venue-only — a browser tab has to say
+ * year for any entry that arrives venue-only: a browser tab has to say
  * something, and the venue is what is confirmed. `description` is the topic
  * when there is one and omitted rather than invented when there is not, so
  * the site-level description from the root layout stands in. Since Phase 6E

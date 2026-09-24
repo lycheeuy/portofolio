@@ -5,7 +5,7 @@ import type { ResearchEntry, ResearchStatus } from "@/types";
  * data does not use, so a status change in the data layer never falls
  * through to a raw enum string on the page.
  *
- * `pending-confirmation` deliberately does not say "submitted" or "accepted" —
+ * `pending-confirmation` deliberately does not say "submitted" or "accepted":
  * the venue is what is confirmed, nothing about the paper's fate is known.
  * `in-publication` is the owner's own wording (2026-09-21) for the ICWT paper
  * and is likewise not "accepted".
@@ -33,7 +33,7 @@ export const SETTLED: ReadonlySet<ResearchStatus> = new Set([
 
 /**
  * The status line for one entry: the label, then the platform when the
- * owner has named one, then the year — "Published · IEEE Xplore · 2026",
+ * owner has named one, then the year: "Published · IEEE Xplore · 2026",
  * "In publication process · IEEE · 2026". The index row and the detail page
  * both print it, so it is composed once here.
  */

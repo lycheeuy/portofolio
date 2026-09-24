@@ -32,7 +32,7 @@ import type {
  *
  * The two projects look different because their data is different, not
  * because they are styled differently. ThoraxVision carries three benchmarked
- * models, so it gets the results tables (currently gated off — see
+ * models, so it gets the results tables (currently gated off; see
  * `SHOW_MODEL_RESULTS`). MelonVision AI carries no evaluation figures but does
  * carry a timeline and a deployment chain ending on ESP32-CAM hardware, so its
  * weight falls on approach and stack. Neither shape is hardcoded per project.
@@ -64,18 +64,13 @@ const asPercent = (value: number | null) =>
 const asCount = (value: number) => value.toLocaleString("en-US");
 
 /**
- * A figure the owner left blank. Shown as an em dash, but read out as words —
- * a screen reader announcing a bare dash in a metrics table tells the listener
- * nothing about why the cell is empty.
+ * A figure the owner left blank. Written out as words rather than a bare
+ * dash or "n/a", so sighted readers and screen readers get the same reason
+ * the cell is empty.
  */
 function Figure({ value }: { value: string | null }) {
   if (value !== null) return <>{value}</>;
-  return (
-    <>
-      <span aria-hidden="true">—</span>
-      <span className="sr-only">Not recorded</span>
-    </>
-  );
+  return <>Not recorded</>;
 }
 
 /* ------------------------------------------------------------------ */
@@ -98,7 +93,7 @@ const headCell = `whitespace-nowrap px-4 py-3 text-left ${metaLabel}`;
 const blockHeading = metaLabel;
 
 /* ------------------------------------------------------------------ */
-/* Results — rendered only for projects that have benchmarked models    */
+/* Results: rendered only for projects that have benchmarked models    */
 /* ------------------------------------------------------------------ */
 
 /**
@@ -117,7 +112,7 @@ const SHOW_MODEL_RESULTS: boolean = false;
  *
  * `min-w-0` is load-bearing here and on every grid item between this and the
  * page root. A grid or flex item defaults to `min-width: auto`, which means it
- * refuses to shrink below its content — so a `min-w-[38rem]` table pushes the
+ * refuses to shrink below its content, so a `min-w-[38rem]` table pushes the
  * whole column past the viewport and the page scrolls sideways instead of the
  * table. Overriding the minimum to 0 lets the column take the track width it
  * was given and hands the excess to this container's own scroll port.
@@ -127,7 +122,7 @@ const SHOW_MODEL_RESULTS: boolean = false;
  * clipped by an ancestor's overflow if that ancestor is in its containing
  * block chain. Without a positioned ancestor the "Not recorded" labels inside
  * these cells resolve against the initial containing block, escape the scroll
- * port, and are laid out at their static position — which for the last column
+ * port, and are laid out at their static position, which for the last column
  * of a 608px table sits well past a 375px viewport. See §11 of the log.
  */
 function ScrollableTable({
@@ -157,7 +152,7 @@ function ModelComparison({
   projectTitle: string;
 }) {
   return (
-    <ScrollableTable label={`${projectTitle} — model comparison, scrollable`}>
+    <ScrollableTable label={`${projectTitle}: model comparison, scrollable`}>
       <table className="w-full min-w-[34rem] border-collapse">
         <caption className={`${metaLabel} pb-3 text-left`}>
           Model comparison
@@ -220,7 +215,7 @@ function PerClassMetrics({
     );
 
   return (
-    <ScrollableTable label={`${projectTitle} — per-class metrics, scrollable`}>
+    <ScrollableTable label={`${projectTitle}: per-class metrics, scrollable`}>
       <table className="w-full min-w-[38rem] border-collapse">
         <caption className={`${metaLabel} pb-3 text-left`}>
           Per-class metrics
@@ -483,7 +478,7 @@ export function ProjectDetail({ project }: { project: Project }) {
           <div className="mt-16 border-t border-[var(--color-border)] pt-8 lg:mt-20">
             <h2 className={blockHeading}>Related research</h2>
             {/* One row per paper: the title as the link, and beneath it the
-                venue, year, and the owner's author position when recorded —
+                venue, year, and the owner's author position when recorded,
                 the same line `/about` prints under each entry. The position
                 is the one documented statement of the owner's role in this
                 project's research, so it belongs where the project is. */}

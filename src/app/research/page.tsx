@@ -6,7 +6,7 @@ import { getSection } from "@/data/site";
 import { routeMetadata } from "@/lib/metadata";
 
 /**
- * Research index — `/research`.
+ * Research index: `/research`.
  *
  * `ResearchLog` owns the rendering. The description is composed from
  * `research.ts` the same way the page's standfirst is: a count, the venue
@@ -34,8 +34,8 @@ const COUNT = research.length;
  * that it is a register of venues and says so instead.
  */
 const DESCRIPTION = ALL_DETAILED
-  ? `${COUNT} conference ${COUNT === 1 ? "paper" : "papers"} — ${ACRONYMS} — with title, topic, and author position for each: ${statusSummary(research)}.`
-  : `${COUNT} conference ${COUNT === 1 ? "venue" : "venues"} confirmed — ${ACRONYMS}. Paper titles, topics, and publication state are listed once they are settled.`;
+  ? `${COUNT} conference ${COUNT === 1 ? "paper" : "papers"} (${ACRONYMS}) with title, topic, and author position for each: ${statusSummary(research)}.`
+  : `${COUNT} conference ${COUNT === 1 ? "venue" : "venues"} confirmed: ${ACRONYMS}. Paper titles, topics, and publication state are listed once they are settled.`;
 
 export const metadata: Metadata = {
   title: getSection("/research")?.label ?? "Research log",

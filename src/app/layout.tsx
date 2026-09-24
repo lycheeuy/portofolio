@@ -44,10 +44,10 @@ const jetbrainsMono = localFont({
  * own resolved title and description. No `og:image` is declared: the OG image
  * does not exist yet (`site.pending`), and a tag pointing at a missing file
  * is worse than none. `metadataBase`, canonical, and `og:url` follow
- * `site.url` — see `lib/metadata.ts` — and are absent while it is `null`.
+ * `site.url` (see `lib/metadata.ts`) and are absent while it is `null`.
  *
  * No `robots` field: index/follow is the crawler default, and an explicit
- * tag here would sit next to the `noindex` Next injects on the 404 route —
+ * tag here would sit next to the `noindex` Next injects on the 404 route:
  * two robots tags on one page, one contradicting the other.
  */
 const ORIGIN = siteUrl();
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
   ...(ORIGIN ? { metadataBase: new URL(ORIGIN) } : {}),
   title: {
     default: site.title,
-    template: `%s — ${site.name}`,
+    template: `%s · ${site.name}`,
   },
   // Location comes from the data layer so metadata cannot drift from what
   // the footer and About page render.

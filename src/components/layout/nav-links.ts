@@ -10,8 +10,8 @@ export { NAVIGATION as NAV_LINKS } from "@/data/site";
 /**
  * Whether a nav target is the page currently being viewed.
  *
- * A detail page marks its index as current — `/projects/melonvision-ai`
- * lights "Projects" — because the reader is inside that part of the site and
+ * A detail page marks its index as current (`/projects/melonvision-ai`
+ * lights "Projects") because the reader is inside that part of the site and
  * a nav bar with nothing marked reads as though they are nowhere. `/` is the
  * exception: every path starts with it, so it matches exactly or not at all.
  */

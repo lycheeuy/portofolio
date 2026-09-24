@@ -1,6 +1,6 @@
-# Alif Reezi — Engineering Archive
+# Alif Reezi · Engineering Archive
 
-Personal portfolio website for **Nashiruddin Alif Alvareezi** (Alif Reezi) — AI Engineer, Machine Learning Engineer, and Biomedical Engineering graduate.
+Personal portfolio website for **Nashiruddin Alif Alvareezi** (Alif Reezi), AI Engineer, Machine Learning Engineer, and Biomedical Engineering graduate.
 
 The site is built as a personal engineering archive rather than a generic developer template: an editorial, typography-led presentation of research and shipped systems.
 
@@ -14,10 +14,10 @@ The site is built as a personal engineering archive rather than a generic develo
 |---|---|---|
 | Framework | Next.js 16.3.1 | App Router, every route statically prerendered |
 | Language | TypeScript 5 | Strict mode |
-| Styling | Tailwind CSS 4 | CSS-first — no `tailwind.config.js`; the design system is `src/app/globals.css` |
+| Styling | Tailwind CSS 4 | CSS-first, no `tailwind.config.js`; the design system is `src/app/globals.css` |
 | 3D | React Three Fiber · drei · Rapier · meshline | The hero Lanyard only; loaded behind `next/dynamic({ ssr: false })` |
 | Fonts | Fraunces · DM Sans · JetBrains Mono | Self-hosted via `next/font/local` |
-| Deployment | — | No production domain yet; `site.url` in `src/data/site.ts` is `null` until one is chosen |
+| Deployment | None yet | No production domain yet; `site.url` in `src/data/site.ts` is `null` until one is chosen |
 
 No animation library, icon set, or UI kit. The Lanyard is adapted from the
 React Bits component source (see `Docs/DEVELOPMENT_LOG.md` §5), not installed
@@ -69,14 +69,14 @@ src/
 │   ├── research/           Research entry view + status labels
 │   ├── ui/                 Shared class strings and link primitives
 │   └── lanyard/            Isolated 3D bundle (client components)
-├── data/                   Content source of truth — profile, projects, research, site
+├── data/                   Content source of truth: profile, projects, research, site
 ├── lib/                    cn(), metadata helpers
 └── types/index.ts          Content interfaces consumed by data/
 
 public/
 ├── fonts/                  Self-hosted variable woff2 files
 ├── lanyard/card.glb        Lanyard card geometry
-└── images/og/              Reserved for the Open Graph image (empty — pending)
+└── images/og/              Reserved for the Open Graph image (empty, pending)
 ```
 
 `Docs/DEVELOPMENT_LOG.md` carries the full per-file tree and the reasoning
@@ -87,7 +87,7 @@ behind it.
 ## Architecture principles
 
 - **Static-first.** No database, no API routes, no CMS. All content lives in typed TypeScript files under `src/data/` and is rendered at build time.
-- **Server Components by default.** Client Components exist only where a browser API or interaction requires them — the mobile menu, the desktop nav's current-page marker, and the two Lanyard components.
+- **Server Components by default.** Client Components exist only where a browser API or interaction requires them: the mobile menu, the desktop nav's current-page marker, and the two Lanyard components.
 - **Minimal dependencies.** A library is added only when CSS or a few lines of code cannot do the job.
 - **The Lanyard is isolated.** The 3D credential card is dynamically imported with SSR disabled, so its Three.js dependency chain never enters the main bundle. A WebGL capability probe and an error boundary guard it.
 - **Nothing is invented.** Every name, figure, URL, and date on the site traces to an owner-supplied document. Anything not yet supplied is `null` in `src/data/` with a `pending` note, and the UI renders nothing for it rather than filler.

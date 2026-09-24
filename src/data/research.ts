@@ -13,7 +13,7 @@ import type { ResearchEntry } from "@/types";
  * none is linked for it. Co-authors are not displayed, by decision. Host and
  * location are still not documented and stay in `pending`.
  *
- * Conference names are stored without the trailing year — `conference.year`
+ * Conference names are stored without the trailing year; `conference.year`
  * carries it, and the UI composes "acronym · name · year" itself.
  */
 
@@ -31,7 +31,7 @@ const icwt2026: ResearchEntry = {
   topic:
     "Comparing VGG19 and DenseNet121 for tuberculosis classification on a local chest X-ray dataset, with experiments focused on batch size, model generalization, and performance differences between architectures.",
   contribution: "Second author",
-  /** Owner, 2026-09-21: in the publication process with IEEE — not accepted, not published. */
+  /** Owner, 2026-09-21: in the publication process with IEEE, not accepted, not published. */
   status: "in-publication",
   platform: "IEEE",
   projectSlug: "thoraxvision",

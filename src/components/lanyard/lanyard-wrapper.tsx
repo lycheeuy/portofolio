@@ -41,7 +41,7 @@ class LanyardErrorBoundary extends Component<BoundaryProps, BoundaryState> {
 
 /**
  * react-three-fiber creates its renderer asynchronously, so a missing WebGL
- * context rejects a promise rather than throwing during render — an error
+ * context rejects a promise rather than throwing during render, so an error
  * boundary never sees it and the hero is left with a dead canvas. Probing up
  * front keeps the quiet fallback in charge whenever WebGL is unavailable.
  */
@@ -71,7 +71,7 @@ export function LanyardWrapper() {
 
   // three + drei + rapier is ~3.3 MB of JavaScript. next/dynamic keeps it out
   // of the initial bundle, but it still fetches and executes the moment this
-  // component renders — which is during hydration, on the same main thread
+  // component renders, which is during hydration, on the same main thread
   // that is trying to make the page interactive. Holding the render back to
   // the first idle period moves all of that after first paint. The fallback
   // occupies the slot in the meantime, and the hero reserves the height, so

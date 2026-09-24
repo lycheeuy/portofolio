@@ -5,9 +5,9 @@ import { getSection } from "@/data/site";
 import { routeMetadata } from "@/lib/metadata";
 
 /**
- * Contact — `/contact`.
+ * Contact: `/contact`.
  *
- * `Contact` owns the rendering: it publishes every `primary` channel — email,
+ * `Contact` owns the rendering: it publishes every `primary` channel: email,
  * LinkedIn, and GitHub. The description is `profile.availability` verbatim.
  */
 export const metadata: Metadata = {

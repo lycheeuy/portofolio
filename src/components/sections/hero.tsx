@@ -16,7 +16,7 @@ import { profile } from "@/data/profile";
 import { site } from "@/data/site";
 
 /**
- * Hero — the portfolio's primary identity section.
+ * Hero: the portfolio's primary identity section.
  *
  * Every string comes from `src/data/profile.ts` or `src/data/site.ts`. The
  * composition is the asymmetric 12-column grid established in Phase 5D-1
@@ -33,11 +33,11 @@ const EMAIL = profile.contact.find((channel) => channel.label === "Email");
 /**
  * Two CTAs, deliberately unequal. The work link is the page's primary action
  * and takes the one solid block in the composition; contact stays a ruled
- * text link — `ActionLink`, the same one the rest of the site uses. Both reach
+ * text link: `ActionLink`, the same one the rest of the site uses. Both reach
  * a 44px tap target even though the label itself is only ~26px tall.
  *
  * Since Phase 6D both are routes rather than scroll targets, so both go
- * through `next/link` — a full document request here would tear down and
+ * through `next/link`; a full document request here would tear down and
  * rebuild the Lanyard's WebGL context on the way out.
  *
  * This is the only filled button on the page, so it is the only place the
@@ -172,7 +172,7 @@ export function Hero() {
               <dt className={metaLabel}>Contact</dt>
               <dd className={colophonValue}>
                 {/* `inline-flex min-h-11` for the 44px target the rest of the
-                    page's links hold — measured at 1440 this was the one link
+                    page's links hold. Measured at 1440 this was the one link
                     left at 21px tall, because a colophon value is not an
                     inline link inside a sentence. Never `inline-block` here:
                     `--spacing-block` in `@theme` makes Tailwind emit a second

@@ -13,8 +13,8 @@ import type { ExternalLink, ResearchEntry } from "@/types";
  * One research entry, as its own page.
  *
  * Every field renders conditionally. Written in Phase 6D when both entries
- * were venue-only — title, conference name, topic, contribution, project link,
- * and paper link all `null` — with a one-line note for that case instead of an
+ * were venue-only (title, conference name, topic, contribution, project link,
+ * and paper link all `null`), with a one-line note for that case instead of an
  * invented abstract. Phase 6E supplied the title, conference name, topic,
  * author position, repository link, and source project for both entries, and
  * the same markup renders them with no change here; the venue-only note stays
@@ -36,7 +36,7 @@ export function ResearchDetail({ entry }: { entry: ResearchEntry }) {
 
   /**
    * With no title the venue is the entry, so the acronym alone becomes the
-   * heading — the year is already set in the eyebrow beside it. When a title
+   * heading; the year is already set in the eyebrow beside it. When a title
    * lands it takes the heading and the venue demotes to the line below, where
    * the year is repeated deliberately because the pairing is then the citation.
    */

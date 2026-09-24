@@ -16,7 +16,7 @@ import { getSection } from "@/data/site";
 import type { ResearchEntry } from "@/types";
 
 /**
- * Research log — the `/research` index.
+ * Research log: the `/research` index.
  *
  * A ruled ledger of what is confirmed. Every field renders only when it is
  * non-null: an entry with a title shows it as the heading with the venue
@@ -24,8 +24,8 @@ import type { ResearchEntry } from "@/types";
  * heading and nothing invented beneath it. As of Phase 6E both entries carry
  * a title, conference name, and topic from `Docs/Detail.txt`; since the
  * owner data finalisation of 2026-09-21 each carries its own publication
- * state and platform — published on IEEE Xplore, in the publication process
- * with IEEE — and the status column prints exactly that. The published
+ * state and platform (published on IEEE Xplore, in the publication process
+ * with IEEE), and the status column prints exactly that. The published
  * paper's IEEE Xplore link is on its detail page; the index rows carry no
  * outbound links.
  *
@@ -51,8 +51,8 @@ const RESEARCH_INDEX = RESEARCH?.index ?? "02";
  * Reasoning: when both papers were venue-only, the entries alone could not
  * show that this work was evaluated and communicated, only that two venues
  * existed; a paper still `pending-confirmation` cannot show it either. This
- * group — hyperparameter experimentation, model evaluation, ROC/AUC, confusion
- * matrix, Grad-CAM, scientific documentation — is documented data that does,
+ * group (hyperparameter experimentation, model evaluation, ROC/AUC, confusion
+ * matrix, Grad-CAM, scientific documentation) is documented data that does,
  * and "Research" is its own label in `profile.capabilities`, so the research
  * page is its natural home. `#about` points here rather than printing it
  * again.
@@ -68,7 +68,7 @@ const RESEARCH_PRACTICE = profile.capabilities.find(
  */
 const ANY_VENUE_ONLY = research.some((entry) => entry.title === null);
 
-/** "1 published · 1 in publication process" — counted from the data. */
+/** "1 published · 1 in publication process", counted from the data. */
 const STATUS_SUMMARY = statusSummary(research);
 
 const PAPER_NOUN = research.length === 1 ? "paper" : "papers";
@@ -98,7 +98,7 @@ function ResearchRow({ entry }: { entry: ResearchEntry }) {
 
   /**
    * With no title the venue is the entry, so the acronym alone becomes the
-   * heading — the year is already set beside it in the rail, and repeating it
+   * heading; the year is already set beside it in the rail, and repeating it
    * as "ICWT 2026" next to a 2026 makes the row read twice. When a title
    * lands it takes the heading and the venue demotes to the metadata line
    * below, where the year is repeated deliberately because the pairing is
@@ -195,7 +195,7 @@ export function ResearchLog() {
         level={1}
       >
         {/* Counts, years, and statuses are read from the data. While any
-            entry is venue-only the second sentence names what is withheld —
+            entry is venue-only the second sentence names what is withheld;
             see `ANY_VENUE_ONLY`; otherwise it states the statuses. */}
         <p className={`mt-6 max-w-[52ch] ${leadText} text-secondary`}>
           {research.length} conference {PAPER_NOUN}

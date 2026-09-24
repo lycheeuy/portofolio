@@ -9,14 +9,14 @@ import { site } from "@/data/site";
  * Sticky editorial header. Rendered once by the root layout, so it is the same
  * element across every route and does not re-mount on navigation.
  *
- * The nav itself is `PrimaryNav` — a client component, because marking the
+ * The nav itself is `PrimaryNav`, a client component, because marking the
  * current page needs the current path. The header stays a Server Component so
  * only the link list ships JavaScript.
  */
 
 /**
  * The skip link is invisible until focused, so it sets its own outline rather
- * than relying on the global `:focus-visible` rule — it has to paint a
+ * than relying on the global `:focus-visible` rule: it has to paint a
  * background and a box at the same moment it becomes visible.
  *
  * `#top` is the `<main>` on every route, not a homepage section, so the link

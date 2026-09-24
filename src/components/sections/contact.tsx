@@ -12,7 +12,7 @@ import { profile } from "@/data/profile";
 import { site } from "@/data/site";
 
 /**
- * Contact — the `/contact` page, and the site's closing statement.
+ * Contact: the `/contact` page, and the site's closing statement.
  *
  * Every address comes from `profile.contact`. No URL, handle, or number is
  * written here.
@@ -33,7 +33,7 @@ const PRIMARY = profile.contact.filter((channel) => channel.primary);
 
 /**
  * The headline action is whichever primary channel is an email, found by URI
- * scheme rather than by matching the label string — the scheme is what makes
+ * scheme rather than by matching the label string; the scheme is what makes
  * it an email, and it survives the label being renamed or translated. If none
  * exists the section simply lists every primary channel instead, with no
  * headline.
@@ -105,7 +105,7 @@ export function Contact() {
                     ? { target: "_blank", rel: "noopener noreferrer" }
                     : {})}
                   /* `relative` so the sr-only note below resolves against
-                     this link rather than the initial containing block —
+                     this link rather than the initial containing block;
                      see §11 of the development log. */
                   className={`group relative mt-2 inline-flex min-h-11 items-center gap-2 break-all ${monoMeta} text-ink hover:text-accent ${colorTransition}`}
                 >

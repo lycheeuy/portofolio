@@ -8,7 +8,7 @@ import { colorTransition, monoCaps } from "@/components/ui/styles";
  * The mirror of `ActionLink`: the same ruled label and the same 44px target,
  * but the arrow leads rather than trails and steps backwards on hover, so the
  * two read as opposite directions rather than as one link drawn twice. Set in
- * `monoCaps` — it is a position marker, not a call to action, and giving it
+ * `monoCaps`: it is a position marker, not a call to action, and giving it
  * the body weight of `ActionLink` would make leaving the page compete with
  * the page.
  *

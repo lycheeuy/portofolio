@@ -11,8 +11,8 @@ import { site } from "@/data/site";
  * further code change, because every route already goes through
  * `routeMetadata`.
  *
- * What is emitted regardless of a domain — `og:type`, `og:site_name`, and
- * (from the root layout) the Twitter card type — needs no URL to be correct.
+ * What is emitted regardless of a domain (`og:type`, `og:site_name`, and
+ * (from the root layout) the Twitter card type) needs no URL to be correct.
  * `og:title` and `og:description` are not set here: Next fills both from the
  * route's resolved `title` (template applied) and `description` when the
  * `openGraph` object leaves them out, so a page cannot share under a title
@@ -30,7 +30,7 @@ export function siteUrl(path = "/"): string | null {
  * `metadata` after `title` and `description`.
  *
  * `openGraph` is a nested field, and Next merges nested fields by
- * replacement, not deeply — a route that set `openGraph: { url }` alone would
+ * replacement, not deeply: a route that set `openGraph: { url }` alone would
  * drop the root layout's `type` and `siteName`. So the whole object is built
  * here, once, for every route.
  */

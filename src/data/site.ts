@@ -9,7 +9,7 @@ import type { NavItem, SectionMeta, SiteConfig } from "@/types";
  *
  * Phase 6D turned the four in-page anchors into routes. `NAVIGATION` now
  * carries page paths, and `Home` joins the list because it is a destination
- * rather than a scroll target — the wordmark alone is not a navigation item.
+ * rather than a scroll target; the wordmark alone is not a navigation item.
  */
 
 export const NAVIGATION: readonly NavItem[] = [
@@ -43,8 +43,8 @@ export function getSection(href: string): SectionMeta | undefined {
 
 /**
  * `title` is the homepage `<title>` and the fallback for any route without
- * one; every other route goes through the `%s — Alif Reezi` template in the
- * root layout, so the separator here is the same em dash. The role names the
+ * one; every other route goes through the `%s · Alif Reezi` template in the
+ * root layout, so the separator here is the same middle dot. The role names the
  * owner's first `profile.roles` entry rather than a shorter form of it, so a
  * search result and the Hero say the same thing.
  *
@@ -55,9 +55,9 @@ export function getSection(href: string): SectionMeta | undefined {
 export const site: SiteConfig = {
   name: "Alif Reezi",
   shortName: "Alif Reezi.",
-  title: "Alif Reezi — AI / Machine Learning Engineer",
+  title: "Alif Reezi · AI / Machine Learning Engineer",
   description:
-    "AI / Machine Learning Engineer and Biomedical Engineering graduate working across computer vision, deep learning, and research — from medical imaging models to edge AI deployment.",
+    "AI / Machine Learning Engineer and Biomedical Engineering graduate working across computer vision, deep learning, and research, from medical imaging models to edge AI deployment.",
   tagline:
     "AI / Machine Learning Engineer working across computer vision, model experimentation, and research.",
   locale: "en",
@@ -65,7 +65,7 @@ export const site: SiteConfig = {
   navigation: NAVIGATION,
   sections: SECTIONS,
   pending: [
-    "Production domain — `url` is null, so canonical URLs, `og:url`, the sitemap entries, and the robots sitemap line are not emitted. Setting `url` turns all four on without further code.",
-    "Open Graph / social share image — `public/images/og/` is empty; no `og:image` is declared rather than one pointing at a file that does not exist.",
+    "Production domain: `url` is null, so canonical URLs, `og:url`, the sitemap entries, and the robots sitemap line are not emitted. Setting `url` turns all four on without further code.",
+    "Open Graph / social share image: `public/images/og/` is empty; no `og:image` is declared rather than one pointing at a file that does not exist.",
   ],
 };

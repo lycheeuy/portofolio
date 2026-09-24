@@ -7,21 +7,21 @@ import { arrowStep, colorTransition, ruledLabel } from "./styles";
  * The page's standard text action: a ruled label that fills in with accent on
  * hover, followed by an arrow that steps forward.
  *
- * Before Phase 6C this markup was written out four times — the Hero's
+ * Before Phase 6C this markup was written out four times (the Hero's
  * secondary CTA, the About closing CTA, the project links in Selected Work,
- * and the entry links in the Research log — and the four had drifted on one
+ * and the entry links in the Research log), and the four had drifted on one
  * point that matters: only Contact and the footer marked an outbound link as
  * outbound. A project repository URL rendered from `projects.ts` would have
  * swapped the tab out with no warning and no `rel`. That is settled here
  * rather than at each call site: the URI scheme decides.
  *
- * - internal (`/projects`, `#top`) — `→`, `next/link`, no announcement
- * - outbound (`https:`, `mailto:`) — `↗`, new tab, `rel="noopener noreferrer"`,
+ * - internal (`/projects`, `#top`): `→`, `next/link`, no announcement
+ * - outbound (`https:`, `mailto:`): `↗`, new tab, `rel="noopener noreferrer"`,
  *   and an `sr-only` note, because the arrow only tells sighted users
  *
  * Phase 6D added the `next/link` branch. Once these targets became routes
- * rather than anchors, a bare `<a>` meant a full document request — and a
- * full teardown of the Lanyard's WebGL context — for every in-site move.
+ * rather than anchors, a bare `<a>` meant a full document request (and a
+ * full teardown of the Lanyard's WebGL context) for every in-site move.
  * Outbound links stay plain `<a>`: `Link` has nothing to prefetch there.
  *
  * `relative` is load-bearing: Tailwind's `sr-only` is `position: absolute`, so
@@ -29,7 +29,7 @@ import { arrowStep, colorTransition, ruledLabel } from "./styles";
  * containing block and escapes any `overflow` container it sits inside,
  * silently widening the document. See §11 of the development log.
  *
- * `min-h-11` holds the 44px touch target — the label itself is only ~26px tall.
+ * `min-h-11` holds the 44px touch target; the label itself is only ~26px tall.
  */
 export function ActionLink({
   href,

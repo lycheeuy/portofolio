@@ -9,7 +9,7 @@
  * Colour is deliberately *not* baked into the type scales (`monoMeta`,
  * `leadText`, `smallText`). The same size and rhythm carries `text-ink`,
  * `text-secondary`, or `text-muted` depending on where it sits, so the caller
- * appends the token. `metaLabel` is the exception — it is always muted, in
+ * appends the token. `metaLabel` is the exception: it is always muted, in
  * every section, and that is what makes it read as one label system.
  */
 
@@ -19,7 +19,7 @@ export const metaLabel =
 
 /**
  * 12px mono set in caps on the label tracking. The Hero's full-name line, the
- * mobile menu toggle, and the mobile menu's contact row — three call sites for
+ * mobile menu toggle, and the mobile menu's contact row: three call sites for
  * one treatment. Append a colour token.
  */
 export const monoCaps =
@@ -37,7 +37,7 @@ export const leadText =
 export const bodyText =
   "font-sans text-[length:var(--text-body)] leading-[var(--leading-body)] text-secondary";
 
-/** 14px secondary copy — colophon values, definition values, notes. */
+/** 14px secondary copy: colophon values, definition values, notes. */
 export const smallText =
   "font-sans text-[length:var(--text-small)] leading-[var(--leading-body)]";
 
@@ -48,12 +48,12 @@ export const sectionHeading =
 /**
  * Square hairline tag. Radius stays at 2px so it reads as a spec sheet, not a
  * pill. Used by the Stack rows in `#work`, the Method row in `#research`, and
- * the Capabilities rows in `#about` — three call sites that each held their own
+ * the Capabilities rows in `#about`: three call sites that each held their own
  * copy of this string until Phase 6C.
  *
  * Do not add `inline-block`. This design system defines `--spacing-block` in
  * `@theme`, and Tailwind 4 therefore reads `inline-block` as the `inline-*`
- * sizing utility with the `block` spacing key — it emits a second
+ * sizing utility with the `block` spacing key: it emits a second
  * `.inline-block { inline-size: var(--spacing-block) }` rule that wins on
  * source order, pinning every tag to that clamp (48px at 1440) regardless of
  * its text. See §11 of the development log. The element is a flex child and is

@@ -5,7 +5,7 @@ import { getSection } from "@/data/site";
 import { routeMetadata } from "@/lib/metadata";
 
 /**
- * About — `/about`.
+ * About: `/about`.
  *
  * `About` owns the rendering. The description is `profile.positioning`
  * verbatim plus the location, both from the data layer, so it cannot drift

@@ -13,7 +13,7 @@
 
 /**
  * An outbound reference. `href` is `null` when the resource is confirmed to
- * exist but its URL has not been supplied — never a guessed address.
+ * exist but its URL has not been supplied, never a guessed address.
  */
 export interface ExternalLink {
   label: string;
@@ -22,7 +22,7 @@ export interface ExternalLink {
   note?: string;
 }
 
-/** Grouped capability listing — "what the owner does", not skill percentages. */
+/** Grouped capability listing: "what the owner does", not skill percentages. */
 export interface CapabilityGroup {
   label: string;
   items: string[];
@@ -54,7 +54,7 @@ export interface Education {
 export interface AboutCopy {
   /** What the owner is most interested in going deeper on right now. */
   interests: string[];
-  /** Why AI / machine learning / computer vision — the way in. */
+  /** Why AI / machine learning / computer vision: the way in. */
   background: string[];
   /** The kind of project the owner likes to build. */
   building: string[];
@@ -89,7 +89,7 @@ export interface Profile {
   /**
    * How the owner's professional experience is described. The owner is a
    * fresh graduate with no formal employment to document, so this is a
-   * label — "Independent projects" — not an employer, title, or period.
+   * label, "Independent projects", not an employer, title, or period.
    * `null` renders no row.
    */
   experience: string | null;
@@ -137,7 +137,7 @@ export interface ModelResult {
 
 export interface Project {
   slug: string;
-  /** Editorial index — "01", "02". */
+  /** Editorial index: "01", "02". */
   index: string;
   title: string;
   /** Discipline line, e.g. "Computer Vision / Research". */
@@ -150,7 +150,7 @@ export interface Project {
   approach: string[];
   /**
    * What the owner counts as the project's main achievement, in their own
-   * words. `null` until supplied — never summarised from the approach.
+   * words. `null` until supplied, never summarised from the approach.
    */
   outcome: string | null;
   /**
@@ -196,14 +196,14 @@ export interface ResearchEntry {
   slug: string;
   index: string;
   year: number;
-  /** Paper title — `null` until the owner supplies it. */
+  /** Paper title: `null` until the owner supplies it. */
   title: string | null;
   conference: Conference;
   topic: string | null;
   contribution: string | null;
   status: ResearchStatus;
   /**
-   * Publication platform the status refers to — "IEEE Xplore" for a
+   * Publication platform the status refers to: "IEEE Xplore" for a
    * published paper, "IEEE" for one in the publication process. `null`
    * when the owner has not named one; the status line then omits it.
    */
@@ -232,7 +232,7 @@ export interface SiteConfig {
   /** One-line description for compact placements. */
   tagline: string;
   locale: string;
-  /** Canonical origin — `null` until a domain is chosen. */
+  /** Canonical origin: `null` until a domain is chosen. */
   url: string | null;
   navigation: readonly NavItem[];
   sections: readonly SectionMeta[];
