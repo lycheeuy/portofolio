@@ -13,6 +13,11 @@ import * as THREE from "three";
    the front face occupies the left half of the base texture, the back face
    the right half. Both read top-left origin (glTF convention), so the
    textures are created with flipY = false.
+
+   The owner's cut-out portrait is the one raster asset the card draws. It is
+   loaded once, drawn into the reserved column on the front face, and the card
+   repaints when it arrives — the same mechanism the webfonts already use. If
+   it never arrives the card paints exactly as it did before it existed.
    --------------------------------------------------------------------------- */
 
 const FRONT_UV = { u0: 0.011, u1: 0.4888, v0: 0.0106, v1: 0.7485 };
@@ -70,6 +75,48 @@ function readTokens(): Tokens {
   };
 }
 
+/* --- portrait -------------------------------------------------------------
+   The asset is a background-removed cut-out, already trimmed to the figure, so
+   it is drawn with no frame and no backdrop: the transparency composites onto
+   the card stock and the figure reads as printed on it. It is fitted, never
+   cropped or stretched — the drawn box is derived from the file's own ratio.  */
+
+const PHOTO_SRC = "/images/profile/alif-lanyard.png";
+
+/** The reserved column, as fractions of the front face's content box. */
+const PHOTO_TOP = 0.545;
+const PHOTO_BOTTOM = 0.845;
+const PHOTO_MAX_W = 0.27;
+/** Clear space between the figure and the metadata column beside it. */
+const PHOTO_GUTTER = 0.04;
+
+let photo: HTMLImageElement | null = null;
+let photoLoad: Promise<void> | null = null;
+
+/**
+ * Resolves when the portrait is decoded, or immediately when it cannot be —
+ * a missing or failed image is not an error the card should surface, so the
+ * promise always resolves and `photo` simply stays null.
+ */
+export function loadCardPhoto(): Promise<void> {
+  if (photoLoad) return photoLoad;
+  photoLoad = new Promise<void>((resolve) => {
+    if (typeof window === "undefined") {
+      resolve();
+      return;
+    }
+    const image = new window.Image();
+    image.decoding = "async";
+    image.onload = () => {
+      photo = image;
+      resolve();
+    };
+    image.onerror = () => resolve();
+    image.src = PHOTO_SRC;
+  });
+  return photoLoad;
+}
+
 /* --- text helpers ---------------------------------------------------------
    Letter-spacing is applied glyph by glyph rather than via ctx.letterSpacing
    so tracking is identical in every browser and can be measured for fitting. */
@@ -98,6 +145,39 @@ function drawTracked(
     ctx.fillText(char, cursor, y);
     cursor += ctx.measureText(char).width + tracking;
   }
+}
+
+/**
+ * Breaks each term onto as few lines as fit `maxWidth`, at the current font.
+ * A term short enough for the column is never touched, so the two-line focus
+ * block the card had before the portrait is exactly what a wide column still
+ * produces.
+ */
+function wrapTracked(
+  ctx: CanvasRenderingContext2D,
+  terms: readonly string[],
+  tracking: number,
+  maxWidth: number,
+): string[] {
+  const lines: string[] = [];
+  for (const term of terms) {
+    if (trackedWidth(ctx, term, tracking) <= maxWidth) {
+      lines.push(term);
+      continue;
+    }
+    let line = "";
+    for (const word of term.split(" ")) {
+      const next = line.length > 0 ? `${line} ${word}` : word;
+      if (line.length > 0 && trackedWidth(ctx, next, tracking) > maxWidth) {
+        lines.push(line);
+        line = word;
+      } else {
+        line = next;
+      }
+    }
+    if (line.length > 0) lines.push(line);
+  }
+  return lines;
 }
 
 /** Shrinks `size` until the tracked string fits `maxWidth`. */
@@ -137,10 +217,17 @@ function uvRect(uv: typeof FRONT_UV): Rect {
   };
 }
 
+/** Focus terms, in the order the hero lists them. Wrapped, never reworded. */
+const FOCUS_TERMS = ["COMPUTER VISION", "RESEARCH"] as const;
+
+/** Baseline step of the focus block — the gap it has always used. */
+const FOCUS_LEADING = 0.063;
+
 /**
  * Front of the credential. Composition is anchored on a single left margin —
  * a header rule under the clamp, the name, a short terracotta rule, role,
- * focus, then a footer row under a second hairline. The top ~14% stays clear
+ * then a row holding the focus metadata with the portrait standing at its
+ * right, and a footer row under a second hairline. The top ~14% stays clear
  * because the model's metal clamp sits over it.
  *
  * Everything is set in `--color-ink` or `--color-secondary`. `--color-muted`
@@ -187,16 +274,52 @@ function drawFront(ctx: CanvasRenderingContext2D, t: Tokens): void {
   drawTracked(ctx, "AI / MACHINE LEARNING", left, r.y + r.h * 0.437, roleTracking);
   drawTracked(ctx, "ENGINEER", left, r.y + r.h * 0.503, roleTracking);
 
+  // Portrait. The figure is bottom-aligned on the footer rule so it stands on
+  // it rather than floating, and fitted by its own ratio inside the reserved
+  // column — the drawn box follows the file, so the person is never stretched
+  // and nothing is cropped away. No frame and no plate behind it: the cut-out's
+  // transparency composites straight onto the card stock.
+  let metaW = contentW;
+
+  if (photo && photo.naturalWidth > 0 && photo.naturalHeight > 0) {
+    const scale = Math.min(
+      (contentW * PHOTO_MAX_W) / photo.naturalWidth,
+      (r.h * (PHOTO_BOTTOM - PHOTO_TOP)) / photo.naturalHeight,
+    );
+    const photoW = photo.naturalWidth * scale;
+    const photoH = photo.naturalHeight * scale;
+    const photoX = right - photoW;
+    ctx.drawImage(photo, photoX, r.y + r.h * PHOTO_BOTTOM - photoH, photoW, photoH);
+    metaW = photoX - contentW * PHOTO_GUTTER - left;
+  }
+
   // Focus — mono metadata, the same register as the hero's focus list. It
   // stays a step under the role through size and family, not tone: this is the
   // smallest type that still has to be read, and at the size the card occupies
   // on screen a lighter grey is the difference between metadata and smudge.
+  //
+  // The size is fixed rather than fitted: the portrait takes a quarter of the
+  // row, so the column beside it is too narrow for "COMPUTER VISION" on one
+  // line, and shrinking the smallest type on the card to force it would put it
+  // under the footer. It wraps instead, and the block stays centred on the
+  // baseline pair it used before the portrait — with no portrait the column is
+  // wide, nothing wraps, and the two lines land exactly where they always did.
   const focusSize = r.h * 0.045;
   const focusTracking = focusSize * 0.13;
   ctx.font = `400 ${focusSize}px ${t.mono}`;
   ctx.fillStyle = t.ink;
-  drawTracked(ctx, "COMPUTER VISION", left, r.y + r.h * 0.638, focusTracking);
-  drawTracked(ctx, "RESEARCH", left, r.y + r.h * 0.701, focusTracking);
+
+  const focusLines = wrapTracked(ctx, FOCUS_TERMS, focusTracking, metaW);
+  const focusStart = 0.638 - ((focusLines.length - 2) * FOCUS_LEADING) / 2;
+  focusLines.forEach((line, index) => {
+    drawTracked(
+      ctx,
+      line,
+      left,
+      r.y + r.h * (focusStart + index * FOCUS_LEADING),
+      focusTracking,
+    );
+  });
 
   // Footer
   ctx.fillStyle = t.secondary;

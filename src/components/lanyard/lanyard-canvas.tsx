@@ -21,7 +21,7 @@ import {
 } from "@react-three/rapier";
 import { MeshLineGeometry, MeshLineMaterial } from "meshline";
 import * as THREE from "three";
-import { createBandTexture, createCardTexture } from "./card-artwork";
+import { createBandTexture, createCardTexture, loadCardPhoto } from "./card-artwork";
 
 // Next.js: assets are served from /public rather than imported as modules.
 // Only the geometry is taken from the model — the card face and the strap are
@@ -213,8 +213,10 @@ function useDrawnTextures() {
   useEffect(() => {
     let cancelled = false;
     // The first paint can happen before Fraunces/DM Sans/JetBrains Mono are
-    // available; reprint the card once they are so it never ships fallbacks.
-    void document.fonts.ready.then(() => {
+    // available, and before the portrait has decoded; reprint the card once
+    // both have arrived so it never ships fallbacks or a photoless face.
+    // `loadCardPhoto` resolves either way, so a missing image cannot stall it.
+    void Promise.all([document.fonts.ready, loadCardPhoto()]).then(() => {
       if (cancelled) return;
       card.repaint();
       band.repaint();

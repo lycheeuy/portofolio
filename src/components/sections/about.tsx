@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Section } from "@/components/layout/section";
 import { SectionHeader } from "@/components/layout/section-header";
@@ -138,16 +139,21 @@ const inlineLink = `text-ink underline decoration-[var(--color-border)] underlin
  * right. The heading is set as a label rather than a subheading — these are
  * the same eleven-pixel tracked-out terms the page's `dt`s use, and the reason
  * they are `<h2>` is the outline, not the type.
+ *
+ * `aside` is optional and sits under the label in the rail — the margin
+ * column, empty for every other block, is where the portrait goes.
  */
 function AboutBlock({
   index,
   heading,
   id,
+  aside,
   children,
 }: {
   index: string;
   heading: string;
   id: string;
+  aside?: ReactNode;
   children: ReactNode;
 }) {
   return (
@@ -155,16 +161,47 @@ function AboutBlock({
       aria-labelledby={id}
       className="grid grid-cols-1 gap-x-8 gap-y-6 border-t border-[var(--color-border)] pt-8 lg:grid-cols-12"
     >
-      <div className="flex items-baseline gap-4 lg:col-span-3 lg:pt-1.5">
-        <span aria-hidden="true" className={`${monoMeta} text-muted`}>
-          {index}
-        </span>
-        <h2 id={id} className={metaLabel}>
-          {heading}
-        </h2>
+      <div className="lg:col-span-3 lg:pt-1.5">
+        <div className="flex items-baseline gap-4">
+          <span aria-hidden="true" className={`${monoMeta} text-muted`}>
+            {index}
+          </span>
+          <h2 id={id} className={metaLabel}>
+            {heading}
+          </h2>
+        </div>
+        {aside ? <div className="mt-6">{aside}</div> : null}
       </div>
       <div className="min-w-0 lg:col-span-8">{children}</div>
     </section>
+  );
+}
+
+/**
+ * The owner's portrait, in the Profile block's margin.
+ *
+ * Framed rather than cropped hard: a 4:5 window over a 3:4 photograph trims a
+ * few percent of height and nothing else, so the figure stays whole, and
+ * `object-position` biases what is trimmed towards the feet rather than the
+ * head. The hairline and 2px radius are the tokens the design system reserves
+ * for images; nothing else is added — no shadow, no filter, no overlay.
+ *
+ * Width is capped below `lg`, where the rail is a full-width row and an
+ * uncapped portrait would open the page on a picture instead of the writing.
+ * At `lg` it takes the rail's own width (~256px at the container maximum),
+ * which is what `sizes` describes to the browser.
+ */
+function Portrait() {
+  return (
+    <div className="relative aspect-[4/5] w-full max-w-[13rem] overflow-hidden rounded-[var(--radius-xs)] border border-[var(--color-border)] bg-[var(--color-surface)] lg:max-w-none">
+      <Image
+        src="/images/profile/alif-portrait.jpg"
+        alt={`${profile.displayName}, standing outdoors in sunlight, taking a phone call.`}
+        fill
+        sizes="(min-width: 1024px) 256px, 208px"
+        className="object-cover object-[50%_30%]"
+      />
+    </div>
   );
 }
 
@@ -205,7 +242,12 @@ export function About() {
 
       <div className="space-y-16 lg:space-y-20">
         {/* 01 — Profile */}
-        <AboutBlock index="01" heading="Profile" id="about-profile">
+        <AboutBlock
+          index="01"
+          heading="Profile"
+          id="about-profile"
+          aside={<Portrait />}
+        >
           {/* Clause by clause: `displayName`, `fullName`, `roles[0]`,
               `status` (lower-cased), `education.field`, `education.institution`
               when present, and `location`. Nothing else is asserted. */}
