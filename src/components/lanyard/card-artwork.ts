@@ -14,10 +14,10 @@ import * as THREE from "three";
    the right half. Both read top-left origin (glTF convention), so the
    textures are created with flipY = false.
 
-   The owner's cut-out portrait is the one raster asset the card draws. It is
-   loaded once, drawn into the reserved column on the front face, and the card
+   The owner's portrait photograph is the one raster asset the card draws. It
+   is loaded once, printed across the top of the front face, and the card
    repaints when it arrives, the same mechanism the webfonts already use. If
-   it never arrives the card paints exactly as it did before it existed.
+   it never arrives the window stays an empty print slot.
    --------------------------------------------------------------------------- */
 
 const FRONT_UV = { u0: 0.011, u1: 0.4888, v0: 0.0106, v1: 0.7485 };
@@ -76,13 +76,11 @@ function readTokens(): Tokens {
 }
 
 /* --- portrait -------------------------------------------------------------
-   The asset is a background-removed cut-out, already trimmed to the figure, so
-   what is drawn is the person and nothing else: the transparency around him
-   becomes the ground of the portrait window on the card. He is scaled from the
-   window's width alone, so the ratio is always the file's: the window crops,
-   it never squeezes.                                                          */
+   The owner's portrait photograph, the same file `/about` shows. It is drawn
+   as a rectangular print across the top of the card: scaled to cover the
+   window, never stretched, so the window crops and the ratio stays the file's. */
 
-const PHOTO_SRC = "/images/profile/alif-lanyard.png";
+const PHOTO_SRC = "/images/profile/alif-portrait.jpg";
 
 let photo: HTMLImageElement | null = null;
 let photoLoad: Promise<void> | null = null;
@@ -174,6 +172,33 @@ function wrapTracked(
   return lines;
 }
 
+/**
+ * One line when it fits; otherwise the two-line break with the most even
+ * lines, never leaving a separator at the end or start of a line. Falls back
+ * to greedy wrapping when no two-line break fits.
+ */
+function balanceTracked(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  tracking: number,
+  maxWidth: number,
+): string[] {
+  if (trackedWidth(ctx, text, tracking) <= maxWidth) return [text];
+  const words = text.split(" ");
+  let best: string[] | null = null;
+  let bestWidth = Infinity;
+  for (let i = 1; i < words.length; i += 1) {
+    if (words[i - 1] === FOCUS_SEPARATOR.trim() || words[i] === FOCUS_SEPARATOR.trim()) continue;
+    const lines = [words.slice(0, i).join(" "), words.slice(i).join(" ")];
+    const width = Math.max(...lines.map((line) => trackedWidth(ctx, line, tracking)));
+    if (width <= maxWidth && width < bestWidth) {
+      best = lines;
+      bestWidth = width;
+    }
+  }
+  return best ?? wrapTracked(ctx, [text], tracking, maxWidth);
+}
+
 /** Shrinks `size` until the tracked string fits `maxWidth`. */
 function fitSize(
   ctx: CanvasRenderingContext2D,
@@ -211,146 +236,104 @@ function uvRect(uv: typeof FRONT_UV): Rect {
   };
 }
 
-/** Focus terms, in the order the hero lists them. Wrapped, never reworded. */
-const FOCUS_TERMS = ["COMPUTER VISION", "RESEARCH"] as const;
-
-/** Separator when the focus terms fit on one line, as the hero sets them. */
-const FOCUS_SEPARATOR = " · ";
+/** Focus terms, joined with the badge's bullet and wrapped, never reworded. */
+const FOCUS_TERMS = ["COMPUTER VISION", "MACHINE LEARNING", "RESEARCH"] as const;
+const FOCUS_SEPARATOR = " • ";
 
 /**
- * Front-face composition.
+ * Front-face composition: a printed ID badge. The photograph is a rectangular
+ * print across the top two thirds of the card; the cream information panel
+ * under it carries the type in one column.
  *
- * Every value is a fraction of the front face's height, and every horizontal
- * measure a fraction of its content width, so the whole face scales with the
- * texture. Two layouts, chosen by whether the portrait decoded:
- *
- * `WITH_PHOTO` is the card as it is meant to be read: the portrait takes the
- * top half, and the type is a caption block under it: name, accent rule, role,
- * one line of focus, then the status row. `TEXT_ONLY` is the fallback, and its
- * numbers are the ones the card used before it had a photograph at all, so a
- * failed image leaves a composition that was designed rather than a gap.
- *
- * `focusCentre` is the middle of the focus block rather than its first
- * baseline: the terms set on one line when they fit and stack when they do
- * not, and centring keeps the block in the same place either way.
+ * Every value is a fraction of the front face's height (horizontal measures
+ * of its width), so the whole face scales with the texture. The type block
+ * flows down from the top of the panel, so a role or focus line that has to
+ * wrap pushes what follows down rather than colliding with it; the status row
+ * is pinned to the bottom edge, where a badge prints it.
  */
-interface FrontLayout {
-  /** Portrait window, or null for the text-only fallback. */
-  photo: { top: number; height: number } | null;
-  /** Hairline above the name. */
-  rule: number;
-  nameSize: number;
-  nameBaseline: number;
-  accentBaseline: number;
-  roleSize: number;
-  roleBaselines: readonly [number, number];
-  focusSize: number;
-  focusCentre: number;
-  focusLeading: number;
-  footerRule: number;
-  footerSize: number;
-  footerBaseline: number;
+const FRONT = {
+  /** Side margin of the photograph, as a fraction of face width. */
+  photoInset: 0.045,
+  /** Photograph window, top and bottom edge. The top clears the clamp's jaw. */
+  photoTop: 0.035,
+  photoBottom: 0.69,
+  /** Left and right margin of the panel type, as a fraction of face width. */
+  padX: 0.085,
+  nameSize: 0.056,
+  nameGap: 0.066,
+  fullNameSize: 0.019,
+  fullNameGap: 0.03,
+  ruleGap: 0.02,
+  roleSize: 0.025,
+  roleGap: 0.035,
+  roleLeading: 0.03,
+  focusSize: 0.019,
+  focusGap: 0.03,
+  focusLeading: 0.024,
+  footerRule: 0.925,
+  footerSize: 0.019,
+  footerBaseline: 0.958,
+} as const;
+
+/**
+ * Where the face sits in the photograph file (fractions of its width and
+ * height), where it should land in the window, and how far past a plain
+ * cover fit the print is enlarged. The window only ever crops: the scale is
+ * uniform and the print always covers the window edge to edge.
+ */
+const FACE_X = 0.49;
+const FACE_Y = 0.42;
+const FACE_TARGET_Y = 0.4;
+const PHOTO_ZOOM = 1.6;
+
+function drawHairlineBox(ctx: CanvasRenderingContext2D, t: Tokens, box: Rect): void {
+  ctx.save();
+  ctx.globalAlpha = 0.35;
+  ctx.strokeStyle = t.secondary;
+  ctx.lineWidth = Math.max(1, box.h * 0.004);
+  ctx.strokeRect(box.x, box.y, box.w, box.h);
+  ctx.restore();
 }
 
-const WITH_PHOTO: FrontLayout = {
-  photo: { top: 0.16, height: 0.45 },
-  rule: 0.652,
-  nameSize: 0.068,
-  nameBaseline: 0.722,
-  accentBaseline: 0.752,
-  roleSize: 0.038,
-  roleBaselines: [0.806, 0.851],
-  focusSize: 0.029,
-  focusCentre: 0.907,
-  focusLeading: 0.04,
-  footerRule: 0.936,
-  footerSize: 0.028,
-  footerBaseline: 0.97,
-};
-
-const TEXT_ONLY: FrontLayout = {
-  photo: null,
-  rule: 0.168,
-  nameSize: 0.105,
-  nameBaseline: 0.278,
-  accentBaseline: 0.321,
-  roleSize: 0.052,
-  roleBaselines: [0.437, 0.503],
-  focusSize: 0.045,
-  focusCentre: 0.6695,
-  focusLeading: 0.063,
-  footerRule: 0.852,
-  footerSize: 0.031,
-  footerBaseline: 0.918,
-};
-
-/**
- * How wide the figure is drawn inside the portrait window, as a fraction of
- * it, and how far its head sits below the window's top edge.
- *
- * The asset is a standing figure trimmed to its own outline: drawn whole it
- * would be a thumbnail on a card this shape, and stretched to fill the window
- * it would not be him any more. So it is enlarged past the window instead and
- * the window clips it (the head-and-shoulders crop an ID photograph has),
- * with the scale taken from the width, so the ratio is the file's throughout.
- */
-const FIGURE_WIDTH = 0.84;
-const FIGURE_TOP = 0.04;
-
-/**
- * The portrait window: a plate of page cream on the card stock, the figure
- * enlarged inside it and clipped to its edges, and a hairline round it.
- *
- * The plate is what makes the cut-out read as a photograph printed on the
- * card rather than a sticker on it; the transparency around the figure
- * becomes the photograph's own ground, one step lighter than the stock.
- */
+/** The photograph, cover-fitted and clipped to its window, with a hairline. */
 function drawPortrait(
   ctx: CanvasRenderingContext2D,
   t: Tokens,
   window: Rect,
   image: HTMLImageElement,
 ): void {
-  ctx.fillStyle = t.bg;
-  ctx.fillRect(window.x, window.y, window.w, window.h);
+  const scale =
+    Math.max(window.w / image.naturalWidth, window.h / image.naturalHeight) * PHOTO_ZOOM;
+  const drawW = image.naturalWidth * scale;
+  const drawH = image.naturalHeight * scale;
 
-  const scale = (window.w * FIGURE_WIDTH) / image.naturalWidth;
-  const figureW = image.naturalWidth * scale;
-  const figureH = image.naturalHeight * scale;
+  const clamp = (value: number, min: number, max: number) =>
+    Math.min(max, Math.max(min, value));
+  const x = clamp(
+    window.x + window.w / 2 - FACE_X * drawW,
+    window.x + window.w - drawW,
+    window.x,
+  );
+  const y = clamp(
+    window.y + window.h * FACE_TARGET_Y - FACE_Y * drawH,
+    window.y + window.h - drawH,
+    window.y,
+  );
 
   ctx.save();
   ctx.beginPath();
   ctx.rect(window.x, window.y, window.w, window.h);
   ctx.clip();
-  ctx.drawImage(
-    image,
-    window.x + (window.w - figureW) / 2,
-    window.y + window.h * FIGURE_TOP,
-    figureW,
-    figureH,
-  );
+  ctx.drawImage(image, x, y, drawW, drawH);
   ctx.restore();
 
-  // Hairline, at the weight the rules use and a third of their tone: enough to
-  // close the plate, not enough to read as a box drawn round a face.
-  ctx.save();
-  ctx.globalAlpha = 0.35;
-  ctx.strokeStyle = t.secondary;
-  ctx.lineWidth = Math.max(1, window.h * 0.004);
-  ctx.strokeRect(window.x, window.y, window.w, window.h);
-  ctx.restore();
+  drawHairlineBox(ctx, t, window);
 }
 
 /**
- * Front of the credential: the portrait, then the type as its caption:
- * a hairline, the name, a short terracotta rule, the role, one line of focus,
- * and the status row under a second hairline. Everything is anchored on a
- * single left margin, and reads top to bottom in that order.
- *
- * The photograph carries the card and the type is set to be read under it, at
- * roughly half the size it took when it was the whole composition. The top
- * ~14% stays clear because the model's metal clamp sits over it, so the
- * portrait starts just below that line.
+ * Front of the credential, top to bottom: the photograph, then on the cream
+ * panel the name in the display face, the full name, a hairline, the role,
+ * the focus line, and the status row under a second hairline.
  *
  * Everything is set in `--color-ink` or `--color-secondary`. `--color-muted`
  * is deliberately not used here: it measures 4.28:1 on `--color-surface`,
@@ -359,122 +342,94 @@ function drawPortrait(
  */
 function drawFront(ctx: CanvasRenderingContext2D, t: Tokens): void {
   const r = uvRect(FRONT_UV);
-  const padX = r.w * 0.1;
-  const left = r.x + padX;
-  const right = r.x + r.w - padX;
+  const u = r.h;
+  const left = r.x + r.w * FRONT.padX;
+  const right = r.x + r.w - r.w * FRONT.padX;
   const contentW = right - left;
+  const hairline = Math.max(1, u * 0.0018);
 
+  // The printed face is cream; the stock shows only on the model's edges.
+  ctx.fillStyle = t.bg;
+  ctx.fillRect(r.x, r.y, r.w, r.h);
+
+  const inset = r.w * FRONT.photoInset;
+  const window: Rect = {
+    x: r.x + inset,
+    y: r.y + u * FRONT.photoTop,
+    w: r.w - inset * 2,
+    h: u * (FRONT.photoBottom - FRONT.photoTop),
+  };
   const portrait =
     photo && photo.naturalWidth > 0 && photo.naturalHeight > 0 ? photo : null;
-  const layout = portrait ? WITH_PHOTO : TEXT_ONLY;
+  if (portrait) {
+    drawPortrait(ctx, t, window, portrait);
+  } else {
+    // No photograph: the window stays an empty print slot in card stock.
+    ctx.fillStyle = t.surface;
+    ctx.fillRect(window.x, window.y, window.w, window.h);
+    drawHairlineBox(ctx, t, window);
+  }
 
   ctx.textBaseline = "alphabetic";
   ctx.textAlign = "left";
+  let y = r.y + u * (FRONT.photoBottom + FRONT.nameGap);
 
-  if (portrait && layout.photo) {
-    drawPortrait(
-      ctx,
-      t,
-      {
-        x: left,
-        y: r.y + r.h * layout.photo.top,
-        w: contentW,
-        h: r.h * layout.photo.height,
-      },
-      portrait,
-    );
-  }
-
-  // Hairline over the type, paired with the footer rule below it to frame the
-  // block. Both are secondary, not border: the card renders at roughly four
-  // fifths of its albedo, and a page-weight hairline measured at that exposure
-  // is simply not there.
-  ctx.fillStyle = t.secondary;
-  ctx.fillRect(left, r.y + r.h * layout.rule, contentW, Math.max(1, r.h * 0.0018));
-
-  // Name: display face, tracked slightly open so it reads as a credential
-  // rather than a repeat of the hero headline.
-  const nameTracking = 0.015;
-  const nameSize = fitSize(
-    ctx,
-    "ALIF REEZI",
-    t.display,
-    "600",
-    r.h * layout.nameSize,
-    nameTracking,
-    contentW,
-  );
-  ctx.font = `600 ${nameSize}px ${t.display}`;
+  // Name: the display face at its natural setting, the primary line.
+  const nameSize = fitSize(ctx, "Alif Reezi", t.display, "500", u * FRONT.nameSize, 0, contentW);
+  ctx.font = `500 ${nameSize}px ${t.display}`;
   ctx.fillStyle = t.ink;
-  drawTracked(ctx, "ALIF REEZI", left, r.y + r.h * layout.nameBaseline, nameSize * nameTracking);
+  ctx.fillText("Alif Reezi", left, y);
 
-  // The one accent mark on the card: the same short rule the hero uses.
-  ctx.fillStyle = t.accent;
-  ctx.fillRect(
-    left,
-    r.y + r.h * layout.accentBaseline,
-    contentW * 0.19,
-    Math.max(2, r.h * 0.006),
-  );
+  // Full name: small, uppercase, tracked open.
+  y += u * FRONT.fullNameGap;
+  const fullName = "NASHIRUDDIN ALIF ALVAREEZI";
+  const fullNameSize = fitSize(ctx, fullName, t.sans, "500", u * FRONT.fullNameSize, 0.16, contentW);
+  ctx.font = `500 ${fullNameSize}px ${t.sans}`;
+  ctx.fillStyle = t.secondary;
+  drawTracked(ctx, fullName, left, y, fullNameSize * 0.16);
 
-  // Role: ink, not secondary. At the size the card renders on screen this is
-  // the line most likely to disappear, so it takes the full-contrast tone and
-  // is fitted so the long first line can never run past the margin.
-  const roleSize = fitSize(
-    ctx,
-    "AI / MACHINE LEARNING",
-    t.sans,
-    "500",
-    r.h * layout.roleSize,
-    0.09,
-    contentW,
-  );
-  const roleTracking = roleSize * 0.09;
+  y += u * FRONT.ruleGap;
+  ctx.fillStyle = t.secondary;
+  ctx.fillRect(left, y, contentW, hairline);
+
+  // Role: ink, one line when it fits, wrapped at a word when it does not.
+  y += u * FRONT.roleGap;
+  const roleSize = u * FRONT.roleSize;
+  const roleTracking = roleSize * 0.08;
   ctx.font = `500 ${roleSize}px ${t.sans}`;
   ctx.fillStyle = t.ink;
-  drawTracked(ctx, "AI / MACHINE LEARNING", left, r.y + r.h * layout.roleBaselines[0], roleTracking);
-  drawTracked(ctx, "ENGINEER", left, r.y + r.h * layout.roleBaselines[1], roleTracking);
+  const roleLines = wrapTracked(ctx, ["AI / MACHINE LEARNING ENGINEER"], roleTracking, contentW);
+  roleLines.forEach((line, index) => {
+    drawTracked(ctx, line, left, y + index * u * FRONT.roleLeading, roleTracking);
+  });
+  y += (roleLines.length - 1) * u * FRONT.roleLeading;
 
-  // Focus: mono metadata, the same register as the hero's focus list. It
-  // stays a step under the role through size and family, not tone: this is the
-  // smallest type that still has to be read, and at the size the card occupies
-  // on screen a lighter grey is the difference between metadata and smudge.
-  //
-  // One line with the hero's separator when the terms fit, stacked when they
-  // do not. The block is centred rather than hung from its first baseline, so
-  // either shape sits in the same place.
-  const focusSize = r.h * layout.focusSize;
-  const focusTracking = focusSize * 0.13;
+  // Focus: mono metadata, wrapped at a word like a printed line.
+  y += u * FRONT.focusGap;
+  const focusSize = u * FRONT.focusSize;
+  const focusTracking = focusSize * 0.12;
   ctx.font = `400 ${focusSize}px ${t.mono}`;
   ctx.fillStyle = t.ink;
-
-  const joined = FOCUS_TERMS.join(FOCUS_SEPARATOR);
-  const focusLines =
-    trackedWidth(ctx, joined, focusTracking) <= contentW
-      ? [joined]
-      : wrapTracked(ctx, FOCUS_TERMS, focusTracking, contentW);
-  const focusTop =
-    layout.focusCentre - ((focusLines.length - 1) * layout.focusLeading) / 2;
+  const focusLines = balanceTracked(
+    ctx,
+    FOCUS_TERMS.join(FOCUS_SEPARATOR),
+    focusTracking,
+    contentW,
+  );
   focusLines.forEach((line, index) => {
-    drawTracked(
-      ctx,
-      line,
-      left,
-      r.y + r.h * (focusTop + index * layout.focusLeading),
-      focusTracking,
-    );
+    drawTracked(ctx, line, left, y + index * u * FRONT.focusLeading, focusTracking);
   });
 
-  // Footer
+  // Status row, pinned to the bottom of the badge.
   ctx.fillStyle = t.secondary;
-  ctx.fillRect(left, r.y + r.h * layout.footerRule, contentW, Math.max(1, r.h * 0.0018));
+  ctx.fillRect(left, r.y + u * FRONT.footerRule, contentW, hairline);
 
-  const footSize = r.h * layout.footerSize;
+  const footSize = u * FRONT.footerSize;
   const footTracking = footSize * 0.13;
   ctx.font = `400 ${footSize}px ${t.mono}`;
   ctx.fillStyle = t.secondary;
-  drawTracked(ctx, "FRESH GRADUATE", left, r.y + r.h * layout.footerBaseline, footTracking);
-  drawTracked(ctx, "2026", right, r.y + r.h * layout.footerBaseline, footTracking, "right");
+  drawTracked(ctx, "FRESH GRADUATE", left, r.y + u * FRONT.footerBaseline, footTracking);
+  drawTracked(ctx, "2026", right, r.y + u * FRONT.footerBaseline, footTracking, "right");
 }
 
 /** Back of the credential: card stock, one hairline, the full legal name. */

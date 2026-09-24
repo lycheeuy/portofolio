@@ -98,8 +98,10 @@ export function LanyardWrapper() {
 
   return (
     <LanyardErrorBoundary>
-      {/* Camera moved closer (z: 20) so the card fills the hero slot. */}
-      <LanyardCanvas position={[0, 0, 20]} fov={20} />
+      {/* Camera moved closer (z: 20) and narrowed (fov: 12) so the card fills
+          the hero slot and its printed panel reads at screen size. Framing
+          only: the physics world is the same size either way. */}
+      <LanyardCanvas position={[0, 0, 20]} fov={12} />
     </LanyardErrorBoundary>
   );
 }

@@ -80,7 +80,7 @@ export function Hero() {
     >
       <PageContainer>
         <div className="grid grid-cols-1 gap-12 pt-[var(--spacing-section)] lg:grid-cols-12 lg:gap-8">
-          <div data-hero-zone="text" className="flex flex-col justify-center lg:col-span-8">
+          <div data-hero-zone="text" className="flex flex-col justify-center lg:col-span-7">
             <SectionEyebrow index={HERO_INDEX} className="mb-8">
               {profile.status}
             </SectionEyebrow>
@@ -144,12 +144,23 @@ export function Hero() {
             </div>
           </div>
 
-          <div data-hero-zone="lanyard" className="relative min-h-[420px] lg:col-span-4 lg:min-h-[560px]">
+          <div
+            data-hero-zone="lanyard"
+            className="relative min-h-[min(34rem,70svh)] [--lanyard-h:min(calc(100svh-4rem),56rem)] md:min-h-[40rem] lg:col-span-5 lg:min-h-[calc(var(--lanyard-h)-var(--spacing-section))]"
+          >
             {/* The canvas bleeds past the column so the strap has room to
                 swing. The bleed is stepped by breakpoint: at lg the page
                 margin is narrower than the bleed, and a fixed -right-16 would
-                push the document into horizontal scroll. */}
-            <div className="pointer-events-none absolute inset-x-0 -top-8 bottom-0 lg:-inset-y-16 lg:-right-6 lg:left-0 xl:-right-12">
+                push the document into horizontal scroll.
+
+                The card's size on screen is the canvas height over the
+                camera's field of view, so the canvas height is the size
+                control. At lg it starts at the top of the hero, under the
+                header, so the strap enters from above, and is as tall as the
+                viewport below the header, capped for very tall screens; the
+                column reserves that height minus the section's top padding
+                so the canvas never runs into the colophon. */}
+            <div className="pointer-events-none absolute inset-x-0 -top-8 bottom-0 lg:-top-[var(--spacing-section)] lg:bottom-auto lg:left-0 lg:-right-6 lg:h-[var(--lanyard-h)] xl:-right-12">
               <div className="pointer-events-auto h-full w-full">
                 <LanyardWrapper />
               </div>
