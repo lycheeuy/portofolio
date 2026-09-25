@@ -140,8 +140,10 @@ const inlineLink = `text-ink underline decoration-[var(--color-border)] underlin
  * the same eleven-pixel tracked-out terms the page's `dt`s use, and the reason
  * they are `<h2>` is the outline, not the type.
  *
- * `aside` is optional and sits under the label in the rail; the margin
- * column, empty for every other block, is where the portrait goes.
+ * `aside` is optional; the margin column, empty for every other block, is
+ * where the portrait goes. When present, the label moves to a row of its own
+ * above both columns, and the aside and content share the row beneath it, so
+ * the portrait's top edge and the first paragraph's top edge are one line.
  *
  * The rail is four columns of twelve against the body's eight, which together
  * are the whole grid: before the portrait it was three, and the twelfth column
@@ -162,23 +164,36 @@ function AboutBlock({
   aside?: ReactNode;
   children: ReactNode;
 }) {
+  const label = (
+    <div className="flex items-baseline gap-4">
+      <span aria-hidden="true" className={`${monoMeta} text-muted`}>
+        {index}
+      </span>
+      <h2 id={id} className={metaLabel}>
+        {heading}
+      </h2>
+    </div>
+  );
+
   return (
     <section
       aria-labelledby={id}
       className="grid grid-cols-1 gap-x-8 gap-y-6 border-t border-[var(--color-border)] pt-8 lg:grid-cols-12"
     >
-      <div className="lg:col-span-4 lg:pt-1.5">
-        <div className="flex items-baseline gap-4">
-          <span aria-hidden="true" className={`${monoMeta} text-muted`}>
-            {index}
-          </span>
-          <h2 id={id} className={metaLabel}>
-            {heading}
-          </h2>
-        </div>
-        {aside ? <div className="mt-6">{aside}</div> : null}
-      </div>
-      <div className="min-w-0 lg:col-span-8">{children}</div>
+      {aside ? (
+        <>
+          {/* With an aside the label takes a row of its own, so the aside and
+              the content share the next row and start on the same line. */}
+          <div className="lg:col-span-12">{label}</div>
+          <div className="lg:col-span-4 lg:row-start-2">{aside}</div>
+          <div className="min-w-0 lg:col-span-8 lg:row-start-2">{children}</div>
+        </>
+      ) : (
+        <>
+          <div className="lg:col-span-4 lg:pt-1.5">{label}</div>
+          <div className="min-w-0 lg:col-span-8">{children}</div>
+        </>
+      )}
     </section>
   );
 }
