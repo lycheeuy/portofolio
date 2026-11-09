@@ -61,7 +61,7 @@ export const site: SiteConfig = {
   tagline:
     "AI / Machine Learning Engineer working across computer vision, model experimentation, and research.",
   locale: "en",
-  url: "https://alifreezi.site",
+  url: "https://www.alifreezi.site",
   navigation: NAVIGATION,
   sections: SECTIONS,
   pending: [
