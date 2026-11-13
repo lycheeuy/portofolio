@@ -1,6 +1,6 @@
 # Alif Reezi · Engineering Archive
 
-Personal portfolio website for **Nashiruddin Alif Alvareezi** (Alif Reezi), AI Engineer, Machine Learning Engineer, and Biomedical Engineering graduate.
+Personal portfolio website for **Nashiruddin Alif Alvareezi** (Alif Reezi), AI / Machine Learning Engineer, and Biomedical Engineering graduate.
 
 The site is built as a personal engineering archive rather than a generic developer template: an editorial, typography-led presentation of research and shipped systems.
 
